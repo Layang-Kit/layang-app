@@ -24,6 +24,9 @@ The application provides a complete authentication system with user management, 
 | ORM | Drizzle ORM 0.29 |
 | Auth | Lucia Auth 3.x + Arctic |
 | Password Hashing | Web Crypto API (PBKDF2) |
+| Email | Resend |
+| Storage | Cloudflare R2 |
+| Image Processing | Canvas API (WebP conversion) |
 | Build Tool | Vite 5.x |
 | Adapter | @sveltejs/adapter-cloudflare |
 | Deployment | Cloudflare Pages |
@@ -38,7 +41,14 @@ The application provides a complete authentication system with user management, 
 │   │   │   ├── lucia.ts           # Lucia auth configuration
 │   │   │   ├── google.ts          # Google OAuth setup
 │   │   │   └── password.ts        # Web Crypto password hashing
-│   │   └── db/
+│   │   ├── db/
+│   │   ├── email/
+│   │   │   ├── resend.ts          # Resend email client
+│   │   │   └── templates/         # Email templates
+│   │   ├── image/
+│   │   │   └── convert.ts         # Image processing (WebP)
+│   │   └── storage/
+│   │       └── r2.ts              # Cloudflare R2 client
 │   │       ├── schema.ts          # Database schema (users, posts, sessions, tokens)
 │   │       ├── index.ts           # DB client factory function
 │   │       └── types.ts           # TypeScript type definitions
@@ -168,6 +178,17 @@ CLOUDFLARE_API_TOKEN=your_api_token
 # Optional - for Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Optional - for Email Verification (Resend)
+RESEND_API_TOKEN=re_your_api_token
+FROM_EMAIL=noreply@yourdomain.com
+
+# Optional - for File/Image Uploads (Cloudflare R2)
+R2_ACCOUNT_ID=your_r2_account_id
+R2_ACCESS_KEY_ID=your_r2_access_key
+R2_SECRET_ACCESS_KEY=your_r2_secret_key
+R2_BUCKET_NAME=your_bucket_name
+R2_PUBLIC_URL=https://pub-yourid.r2.dev
 ```
 
 **API Token Requirements:**
@@ -202,13 +223,15 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 ### Auth
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/auth/register` | Register with email/password |
-| POST | `/auth/login` | Login with email/password |
+| POST | `/auth/register` | Register with email/password (sends verification email) |
+| POST | `/auth/login` | Login with email/password (requires verified email) |
 | POST | `/auth/logout` | Logout current session |
 | GET | `/auth/google` | Initiate Google OAuth |
 | GET | `/auth/google/callback` | Google OAuth callback |
 | POST | `/auth/forgot-password` | Request reset token |
 | POST | `/auth/reset-password` | Reset password |
+| GET | `/auth/verify-email` | Verify email with token |
+| POST | `/auth/resend-verification` | Resend verification email |
 
 ### Profile
 | Method | Endpoint | Description |
@@ -223,6 +246,13 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 | POST | `/api/users` | Create new user |
 | GET | `/api/users/[id]` | Get user by ID |
 | DELETE | `/api/users/[id]` | Delete user |
+
+### Upload
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/upload/presign` | Get presigned URL for direct R2 upload (files) |
+| POST | `/api/upload/image` | Upload image → convert to WebP → store in R2 |
+| DELETE | `/api/upload/image` | Delete image from R2 |
 
 ### Health
 | Method | Endpoint | Description |

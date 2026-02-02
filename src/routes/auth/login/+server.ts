@@ -52,6 +52,13 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
       throw error(401, { message: 'Invalid email or password' });
     }
 
+    // Check if email is verified
+    if (!user.emailVerified) {
+      throw error(403, { 
+        message: 'Please verify your email before logging in. Check your inbox or request a new verification email.' 
+      });
+    }
+
     // Create session
     const adapter = createAuthAdapter(platform.env.DB);
     const lucia = createLucia(adapter);

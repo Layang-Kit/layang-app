@@ -48,6 +48,7 @@ export async function hashPassword(password: string): Promise<string> {
   const derivedBits = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
+      // @ts-ignore
       salt,
       iterations: ITERATIONS,
       hash: 'SHA-256'
@@ -85,6 +86,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
     );
     
     // Derive bits with same salt
+    // @ts-ignore - Type mismatch between Uint8Array and BufferSource in TypeScript
     const derivedBits = await crypto.subtle.deriveBits(
       {
         name: 'PBKDF2',

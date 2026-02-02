@@ -4,7 +4,7 @@
   import { 
     User, Mail, MapPin, Link as LinkIcon, 
     FileText, Camera, Loader2, Check, ArrowLeft,
-    LogOut
+    LogOut, Upload, X
   } from 'lucide-svelte';
   import type { User as UserType } from '$lib/db/types';
   
@@ -13,6 +13,12 @@
   let saving = false;
   let errorMsg = '';
   let successMsg = '';
+  
+  // Avatar upload
+  let avatarFile: File | null = null;
+  let avatarPreview: string | null = null;
+  let uploadingAvatar = false;
+  let fileInput: HTMLInputElement;
   
   // Form fields
   let name = '';
@@ -46,6 +52,90 @@
       errorMsg = err.message;
     } finally {
       loading = false;
+    }
+  }
+  
+  function handleFileSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    
+    if (file) {
+      // Validate file
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        errorMsg = 'Please select a valid image file (JPG, PNG, GIF, or WebP)';
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        errorMsg = 'File size must be less than 5MB';
+        return;
+      }
+      
+      avatarFile = file;
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        avatarPreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+      
+      errorMsg = '';
+    }
+  }
+  
+  function clearAvatarSelection() {
+    avatarFile = null;
+    avatarPreview = null;
+    if (fileInput) fileInput.value = '';
+  }
+  
+  async function uploadAvatar() {
+    if (!avatarFile) return;
+    
+    uploadingAvatar = true;
+    errorMsg = '';
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', avatarFile);
+      formData.append('type', 'avatar');
+      
+      const res = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await res.json() as { success: boolean; url?: string; message?: string };
+      
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to upload avatar');
+      }
+      
+      // Update user profile with new avatar URL
+      const updateRes = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar: data.url }),
+      });
+      
+      if (!updateRes.ok) {
+        throw new Error('Failed to update profile');
+      }
+      
+      // Update local user data
+      if (user && data.url) {
+        user = { ...user, avatar: data.url };
+      }
+      
+      successMsg = 'Avatar updated successfully!';
+      clearAvatarSelection();
+      
+    } catch (err: any) {
+      errorMsg = err.message;
+    } finally {
+      uploadingAvatar = false;
     }
   }
   
@@ -116,19 +206,41 @@
       <div class="space-y-6">
         <!-- Profile Header -->
         <div class="bg-gray-800 rounded-xl p-6">
-          <div class="flex items-start gap-6">
-            <!-- Avatar -->
+          <div class="flex flex-col sm:flex-row items-start gap-6">
+            <!-- Avatar Upload -->
             <div class="relative">
-              {#if user.avatar}
+              {#if avatarPreview}
+                <!-- Preview -->
+                <img src={avatarPreview} alt="Preview" class="w-24 h-24 rounded-full object-cover ring-4 ring-blue-500/50" />
+                <button
+                  on:click={clearAvatarSelection}
+                  class="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600 transition"
+                >
+                  <X class="w-4 h-4 text-white" />
+                </button>
+              {:else if user.avatar}
                 <img src={user.avatar} alt={user.name} class="w-24 h-24 rounded-full object-cover" />
               {:else}
                 <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
               {/if}
-              <button class="absolute -bottom-2 -right-2 bg-gray-700 p-2 rounded-full hover:bg-gray-600 transition">
+              
+              <!-- Upload Button -->
+              <button
+                on:click={() => fileInput?.click()}
+                class="absolute -bottom-2 -right-2 bg-gray-700 p-2 rounded-full hover:bg-gray-600 transition border-2 border-gray-800"
+              >
                 <Camera class="w-4 h-4" />
               </button>
+              
+              <input
+                type="file"
+                bind:this={fileInput}
+                on:change={handleFileSelect}
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                class="hidden"
+              />
             </div>
             
             <!-- User Info -->
@@ -147,8 +259,37 @@
                     <Check class="w-3 h-3" />
                     Verified
                   </span>
+                {:else}
+                  <span class="text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400">
+                    Unverified
+                  </span>
                 {/if}
               </div>
+              
+              <!-- Upload Actions -->
+              {#if avatarFile}
+                <div class="mt-4 flex items-center gap-3">
+                  <button
+                    on:click={uploadAvatar}
+                    disabled={uploadingAvatar}
+                    class="inline-flex items-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                  >
+                    {#if uploadingAvatar}
+                      <Loader2 class="w-4 h-4 animate-spin" />
+                      Uploading...
+                    {:else}
+                      <Upload class="w-4 h-4" />
+                      Upload Avatar
+                    {/if}
+                  </button>
+                  <button
+                    on:click={clearAvatarSelection}
+                    class="text-gray-400 hover:text-white transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              {/if}
             </div>
           </div>
         </div>
@@ -196,6 +337,7 @@
                 id="bio"
                 bind:value={bio}
                 rows="3"
+                maxlength="160"
                 class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none"
                 placeholder="Tell us about yourself..."
               />
@@ -212,6 +354,7 @@
                 id="location"
                 type="text"
                 bind:value={location}
+                maxlength="100"
                 class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
                 placeholder="City, Country"
               />
@@ -266,6 +409,24 @@
                 Change
               </a>
             </div>
+            
+            {#if !user.emailVerified}
+              <div class="flex items-center justify-between py-3 border-b border-gray-700">
+                <div>
+                  <p class="text-white font-medium">Email Verification</p>
+                  <p class="text-sm text-gray-400">Verify your email address</p>
+                </div>
+                <form method="POST" action="/auth/resend-verification">
+                  <input type="hidden" name="email" value={user.email} />
+                  <button 
+                    type="submit"
+                    class="text-blue-400 hover:text-blue-300 font-medium"
+                  >
+                    Resend
+                  </button>
+                </form>
+              </div>
+            {/if}
           </div>
         </div>
       </div>
