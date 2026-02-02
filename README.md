@@ -40,6 +40,16 @@ A modern, full-stack starter template with authentication, email verification, a
 | Styling | [Tailwind CSS](https://tailwindcss.com/) |
 | Icons | [Lucide](https://lucide.dev/) |
 
+## 📚 Documentation
+
+Lihat folder [`docs/`](docs/) untuk dokumentasi lengkap:
+
+- **[Quick Start](docs/setup/01-quick-start.md)** - Setup dalam 5 menit
+- **[Environment Variables](docs/setup/02-environment-variables.md)** - Konfigurasi lengkap
+- **[Setup Guides](docs/setup/)** - Panduan setup semua layanan
+- **[Feature Guides](docs/guides/)** - Panduan menggunakan fitur
+- **[Troubleshooting](docs/troubleshooting/)** - Solusi masalah umum
+
 ## 🚀 Quick Start
 
 ### Prerequisites
