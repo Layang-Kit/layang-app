@@ -2,6 +2,7 @@
 
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import type * as schema from '$lib/db/schema';
+import type { Session, User } from 'lucia';
 
 declare global {
   namespace App {
@@ -14,6 +15,8 @@ declare global {
     
     interface Locals {
       db: DrizzleD1Database<typeof schema>;
+      user: User | null;
+      session: Session | null;
     }
   }
 }

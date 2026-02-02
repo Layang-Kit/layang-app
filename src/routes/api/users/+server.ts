@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import * as schema from '$lib/db/schema';
 import type { RequestHandler } from './$types';
+import { generateId } from '$lib/auth/lucia';
 
 // GET /api/users
 export const GET: RequestHandler = async ({ locals }) => {
@@ -26,9 +27,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       throw error(400, { message: 'Email and name required' });
     }
     
+    const userId = generateId();
+    
     const result = await locals.db.insert(schema.users).values({
+      id: userId,
       email: body.email,
-      name: body.name
+      name: body.name,
+      provider: 'email'
     }).returning();
     
     return json({ success: true, data: result[0] }, { status: 201 });

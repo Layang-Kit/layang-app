@@ -5,6 +5,14 @@ const DB_ID = process.env.CLOUDFLARE_DATABASE_ID!;
 const ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID!;
 const TOKEN = process.env.CLOUDFLARE_API_TOKEN!;
 
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 async function query(sql: string, params?: any[]) {
   const res = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/d1/database/${DB_ID}/query`,
@@ -23,40 +31,39 @@ async function query(sql: string, params?: any[]) {
 async function seed() {
   console.log('🌱 Seeding database...\n');
   
+  // Generate UUIDs for users
+  const user1Id = generateUUID();
+  const user2Id = generateUUID();
+  const user3Id = generateUUID();
+  
   // Insert users
   const users = [
-    { email: 'john@example.com', name: 'John Doe' },
-    { email: 'jane@example.com', name: 'Jane Smith' },
-    { email: 'bob@example.com', name: 'Bob Wilson' },
+    { id: user1Id, email: 'john@example.com', name: 'John Doe', provider: 'email' },
+    { id: user2Id, email: 'jane@example.com', name: 'Jane Smith', provider: 'google' },
+    { id: user3Id, email: 'bob@example.com', name: 'Bob Wilson', provider: 'email' },
   ];
   
   for (const user of users) {
     await query(
-      'INSERT OR IGNORE INTO users (email, name) VALUES (?, ?)',
-      [user.email, user.name]
+      `INSERT OR IGNORE INTO users (id, email, name, provider) VALUES (?, ?, ?, ?)`,
+      [user.id, user.email, user.name, user.provider]
     );
-    console.log(`✅ User: ${user.name}`);
+    console.log(`✅ User: ${user.name} (${user.provider})`);
   }
   
   // Insert posts
   const posts = [
-    { title: 'Hello World', content: 'My first post!', published: 1, author_email: 'john@example.com' },
-    { title: 'SvelteKit Tips', content: 'Best practices for SvelteKit', published: 1, author_email: 'jane@example.com' },
-    { title: 'Draft Post', content: 'Work in progress...', published: 0, author_email: 'bob@example.com' },
+    { title: 'Hello World', content: 'My first post!', published: 1, author_id: user1Id },
+    { title: 'SvelteKit Tips', content: 'Best practices for SvelteKit', published: 1, author_id: user2Id },
+    { title: 'Draft Post', content: 'Work in progress...', published: 0, author_id: user3Id },
   ];
   
   for (const post of posts) {
-    // Get user id first
-    const userResult = await query('SELECT id FROM users WHERE email = ?', [post.author_email]);
-    const userId = userResult.result?.[0]?.results?.[0]?.id;
-    
-    if (userId) {
-      await query(
-        'INSERT OR IGNORE INTO posts (title, content, published, author_id) VALUES (?, ?, ?, ?)',
-        [post.title, post.content, post.published, userId]
-      );
-      console.log(`✅ Post: ${post.title}`);
-    }
+    await query(
+      `INSERT OR IGNORE INTO posts (title, content, published, author_id) VALUES (?, ?, ?, ?)`,
+      [post.title, post.content, post.published, post.author_id]
+    );
+    console.log(`✅ Post: ${post.title}`);
   }
   
   console.log('\n🎉 Seeding complete!');
