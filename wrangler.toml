@@ -1,0 +1,11 @@
+name = "sveltekit-d1-app"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "DB"
+database_id = "83111ad0-7fa8-4723-b8d2-96ad00e60e04"
+preview_database_id = "DB"
+migrations_dir = "drizzle"
