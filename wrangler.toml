@@ -7,6 +7,6 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "DB"
 database_id = "83111ad0-7fa8-4723-b8d2-96ad00e60e04"
-preview_database_id = "DB"
+# preview_database_id = "DB"  # Uncomment for local dev, comment for production
 migrations_dir = "drizzle"
 

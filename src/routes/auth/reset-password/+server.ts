@@ -51,7 +51,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         eq(passwordResetTokens.userId, user.id),
         eq(passwordResetTokens.tokenHash, tokenHash),
         eq(passwordResetTokens.used, false),
-        gt(passwordResetTokens.expiresAt, new Date())
+        gt(passwordResetTokens.expiresAt, Date.now())
       )
     });
 
@@ -66,7 +66,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     await locals.db.update(users)
       .set({ 
         passwordHash,
-        updatedAt: new Date()
+        updatedAt: Date.now()
       })
       .where(eq(users.id, user.id));
 

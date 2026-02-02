@@ -70,7 +70,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
     
     // Build update object (only include defined fields)
     const updateData: any = {
-      updatedAt: new Date()
+      updatedAt: Date.now()
     };
     
     if (name !== undefined) updateData.name = name;

@@ -14,6 +14,8 @@ Cloudflare D1 adalah database SQLite yang berjalan di edge network Cloudflare.
 
 ## 🚀 Setup Database
 
+> 📖 **Switching Local ↔ Production?** Lihat [Local vs Production Database](../guides/05-local-vs-production-database.md)
+
 ### 1. Create Database
 
 ```bash

@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         eq(emailVerificationTokens.userId, user.id),
         eq(emailVerificationTokens.tokenHash, tokenHash),
         eq(emailVerificationTokens.used, false),
-        gt(emailVerificationTokens.expiresAt, new Date())
+        gt(emailVerificationTokens.expiresAt, Date.now())
       )
     });
     
@@ -70,7 +70,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     await locals.db.update(users)
       .set({ 
         emailVerified: true,
-        updatedAt: new Date()
+        updatedAt: Date.now()
       })
       .where(eq(users.id, user.id));
     

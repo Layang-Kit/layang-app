@@ -67,8 +67,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       .where(eq(passwordResetTokens.userId, user.id));
 
     // Create new reset token (expires in 1 hour)
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1);
+    const expiresAt = Date.now() + 60 * 60 * 1000;
 
     await locals.db.insert(passwordResetTokens).values({
       id: generateId(),

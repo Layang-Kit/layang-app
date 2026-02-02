@@ -4,7 +4,7 @@
   import type { User } from '$lib/db/types';
   import { 
     User as UserIcon, Database, ArrowRight, LogOut, 
-    Settings, Users, Loader2, Shield 
+    Settings, Users, Loader2, Shield, Hexagon, Mail
   } from 'lucide-svelte';
   
   let user: User | null = null;
@@ -59,36 +59,43 @@
   }
 </script>
 
-<div class="min-h-screen bg-gray-900">
-  <!-- Navigation -->
-  <nav class="bg-gray-800 border-b border-gray-700">
-    <div class="container mx-auto px-4 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <a href="/" class="text-xl font-bold text-blue-400">SvelteKit D1</a>
-          <span class="text-gray-600">/</span>
-          <span class="text-white">Dashboard</span>
+<div class="min-h-screen grain">
+  <!-- Header -->
+  <header class="border-b border-neutral-800/50 bg-neutral-950/50 backdrop-blur-xl">
+    <div class="container-wide">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-accent-500 flex items-center justify-center">
+            <Hexagon class="w-5 h-5 text-neutral-950" strokeWidth={2.5} />
+          </div>
+          <div>
+            <h1 class="font-display font-bold text-lg text-neutral-100">Dashboard</h1>
+            <p class="text-xs text-neutral-600">Overview</p>
+          </div>
         </div>
         
         {#if user}
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
             <a 
               href="/profile" 
-              class="flex items-center gap-2 text-gray-300 hover:text-white transition"
+              class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-900 transition"
             >
               {#if user.avatar}
-                <img src={user.avatar} alt={user.name} class="w-8 h-8 rounded-full" />
+                <img src={user.avatar} alt={user.name} class="w-9 h-9 rounded-full ring-2 ring-neutral-800" />
               {:else}
-                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-bold">
+                <div class="w-9 h-9 rounded-full bg-accent-500 flex items-center justify-center text-sm font-bold text-neutral-950">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
               {/if}
-              <span class="hidden sm:inline">{user.name}</span>
+              <div class="hidden sm:block text-left">
+                <p class="text-sm font-medium text-neutral-200">{user.name}</p>
+                <p class="text-xs text-neutral-600">{user.email}</p>
+              </div>
             </a>
             
             <button
               on:click={handleLogout}
-              class="p-2 text-gray-400 hover:text-red-400 transition"
+              class="p-2.5 rounded-xl text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
               title="Logout"
             >
               <LogOut class="w-5 h-5" />
@@ -97,134 +104,130 @@
         {/if}
       </div>
     </div>
-  </nav>
+  </header>
   
   <!-- Main Content -->
-  <main class="container mx-auto px-4 py-8 max-w-6xl">
+  <main class="container-wide py-8">
     {#if loading}
-      <div class="flex items-center justify-center py-12">
-        <Loader2 class="w-8 h-8 animate-spin text-blue-500" />
+      <div class="flex items-center justify-center py-20">
+        <Loader2 class="w-8 h-8 animate-spin text-accent-500" />
       </div>
     {:else if user}
-      <!-- Welcome Section -->
+      <!-- Welcome -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white">
-          Welcome back, {user.name.split(' ')[0]}!
-        </h1>
-        <p class="text-gray-400 mt-2">
-          Here's what's happening with your account.
+        <h2 class="font-display text-display-sm text-neutral-100">
+          Hello, {user.name.split(' ')[0]}
+        </h2>
+        <p class="text-neutral-500 mt-1">
+          Here's what's happening with your account
         </p>
       </div>
       
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-gray-800 rounded-xl p-6">
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="card p-6">
           <div class="flex items-center gap-4">
-            <div class="p-3 bg-blue-500/20 rounded-lg">
-              <UserIcon class="w-6 h-6 text-blue-400" />
+            <div class="w-11 h-11 rounded-xl bg-neutral-800 flex items-center justify-center">
+              <UserIcon class="w-5 h-5 text-neutral-400" />
             </div>
             <div>
-              <p class="text-gray-400 text-sm">Profile Status</p>
-              <p class="text-white font-semibold">
-                {#if user.bio && user.location}
-                  Complete
-                {:else}
-                  Incomplete
-                {/if}
+              <p class="text-sm text-neutral-500">Profile Status</p>
+              <p class="text-lg font-semibold text-neutral-100">
+                {user.bio && user.location ? 'Complete' : 'Incomplete'}
               </p>
             </div>
           </div>
         </div>
         
-        <div class="bg-gray-800 rounded-xl p-6">
+        <div class="card p-6">
           <div class="flex items-center gap-4">
-            <div class="p-3 bg-green-500/20 rounded-lg">
-              <Shield class="w-6 h-6 text-green-400" />
+            <div class="w-11 h-11 rounded-xl bg-neutral-800 flex items-center justify-center">
+              <Shield class="w-5 h-5 text-neutral-400" />
             </div>
             <div>
-              <p class="text-gray-400 text-sm">Account Type</p>
-              <p class="text-white font-semibold capitalize">{user.provider}</p>
+              <p class="text-sm text-neutral-500">Account Type</p>
+              <p class="text-lg font-semibold text-neutral-100 capitalize">{user.provider}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-gray-800 rounded-xl p-6">
+        <div class="card p-6">
           <div class="flex items-center gap-4">
-            <div class="p-3 bg-purple-500/20 rounded-lg">
-              <Users class="w-6 h-6 text-purple-400" />
+            <div class="w-11 h-11 rounded-xl bg-neutral-800 flex items-center justify-center">
+              <Users class="w-5 h-5 text-neutral-400" />
             </div>
             <div>
-              <p class="text-gray-400 text-sm">Total Users</p>
-              <p class="text-white font-semibold">{users.length}</p>
+              <p class="text-sm text-neutral-500">Total Users</p>
+              <p class="text-lg font-semibold text-neutral-100">{users.length}</p>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Action Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <a 
           href="/profile" 
-          class="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition group"
+          class="card p-6 group hover:border-neutral-700 transition-all"
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <div class="p-3 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition">
-                <Settings class="w-6 h-6 text-blue-400" />
+              <div class="w-11 h-11 rounded-xl bg-neutral-800 flex items-center justify-center group-hover:bg-accent-500/10 transition-colors">
+                <Settings class="w-5 h-5 text-neutral-400 group-hover:text-accent-500 transition-colors" />
               </div>
               <div>
-                <h3 class="text-white font-semibold">Edit Profile</h3>
-                <p class="text-gray-400 text-sm">Update your information</p>
+                <h3 class="font-semibold text-neutral-200">Edit Profile</h3>
+                <p class="text-sm text-neutral-500">Update your information</p>
               </div>
             </div>
-            <ArrowRight class="w-5 h-5 text-gray-500 group-hover:text-white transition" />
+            <ArrowRight class="w-5 h-5 text-neutral-600 group-hover:text-neutral-400 group-hover:translate-x-1 transition-all" />
           </div>
         </a>
         
-        <div class="bg-gray-800 rounded-xl p-6">
+        <div class="card p-6">
           <div class="flex items-center gap-4">
-            <div class="p-3 bg-green-500/20 rounded-lg">
-              <Database class="w-6 h-6 text-green-400" />
+            <div class="w-11 h-11 rounded-xl bg-neutral-800 flex items-center justify-center">
+              <Database class="w-5 h-5 text-neutral-400" />
             </div>
             <div>
-              <h3 class="text-white font-semibold">D1 Database</h3>
-              <p class="text-gray-400 text-sm">Connected and running</p>
+              <h3 class="font-semibold text-neutral-200">D1 Database</h3>
+              <p class="text-sm text-neutral-500">Connected and running</p>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Users Section -->
-      <div class="bg-gray-800 rounded-xl overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-700">
-          <h2 class="text-xl font-semibold text-white">All Users</h2>
+      <!-- Users List -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-4 border-b border-neutral-800">
+          <h3 class="font-display font-semibold text-neutral-100">All Users</h3>
         </div>
         
         {#if usersLoading}
-          <div class="flex items-center justify-center py-8">
-            <Loader2 class="w-6 h-6 animate-spin text-blue-500" />
+          <div class="flex items-center justify-center py-12">
+            <Loader2 class="w-6 h-6 animate-spin text-accent-500" />
           </div>
         {:else}
-          <div class="divide-y divide-gray-700">
+          <div class="divide-y divide-neutral-800/50">
             {#each users as u}
-              <div class="px-6 py-4 flex items-center gap-4">
+              <div class="px-6 py-4 flex items-center gap-4 hover:bg-neutral-900/30 transition">
                 {#if u.avatar}
-                  <img src={u.avatar} alt={u.name} class="w-10 h-10 rounded-full" />
+                  <img src={u.avatar} alt={u.name} class="w-10 h-10 rounded-full ring-2 ring-neutral-800" />
                 {:else}
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold">
+                  <div class="w-10 h-10 rounded-full bg-accent-500 flex items-center justify-center text-sm font-bold text-neutral-950">
                     {u.name.charAt(0).toUpperCase()}
                   </div>
                 {/if}
-                <div class="flex-1">
-                  <p class="text-white font-medium">{u.name}</p>
-                  <p class="text-sm text-gray-400">{u.email}</p>
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium text-neutral-100 truncate">{u.name}</p>
+                  <p class="text-sm text-neutral-600 truncate">{u.email}</p>
                 </div>
-                <span class="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-300 capitalize">
+                <span class="text-xs px-2.5 py-1 rounded-lg bg-neutral-800 text-neutral-400 capitalize">
                   {u.provider}
                 </span>
               </div>
             {:else}
-              <div class="px-6 py-8 text-center text-gray-500">
+              <div class="px-6 py-12 text-center text-neutral-600">
                 No users found
               </div>
             {/each}
@@ -232,11 +235,11 @@
         {/if}
       </div>
     {:else}
-      <div class="text-center py-12">
-        <p class="text-gray-400 mb-4">Please log in to view your dashboard</p>
+      <div class="text-center py-20">
+        <p class="text-neutral-500 mb-4">Please log in to view your dashboard</p>
         <a 
           href="/login" 
-          class="inline-flex items-center gap-2 bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition"
+          class="btn-primary"
         >
           Go to Login
         </a>

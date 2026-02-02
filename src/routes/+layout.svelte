@@ -1,9 +1,10 @@
 <script lang="ts">
   import '../app.css';
   import { page } from '$app/stores';
-  import { User, LogIn, LayoutDashboard } from 'lucide-svelte';
+  import { User, LayoutDashboard, Hexagon, Menu, X } from 'lucide-svelte';
   
-  // Check if we're on an auth page (no nav needed)
+  let mobileMenuOpen = false;
+  
   $: isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].some(
     path => $page.url.pathname.startsWith(path)
   );
@@ -12,59 +13,95 @@
 </script>
 
 {#if isAuthPage}
-  <!-- Auth pages - no navigation -->
   <slot />
 {:else}
-  <!-- Regular pages with navigation -->
-  <div class="min-h-screen bg-gray-900">
+  <div class="min-h-screen flex flex-col grain">
     {#if !isHomePage}
-      <!-- Top Navigation -->
-      <nav class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
-        <div class="container mx-auto px-4">
+      <header class="sticky top-0 z-50 bg-neutral-950/80 backdrop-blur-xl border-b border-neutral-800/50">
+        <div class="container-wide">
           <div class="flex items-center justify-between h-16">
             <!-- Logo -->
-            <a href="/" class="flex items-center gap-2">
-              <span class="text-xl font-bold text-blue-400">SvelteKit D1</span>
+            <a href="/" class="flex items-center gap-3 group">
+              <div class="w-9 h-9 rounded-lg bg-accent-500 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                <Hexagon class="w-5 h-5 text-neutral-950" strokeWidth={2.5} />
+              </div>
+              <span class="font-display font-bold text-lg text-neutral-100 hidden sm:block">Studio</span>
             </a>
             
-            <!-- Navigation Links -->
-            <div class="flex items-center gap-2">
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-1">
               <a 
                 href="/dashboard" 
-                class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition"
-                class:bg-gray-700={$page.url.pathname === '/dashboard'}
-                class:text-white={$page.url.pathname === '/dashboard'}
+                class="nav-link {$page.url.pathname === '/dashboard' ? 'nav-link-active' : ''}"
               >
-                <LayoutDashboard class="w-4 h-4" />
-                <span class="hidden sm:inline">Dashboard</span>
+                <LayoutDashboard class="w-4 h-4 mr-2" />
+                Dashboard
               </a>
               
               <a 
                 href="/profile" 
-                class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition"
-                class:bg-gray-700={$page.url.pathname === '/profile'}
-                class:text-white={$page.url.pathname === '/profile'}
+                class="nav-link {$page.url.pathname === '/profile' ? 'nav-link-active' : ''}"
               >
-                <User class="w-4 h-4" />
-                <span class="hidden sm:inline">Profile</span>
+                <User class="w-4 h-4 mr-2" />
+                Profile
               </a>
-            </div>
+            </nav>
+            
+            <!-- Mobile Menu Button -->
+            <button
+              class="md:hidden p-2 rounded-lg text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900 transition"
+              on:click={() => mobileMenuOpen = !mobileMenuOpen}
+            >
+              <svelte:component this={mobileMenuOpen ? X : Menu} class="w-5 h-5" />
+            </button>
           </div>
         </div>
-      </nav>
+        
+        <!-- Mobile Navigation -->
+        {#if mobileMenuOpen}
+          <nav class="md:hidden border-t border-neutral-800/50 bg-neutral-950/95 backdrop-blur-xl">
+            <div class="container-wide py-3 space-y-1">
+              <a 
+                href="/dashboard" 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors {$page.url.pathname === '/dashboard' ? 'text-neutral-100 bg-neutral-800' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
+                on:click={() => mobileMenuOpen = false}
+              >
+                <LayoutDashboard class="w-4 h-4" />
+                Dashboard
+              </a>
+              
+              <a 
+                href="/profile" 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors {$page.url.pathname === '/profile' ? 'text-neutral-100 bg-neutral-800' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
+                on:click={() => mobileMenuOpen = false}
+              >
+                <User class="w-4 h-4" />
+                Profile
+              </a>
+            </div>
+          </nav>
+        {/if}
+      </header>
     {/if}
     
-    <!-- Main Content -->
-    <main>
+    <main class="flex-1">
       <slot />
     </main>
     
-    <!-- Footer (only on home page) -->
     {#if isHomePage}
-      <footer class="bg-gray-800 border-t border-gray-700 py-8">
-        <div class="container mx-auto px-4 text-center text-gray-400">
-          <p>SvelteKit + Cloudflare D1 + Drizzle ORM Boilerplate</p>
-          <p class="text-sm mt-2">Built with ❤️ for the community</p>
+      <footer class="border-t border-neutral-800/50 py-12">
+        <div class="container-wide">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-accent-500 flex items-center justify-center">
+                <Hexagon class="w-4 h-4 text-neutral-950" strokeWidth={2.5} />
+              </div>
+              <span class="font-display font-semibold text-neutral-200">Studio</span>
+            </div>
+            <p class="text-sm text-neutral-600">
+              Crafted with precision
+            </p>
+          </div>
         </div>
       </footer>
     {/if}

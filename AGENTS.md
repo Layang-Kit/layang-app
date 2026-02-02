@@ -19,7 +19,7 @@ The application provides a complete authentication system with user management, 
 |----------|------------|
 | Framework | SvelteKit 2.x |
 | UI Library | Svelte 4.x |
-| Styling | Tailwind CSS 3.4 |
+| Styling | Tailwind CSS 3.4 (Custom "Dark Elegance" theme) |
 | Database | Cloudflare D1 (SQLite) |
 | ORM | Drizzle ORM 0.29 |
 | Auth | Lucia Auth 3.x + Arctic |
@@ -371,15 +371,20 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 ## UI/UX Conventions
 
-- **Theme**: Dark mode only
+- **Theme**: Dark mode only (Dark Elegance)
 - **Color Scheme**: 
-  - Background: `bg-gray-900`
-  - Cards: `bg-gray-800`
-  - Primary: `text-blue-400`
-  - Success: `text-green-400`
-  - Error: `text-red-400`
+  - Background: `bg-neutral-950` (true black)
+  - Surface: `bg-neutral-900` (soft black)
+  - Cards: `bg-neutral-900/50` with `border-neutral-800`
+  - Primary Accent: `text-accent-500` (warm amber #f59e0b)
+  - Secondary Accent: `text-rose-400` (soft rose)
+  - Success: `text-emerald-400`
+  - Error: `text-rose-400`
+  - Text Primary: `text-neutral-100`
+  - Text Secondary: `text-neutral-500`
+  - Border: `border-neutral-800` (subtle)
 - **Layout**: Container with max-width (`max-w-4xl`)
-- **Icons**: Lucide Svelte
+- **Icons**: Lucide Svelte (Hexagon for logo, minimal style)
 - **Forms**: Server-side validation with error display
 
 ## Testing Strategy

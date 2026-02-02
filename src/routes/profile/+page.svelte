@@ -2,9 +2,8 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { 
-    User, Mail, MapPin, Link as LinkIcon, 
-    FileText, Camera, Loader2, Check, ArrowLeft,
-    LogOut, Upload, X
+    Mail, MapPin, Link as LinkIcon, FileText, Camera, Loader2, 
+    Check, ArrowLeft, LogOut, Upload, X, User, Shield, Hexagon
   } from 'lucide-svelte';
   import type { User as UserType } from '$lib/db/types';
   
@@ -14,13 +13,11 @@
   let errorMsg = '';
   let successMsg = '';
   
-  // Avatar upload
   let avatarFile: File | null = null;
   let avatarPreview: string | null = null;
   let uploadingAvatar = false;
   let fileInput: HTMLInputElement;
   
-  // Form fields
   let name = '';
   let bio = '';
   let location = '';
@@ -42,7 +39,6 @@
       const data = await res.json() as { user: UserType };
       user = data.user;
       
-      // Populate form
       name = user.name || '';
       bio = user.bio || '';
       location = user.location || '';
@@ -60,7 +56,6 @@
     const file = input.files?.[0];
     
     if (file) {
-      // Validate file
       const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
       if (!validTypes.includes(file.type)) {
         errorMsg = 'Please select a valid image file (JPG, PNG, GIF, or WebP)';
@@ -74,7 +69,6 @@
       
       avatarFile = file;
       
-      // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         avatarPreview = e.target?.result as string;
@@ -113,7 +107,6 @@
         throw new Error(data.message || 'Failed to upload avatar');
       }
       
-      // Update user profile with new avatar URL
       const updateRes = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -124,7 +117,6 @@
         throw new Error('Failed to update profile');
       }
       
-      // Update local user data
       if (user && data.url) {
         user = { ...user, avatar: data.url };
       }
@@ -159,7 +151,6 @@
       
       successMsg = 'Profile updated successfully!';
       
-      // Update local user data
       if (user) {
         user = { ...user, name, bio, location, website };
       }
@@ -181,17 +172,17 @@
   }
 </script>
 
-<div class="min-h-screen bg-gray-900">
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
+<div class="min-h-screen grain py-8 px-4">
+  <div class="container-tight">
     <!-- Navigation -->
     <div class="flex items-center justify-between mb-8">
-      <a href="/dashboard" class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition">
+      <a href="/dashboard" class="btn-ghost">
         <ArrowLeft class="w-4 h-4" />
         Back to Dashboard
       </a>
       <button
         on:click={handleLogout}
-        class="inline-flex items-center gap-2 text-red-400 hover:text-red-300 transition"
+        class="btn-ghost text-rose-400 hover:text-rose-300"
       >
         <LogOut class="w-4 h-4" />
         Logout
@@ -199,39 +190,36 @@
     </div>
     
     {#if loading}
-      <div class="flex items-center justify-center py-12">
-        <Loader2 class="w-8 h-8 animate-spin text-blue-500" />
+      <div class="flex items-center justify-center py-20">
+        <Loader2 class="w-8 h-8 animate-spin text-accent-500" />
       </div>
     {:else if user}
       <div class="space-y-6">
         <!-- Profile Header -->
-        <div class="bg-gray-800 rounded-xl p-6">
+        <div class="card-elevated p-6 sm:p-8">
           <div class="flex flex-col sm:flex-row items-start gap-6">
-            <!-- Avatar Upload -->
             <div class="relative">
               {#if avatarPreview}
-                <!-- Preview -->
-                <img src={avatarPreview} alt="Preview" class="w-24 h-24 rounded-full object-cover ring-4 ring-blue-500/50" />
+                <img src={avatarPreview} alt="Preview" class="w-24 h-24 rounded-full object-cover ring-4 ring-accent-500/30" />
                 <button
                   on:click={clearAvatarSelection}
-                  class="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600 transition"
+                  class="absolute -top-2 -right-2 p-1.5 bg-rose-500 rounded-full hover:bg-rose-600 transition"
                 >
                   <X class="w-4 h-4 text-white" />
                 </button>
               {:else if user.avatar}
-                <img src={user.avatar} alt={user.name} class="w-24 h-24 rounded-full object-cover" />
+                <img src={user.avatar} alt={user.name} class="w-24 h-24 rounded-full object-cover ring-4 ring-neutral-800" />
               {:else}
-                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold">
+                <div class="w-24 h-24 rounded-full bg-accent-500 flex items-center justify-center text-3xl font-bold text-neutral-950">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
               {/if}
               
-              <!-- Upload Button -->
               <button
                 on:click={() => fileInput?.click()}
-                class="absolute -bottom-2 -right-2 bg-gray-700 p-2 rounded-full hover:bg-gray-600 transition border-2 border-gray-800"
+                class="absolute -bottom-1 -right-1 p-2.5 bg-neutral-800 rounded-full hover:bg-neutral-700 transition border-4 border-neutral-900"
               >
-                <Camera class="w-4 h-4" />
+                <Camera class="w-4 h-4 text-neutral-300" />
               </button>
               
               <input
@@ -243,36 +231,34 @@
               />
             </div>
             
-            <!-- User Info -->
             <div class="flex-1">
-              <h1 class="text-2xl font-bold text-white">{user.name}</h1>
-              <p class="text-gray-400 flex items-center gap-2 mt-1">
+              <h1 class="font-display text-display-xs text-neutral-100">{user.name}</h1>
+              <p class="text-neutral-500 flex items-center gap-2 mt-1">
                 <Mail class="w-4 h-4" />
                 {user.email}
               </p>
-              <div class="flex items-center gap-4 mt-3">
-                <span class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400">
+              <div class="flex items-center gap-3 mt-3">
+                <span class="text-xs px-3 py-1 rounded-lg bg-neutral-800 text-neutral-400 border border-neutral-700">
                   {user.provider === 'google' ? 'Google Account' : 'Email Account'}
                 </span>
                 {#if user.emailVerified}
-                  <span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400 flex items-center gap-1">
+                  <span class="text-xs px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                     <Check class="w-3 h-3" />
                     Verified
                   </span>
                 {:else}
-                  <span class="text-xs px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400">
+                  <span class="text-xs px-3 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
                     Unverified
                   </span>
                 {/if}
               </div>
               
-              <!-- Upload Actions -->
               {#if avatarFile}
                 <div class="mt-4 flex items-center gap-3">
                   <button
                     on:click={uploadAvatar}
                     disabled={uploadingAvatar}
-                    class="inline-flex items-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                    class="btn-primary text-sm py-2 px-4"
                   >
                     {#if uploadingAvatar}
                       <Loader2 class="w-4 h-4 animate-spin" />
@@ -284,7 +270,7 @@
                   </button>
                   <button
                     on:click={clearAvatarSelection}
-                    class="text-gray-400 hover:text-white transition"
+                    class="text-neutral-500 hover:text-neutral-300 transition text-sm"
                   >
                     Cancel
                   </button>
@@ -296,25 +282,24 @@
         
         <!-- Messages -->
         {#if errorMsg}
-          <div class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg">
+          <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
             {errorMsg}
           </div>
         {/if}
         
         {#if successMsg}
-          <div class="bg-green-500/10 border border-green-500 text-green-500 px-4 py-3 rounded-lg">
+          <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
             {successMsg}
           </div>
         {/if}
         
-        <!-- Edit Profile Form -->
-        <div class="bg-gray-800 rounded-xl p-6">
-          <h2 class="text-xl font-semibold text-white mb-6">Edit Profile</h2>
+        <!-- Edit Form -->
+        <div class="card-elevated p-6 sm:p-8">
+          <h2 class="font-display text-display-xs text-neutral-100 mb-6">Edit Profile</h2>
           
-          <form on:submit|preventDefault={handleSubmit} class="space-y-5">
-            <!-- Name Field -->
+          <form on:submit|preventDefault={handleSubmit} class="space-y-6">
             <div>
-              <label for="name" class="block text-sm font-medium text-gray-300 mb-2">
+              <label for="name" class="block text-sm font-medium text-neutral-400 mb-2">
                 <User class="w-4 h-4 inline mr-2" />
                 Full Name
               </label>
@@ -323,13 +308,12 @@
                 type="text"
                 bind:value={name}
                 required
-                class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
+                class="input"
               />
             </div>
             
-            <!-- Bio Field -->
             <div>
-              <label for="bio" class="block text-sm font-medium text-gray-300 mb-2">
+              <label for="bio" class="block text-sm font-medium text-neutral-400 mb-2">
                 <FileText class="w-4 h-4 inline mr-2" />
                 Bio
               </label>
@@ -338,15 +322,14 @@
                 bind:value={bio}
                 rows="3"
                 maxlength="160"
-                class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition resize-none"
+                class="input resize-none"
                 placeholder="Tell us about yourself..."
               />
-              <p class="text-xs text-gray-500 mt-1">{bio?.length || 0}/160 characters</p>
+              <p class="text-xs text-neutral-600 mt-2">{bio?.length || 0}/160 characters</p>
             </div>
             
-            <!-- Location Field -->
             <div>
-              <label for="location" class="block text-sm font-medium text-gray-300 mb-2">
+              <label for="location" class="block text-sm font-medium text-neutral-400 mb-2">
                 <MapPin class="w-4 h-4 inline mr-2" />
                 Location
               </label>
@@ -355,14 +338,13 @@
                 type="text"
                 bind:value={location}
                 maxlength="100"
-                class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
+                class="input"
                 placeholder="City, Country"
               />
             </div>
             
-            <!-- Website Field -->
             <div>
-              <label for="website" class="block text-sm font-medium text-gray-300 mb-2">
+              <label for="website" class="block text-sm font-medium text-neutral-400 mb-2">
                 <LinkIcon class="w-4 h-4 inline mr-2" />
                 Website
               </label>
@@ -370,17 +352,16 @@
                 id="website"
                 type="url"
                 bind:value={website}
-                class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
+                class="input"
                 placeholder="https://yourwebsite.com"
               />
             </div>
             
-            <!-- Submit Button -->
             <div class="pt-4">
               <button
                 type="submit"
                 disabled={saving}
-                class="w-full sm:w-auto bg-blue-600 text-white py-3 px-8 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                class="btn-primary"
               >
                 {#if saving}
                   <Loader2 class="w-5 h-5 animate-spin" />
@@ -393,34 +374,44 @@
           </form>
         </div>
         
-        <!-- Security Section -->
-        <div class="bg-gray-800 rounded-xl p-6">
-          <h2 class="text-xl font-semibold text-white mb-4">Security</h2>
+        <!-- Security -->
+        <div class="card-elevated p-6 sm:p-8">
+          <h2 class="font-display text-display-xs text-neutral-100 mb-6">Security</h2>
           <div class="space-y-4">
-            <div class="flex items-center justify-between py-3 border-b border-gray-700">
-              <div>
-                <p class="text-white font-medium">Password</p>
-                <p class="text-sm text-gray-400">Change your password</p>
+            <div class="flex items-center justify-between py-3 border-b border-neutral-800/50">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center">
+                  <Shield class="w-5 h-5 text-neutral-400" />
+                </div>
+                <div>
+                  <p class="font-medium text-neutral-100">Password</p>
+                  <p class="text-sm text-neutral-500">Change your password</p>
+                </div>
               </div>
               <a 
                 href="/forgot-password" 
-                class="text-blue-400 hover:text-blue-300 font-medium"
+                class="text-accent-500 hover:text-accent-400 font-medium text-sm"
               >
                 Change
               </a>
             </div>
             
             {#if !user.emailVerified}
-              <div class="flex items-center justify-between py-3 border-b border-gray-700">
-                <div>
-                  <p class="text-white font-medium">Email Verification</p>
-                  <p class="text-sm text-gray-400">Verify your email address</p>
+              <div class="flex items-center justify-between py-3 border-b border-neutral-800/50">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center">
+                    <Mail class="w-5 h-5 text-neutral-400" />
+                  </div>
+                  <div>
+                    <p class="font-medium text-neutral-100">Email Verification</p>
+                    <p class="text-sm text-neutral-500">Verify your email address</p>
+                  </div>
                 </div>
                 <form method="POST" action="/auth/resend-verification">
                   <input type="hidden" name="email" value={user.email} />
                   <button 
                     type="submit"
-                    class="text-blue-400 hover:text-blue-300 font-medium"
+                    class="text-accent-500 hover:text-accent-400 font-medium text-sm"
                   >
                     Resend
                   </button>
@@ -431,7 +422,7 @@
         </div>
       </div>
     {:else}
-      <div class="text-center py-12 text-gray-400">
+      <div class="text-center py-20 text-neutral-500">
         Failed to load profile. Please try again.
       </div>
     {/if}

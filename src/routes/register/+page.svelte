@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { Chrome, Mail, Lock, User, Eye, EyeOff, Loader2, Check, X } from 'lucide-svelte';
+  import { Chrome, Mail, Lock, User, Eye, EyeOff, Loader2, Check, X, Hexagon, ArrowRight } from 'lucide-svelte';
   
   let name = '';
   let email = '';
@@ -10,7 +10,6 @@
   let errorMsg = '';
   let errors: Record<string, string[]> = {};
   
-  // Password validation
   $: passwordValid = {
     length: password.length >= 8,
     uppercase: /[A-Z]/.test(password),
@@ -38,8 +37,8 @@
         throw new Error(data.message || 'Registration failed');
       }
       
-      // Redirect to dashboard on success
-      goto('/dashboard');
+      // Redirect to verification pending page
+      goto(`/verify-email-sent?email=${encodeURIComponent(email)}`);
       
     } catch (err: any) {
       errorMsg = err.message;
@@ -53,177 +52,166 @@
   }
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-900 px-4 py-12">
-  <div class="w-full max-w-md space-y-8">
-    <!-- Header -->
-    <div class="text-center">
-      <h1 class="text-3xl font-bold text-white">Create Account</h1>
-      <p class="mt-2 text-gray-400">Get started with your free account</p>
+<div class="min-h-screen flex items-center justify-center py-12 px-4 grain">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-accent-500/5 rounded-full blur-3xl"></div>
+  </div>
+  
+  <div class="w-full max-w-md relative z-10">
+    <div class="text-center mb-8">
+      <a href="/" class="inline-flex items-center gap-3 group">
+        <div class="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+          <Hexagon class="w-6 h-6 text-neutral-950" strokeWidth={2.5} />
+        </div>
+      </a>
     </div>
     
-    <!-- Error Alert -->
-    {#if errorMsg}
-      <div class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg">
-        {errorMsg}
-      </div>
-    {/if}
-    
-    <!-- Google Register Button -->
-    <button
-      on:click={registerWithGoogle}
-      class="w-full flex items-center justify-center gap-3 bg-white text-gray-900 py-3 px-4 rounded-lg font-medium hover:bg-gray-100 transition disabled:opacity-50"
-      disabled={loading}
-    >
-      <Chrome class="w-5 h-5" />
-      Continue with Google
-    </button>
-    
-    <!-- Divider -->
-    <div class="relative">
-      <div class="absolute inset-0 flex items-center">
-        <div class="w-full border-t border-gray-700"></div>
-      </div>
-      <div class="relative flex justify-center text-sm">
-        <span class="px-2 bg-gray-900 text-gray-400">Or register with email</span>
-      </div>
-    </div>
-    
-    <!-- Register Form -->
-    <form on:submit|preventDefault={handleSubmit} class="space-y-5">
-      <!-- Name Field -->
-      <div>
-        <label for="name" class="block text-sm font-medium text-gray-300 mb-2">
-          Full Name
-        </label>
-        <div class="relative">
-          <User class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-          <input
-            id="name"
-            type="text"
-            bind:value={name}
-            required
-            class="w-full bg-gray-800 text-white pl-10 pr-4 py-3 rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
-            placeholder="John Doe"
-          />
-        </div>
-        {#if errors.name}
-          <p class="mt-1 text-sm text-red-500">{errors.name[0]}</p>
-        {/if}
+    <div class="card-elevated p-8">
+      <div class="text-center mb-8">
+        <h1 class="font-display text-display-xs text-neutral-100 mb-2">Create Account</h1>
+        <p class="text-neutral-500">Get started with your free account</p>
       </div>
       
-      <!-- Email Field -->
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
-          Email Address
-        </label>
-        <div class="relative">
-          <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-          <input
-            id="email"
-            type="email"
-            bind:value={email}
-            required
-            class="w-full bg-gray-800 text-white pl-10 pr-4 py-3 rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
-            placeholder="you@example.com"
-          />
+      {#if errorMsg}
+        <div class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+          {errorMsg}
         </div>
-        {#if errors.email}
-          <p class="mt-1 text-sm text-red-500">{errors.email[0]}</p>
-        {/if}
-      </div>
-      
-      <!-- Password Field -->
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
-          Password
-        </label>
-        <div class="relative">
-          <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-          {#if showPassword}
-            <input
-              id="password"
-              type="text"
-              bind:value={password}
-              required
-              class="w-full bg-gray-800 text-white pl-10 pr-12 py-3 rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
-              placeholder="••••••••"
-            />
-          {:else}
-            <input
-              id="password"
-              type="password"
-              bind:value={password}
-              required
-              class="w-full bg-gray-800 text-white pl-10 pr-12 py-3 rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition"
-              placeholder="••••••••"
-            />
-          {/if}
-          <button
-            type="button"
-            on:click={() => showPassword = !showPassword}
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-          >
-            {#if showPassword}
-              <EyeOff class="w-5 h-5" />
-            {:else}
-              <Eye class="w-5 h-5" />
-            {/if}
-          </button>
-        </div>
-        
-        <!-- Password Requirements -->
-        <div class="mt-3 space-y-2">
-          <p class="text-sm text-gray-500">Password must have:</p>
-          <div class="space-y-1">
-            <div class="flex items-center gap-2 text-sm" class:text-green-400={passwordValid.length} class:text-gray-500={!passwordValid.length}>
-              {#if passwordValid.length}
-                <Check class="w-4 h-4" />
-              {:else}
-                <X class="w-4 h-4" />
-              {/if}
-              At least 8 characters
-            </div>
-            <div class="flex items-center gap-2 text-sm" class:text-green-400={passwordValid.uppercase} class:text-gray-500={!passwordValid.uppercase}>
-              {#if passwordValid.uppercase}
-                <Check class="w-4 h-4" />
-              {:else}
-                <X class="w-4 h-4" />
-              {/if}
-              One uppercase letter
-            </div>
-            <div class="flex items-center gap-2 text-sm" class:text-green-400={passwordValid.number} class:text-gray-500={!passwordValid.number}>
-              {#if passwordValid.number}
-                <Check class="w-4 h-4" />
-              {:else}
-                <X class="w-4 h-4" />
-              {/if}
-              One number
-            </div>
-          </div>
-        </div>
-        {#if errors.password}
-          <p class="mt-1 text-sm text-red-500">{errors.password[0]}</p>
-        {/if}
-      </div>
+      {/if}
       
       <button
-        type="submit"
-        disabled={loading || !passwordValid.length || !passwordValid.uppercase || !passwordValid.number}
-        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        on:click={registerWithGoogle}
+        disabled={loading}
+        class="w-full flex items-center justify-center gap-3 bg-neutral-100 text-neutral-950 py-3 px-4 rounded-xl font-semibold hover:bg-white transition disabled:opacity-50 mb-6"
       >
-        {#if loading}
-          <Loader2 class="w-5 h-5 animate-spin" />
-          Creating account...
-        {:else}
-          Create Account
-        {/if}
+        <Chrome class="w-5 h-5" />
+        Continue with Google
       </button>
-    </form>
+      
+      <div class="relative mb-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="divider w-full"></div>
+        </div>
+        <div class="relative flex justify-center text-xs">
+          <span class="px-4 bg-neutral-900 text-neutral-600">or register with email</span>
+        </div>
+      </div>
+      
+      <form on:submit|preventDefault={handleSubmit} class="space-y-5">
+        <div>
+          <label for="name" class="block text-sm font-medium text-neutral-400 mb-2">
+            Full Name
+          </label>
+          <div class="relative">
+            <User class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-600" />
+            <input
+              id="name"
+              type="text"
+              bind:value={name}
+              required
+              class="input pl-12"
+              placeholder="John Doe"
+            />
+          </div>
+          {#if errors.name}
+            <p class="mt-2 text-sm text-rose-400">{errors.name[0]}</p>
+          {/if}
+        </div>
+        
+        <div>
+          <label for="email" class="block text-sm font-medium text-neutral-400 mb-2">
+            Email Address
+          </label>
+          <div class="relative">
+            <Mail class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-600" />
+            <input
+              id="email"
+              type="email"
+              bind:value={email}
+              required
+              class="input pl-12"
+              placeholder="you@example.com"
+            />
+          </div>
+          {#if errors.email}
+            <p class="mt-2 text-sm text-rose-400">{errors.email[0]}</p>
+          {/if}
+        </div>
+        
+        <div>
+          <label for="password" class="block text-sm font-medium text-neutral-400 mb-2">
+            Password
+          </label>
+          <div class="relative">
+            <Lock class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-600" />
+            {#if showPassword}
+              <input
+                id="password"
+                type="text"
+                bind:value={password}
+                required
+                class="input pl-12 pr-12"
+                placeholder="••••••••"
+              />
+            {:else}
+              <input
+                id="password"
+                type="password"
+                bind:value={password}
+                required
+                class="input pl-12 pr-12"
+                placeholder="••••••••"
+              />
+            {/if}
+            <button
+              type="button"
+              on:click={() => showPassword = !showPassword}
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-400 transition"
+            >
+              <svelte:component this={showPassword ? EyeOff : Eye} class="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div class="mt-4 space-y-2">
+            <p class="text-xs text-neutral-600 uppercase tracking-wider font-medium">Password requirements</p>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-sm {passwordValid.length ? 'text-emerald-400' : 'text-neutral-600'}">
+                <svelte:component this={passwordValid.length ? Check : X} class="w-4 h-4" />
+                At least 8 characters
+              </div>
+              <div class="flex items-center gap-2 text-sm {passwordValid.uppercase ? 'text-emerald-400' : 'text-neutral-600'}">
+                <svelte:component this={passwordValid.uppercase ? Check : X} class="w-4 h-4" />
+                One uppercase letter
+              </div>
+              <div class="flex items-center gap-2 text-sm {passwordValid.number ? 'text-emerald-400' : 'text-neutral-600'}">
+                <svelte:component this={passwordValid.number ? Check : X} class="w-4 h-4" />
+                One number
+              </div>
+            </div>
+          </div>
+          {#if errors.password}
+            <p class="mt-2 text-sm text-rose-400">{errors.password[0]}</p>
+          {/if}
+        </div>
+        
+        <button
+          type="submit"
+          disabled={loading || !passwordValid.length || !passwordValid.uppercase || !passwordValid.number}
+          class="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {#if loading}
+            <Loader2 class="w-5 h-5 animate-spin" />
+            Creating account...
+          {:else}
+            Create Account
+            <ArrowRight class="w-4 h-4" />
+          {/if}
+        </button>
+      </form>
+    </div>
     
-    <!-- Login Link -->
-    <p class="text-center text-gray-400">
+    <p class="text-center mt-6 text-neutral-500">
       Already have an account?
-      <a href="/login" class="text-blue-400 hover:text-blue-300 font-medium">
+      <a href="/login" class="text-accent-500 hover:text-accent-400 font-medium transition">
         Sign in
       </a>
     </p>

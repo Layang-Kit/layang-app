@@ -61,7 +61,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
     }
     
     // Check for recent token (rate limiting - 1 minute)
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+    const oneMinuteAgo = Date.now() - 60 * 1000;
     const recentToken = await locals.db.query.emailVerificationTokens.findFirst({
       where: and(
         eq(emailVerificationTokens.userId, user.id),
@@ -84,8 +84,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
       .where(eq(emailVerificationTokens.userId, user.id));
     
     // Create new token (expires in 24 hours)
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
     
     await locals.db.insert(emailVerificationTokens).values({
       id: generateId(),

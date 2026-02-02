@@ -16,8 +16,8 @@ export const users = sqliteTable('users', {
   avatar: text('avatar'), // profile picture URL
   emailVerified: integer('email_verified', { mode: 'boolean' }).default(false),
   // Timestamps
-  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+  createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now()),
+  updatedAt: integer('updated_at', { mode: 'number' }).$defaultFn(() => Date.now())
 });
 
 // Sessions table for Lucia auth
@@ -26,7 +26,7 @@ export const sessions = sqliteTable('sessions', {
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+  expiresAt: integer('expires_at', { mode: 'number' }).notNull()
 });
 
 // Password reset tokens
@@ -36,9 +36,9 @@ export const passwordResetTokens = sqliteTable('password_reset_tokens', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   tokenHash: text('token_hash').notNull(),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  expiresAt: integer('expires_at', { mode: 'number' }).notNull(),
   used: integer('used', { mode: 'boolean' }).default(false),
-  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+  createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now())
 });
 
 // Email verification tokens
@@ -48,9 +48,9 @@ export const emailVerificationTokens = sqliteTable('email_verification_tokens', 
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   tokenHash: text('token_hash').notNull(),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  expiresAt: integer('expires_at', { mode: 'number' }).notNull(),
   used: integer('used', { mode: 'boolean' }).default(false),
-  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+  createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now())
 });
 
 // Posts table (existing)
@@ -60,8 +60,8 @@ export const posts = sqliteTable('posts', {
   content: text('content'),
   published: integer('published', { mode: 'boolean' }).default(false),
   authorId: text('author_id').references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+  createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now()),
+  updatedAt: integer('updated_at', { mode: 'number' }).$defaultFn(() => Date.now())
 });
 
 // Relations

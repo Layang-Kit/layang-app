@@ -80,8 +80,7 @@ export const POST: RequestHandler = async ({ request, locals, platform, url }) =
     const tokenHash = await hashToken(token);
 
     // Create verification token (expires in 24 hours)
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
     await locals.db.insert(emailVerificationTokens).values({
       id: generateId(),

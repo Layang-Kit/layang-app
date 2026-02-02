@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { CheckCircle, XCircle, Loader2, Mail } from 'lucide-svelte';
+  import { CheckCircle, XCircle, Mail, Hexagon } from 'lucide-svelte';
   import type { PageData } from './$types';
   
   export let data: PageData;
@@ -13,30 +13,34 @@
   }
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-900 px-4">
-  <div class="w-full max-w-md">
-    <div class="bg-gray-800 rounded-xl p-8 text-center">
+<div class="min-h-screen flex items-center justify-center px-4 grain">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-accent-500/5 rounded-full blur-3xl"></div>
+  </div>
+  
+  <div class="w-full max-w-md relative z-10">
+    <div class="card-elevated p-8 text-center">
       {#if data.success}
         <!-- Success State -->
         <div class="mb-6">
-          <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle class="w-10 h-10 text-green-500" />
+          <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle class="w-10 h-10 text-emerald-400" />
           </div>
-          <h1 class="text-2xl font-bold text-white mb-2">
+          <h1 class="font-display text-display-xs text-neutral-100 mb-2">
             {data.alreadyVerified ? 'Already Verified!' : 'Email Verified!'}
           </h1>
-          <p class="text-gray-400">{data.message}</p>
+          <p class="text-neutral-500">{data.message}</p>
         </div>
         
         {#if !data.alreadyVerified}
-          <p class="text-sm text-gray-500 mb-6">
+          <p class="text-sm text-neutral-600 mb-6">
             Redirecting to login page in 5 seconds...
           </p>
         {/if}
         
         <a 
           href="/login" 
-          class="inline-flex items-center justify-center w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition"
+          class="btn-primary w-full"
         >
           Go to Login
         </a>
@@ -44,17 +48,17 @@
       {:else}
         <!-- Error State -->
         <div class="mb-6">
-          <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <XCircle class="w-10 h-10 text-red-500" />
+          <div class="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <XCircle class="w-10 h-10 text-rose-400" />
           </div>
-          <h1 class="text-2xl font-bold text-white mb-2">Verification Failed</h1>
-          <p class="text-gray-400">{data.message}</p>
+          <h1 class="font-display text-display-xs text-neutral-100 mb-2">Verification Failed</h1>
+          <p class="text-neutral-500">{data.message}</p>
         </div>
         
         <div class="space-y-3">
           <a 
             href="/login" 
-            class="inline-flex items-center justify-center w-full bg-gray-700 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 transition"
+            class="btn-secondary w-full"
           >
             Go to Login
           </a>
@@ -63,7 +67,7 @@
             <input type="hidden" name="email" value={new URLSearchParams(window.location.search).get('email')} />
             <button 
               type="submit"
-              class="inline-flex items-center justify-center w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition"
+              class="btn-primary w-full"
             >
               <Mail class="w-4 h-4 mr-2" />
               Resend Verification Email
