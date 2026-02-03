@@ -33,7 +33,7 @@ export const load = async ({ locals }) => {
 **+page.svelte**
 ```svelte
 <script>
-  export let data; // Auto-populated!
+  let { data } = $props(); // Auto-populated!
 </script>
 
 {#each data.users as user}

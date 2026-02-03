@@ -97,7 +97,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 <!-- routes/dashboard/+page.svelte -->
 <script>
   // ✅ Data langsung dari server!
-  export let data;
+  let { data } = $props();
 </script>
 
 <!-- ✅ Langsung render, no loading! -->
@@ -157,7 +157,7 @@ export const actions: Actions = {
 ```svelte
 <!-- routes/register/+page.svelte -->
 <script>
-  export let form; // Data dari action return
+  let { form } = $props(); // Data dari action return
 </script>
 
 <!-- ✅ Form POST langsung ke server -->
@@ -189,7 +189,7 @@ Form Actions work tanpa JS, tapi kita bisa tambahkan UX yang lebih baik:
 <script>
   import { enhance } from '$app/forms';
   
-  let loading = false;
+  let loading = $state(false);
 </script>
 
 <form
@@ -290,7 +290,7 @@ export const load = async ({ locals }) => {
 ```svelte
 <!-- routes/users/+page.svelte -->
 <script>
-  export let data;  // ✅ Auto-populated dari load()
+  let { data } = $props();  // ✅ Auto-populated dari load()
 </script>
 
 {#each data.users as user}
@@ -305,7 +305,7 @@ export const load = async ({ locals }) => {
 - [ ] Hapus `/api/*` routes yang hanya dipakai internal
 - [ ] Pindahkan data fetching ke `+page.server.ts` `load()`
 - [ ] Pindahkan form submission ke `+page.server.ts` `actions`
-- [ ] Ganti `fetch()` di browser dengan `export let data`
+- [ ] Ganti `fetch()` di browser dengan `let { data } = $props()`
 - [ ] Hapus loading states yang tidak perlu
 - [ ] Tambahkan `use:enhance` untuk form UX
 

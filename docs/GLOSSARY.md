@@ -184,7 +184,7 @@ await db.select().from(users).where(eq(users.id, userId))
 
 **Traditional (JavaScript Required):**
 ```html
-<form on:submit={handleSubmit}>
+<form onsubmit={handleSubmit}>
   <!-- Won't work without JS -->
 </form>
 ```

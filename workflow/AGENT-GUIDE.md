@@ -9,9 +9,9 @@ Project ini menggunakan 3 agent yang bekerja sama untuk membangun aplikasi denga
 3. **MANAGER_AGENT** - Manajemen perubahan dan release notes
 
 **Tech Stack:**
-- SvelteKit 2.x + Svelte 4.x
-- Cloudflare D1 (SQLite) + Drizzle ORM
-- Tailwind CSS 3.4
+- SvelteKit 2.x + Svelte 5.x (with Runes)
+- Cloudflare D1 (SQLite) + Drizzle ORM 0.40
+- Tailwind CSS 4.x
 - Lucia Auth 3.x
 - Cloudflare Pages (deployment)
 

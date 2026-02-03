@@ -40,15 +40,15 @@ Silakan mention @workflow/TASK_AGENT.md untuk implementasi fitur."
 | Category | Technology |
 |----------|------------|
 | Framework | SvelteKit 2.x |
-| UI Library | Svelte 4.x |
-| Styling | Tailwind CSS 3.4 |
+| UI Library | Svelte 5.x |
+| Styling | Tailwind CSS 4.x |
 | Database | Cloudflare D1 (SQLite) |
-| ORM | Drizzle ORM 0.29 |
+| ORM | Drizzle ORM 0.40 |
 | Auth | Lucia Auth 3.x + Arctic |
 | Password Hashing | Web Crypto API (PBKDF2) |
 | Email | Resend |
 | Storage | Cloudflare R2 |
-| Build Tool | Vite 5.x |
+| Build Tool | Vite 6.x |
 | Adapter | @sveltejs/adapter-cloudflare |
 | Deployment | Cloudflare Pages |
 
@@ -235,7 +235,7 @@ npm run db:seed:local
 ### 10. Setup Design System
 
 Konfigurasi theme:
-- Update `tailwind.config.js` dengan branding colors, typography, dan design tokens dari `workflow/PRD.md` dan `workflow/ui-kit.html`
+- Update `src/app.css` dengan Tailwind 4 CSS-first configuration (branding colors, typography, design tokens) dari `workflow/PRD.md` dan `workflow/ui-kit.html`
 - Update `src/app.css` dengan custom styles jika diperlukan
 
 ### 11. Create Layout Components

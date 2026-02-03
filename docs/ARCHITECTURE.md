@@ -223,7 +223,7 @@ sveltekit-cf-starter/
 ├── .env.example              # Template
 ├── drizzle.config.ts         # Drizzle CLI config
 ├── svelte.config.js          # SvelteKit config
-├── tailwind.config.js        # Tailwind config
+├── src/app.css               # Tailwind 4 config (@theme)
 ├── vite.config.ts            # Vite config
 └── wrangler.toml             # Cloudflare config
 ```
@@ -331,7 +331,7 @@ export const load = async ({ locals }) => {
 
 // +page.svelte
 <script>
-  export let data; // Data sudah ada, no loading state!
+  let { data } = $props(); // Data sudah ada, no loading state!
 </script>
 
 {#each data.users as user}

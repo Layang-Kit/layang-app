@@ -18,16 +18,16 @@ The application provides a complete authentication system with user management, 
 | Category | Technology |
 |----------|------------|
 | Framework | SvelteKit 2.x |
-| UI Library | Svelte 4.x |
-| Styling | Tailwind CSS 3.4 (Custom "Dark Elegance" theme) |
+| UI Library | Svelte 5.x |
+| Styling | Tailwind CSS 4.x (Custom "Dark Elegance" theme) |
 | Database | Cloudflare D1 (SQLite) |
-| ORM | Drizzle ORM 0.29 |
+| ORM | Drizzle ORM 0.40 |
 | Auth | Lucia Auth 3.x + Arctic |
 | Password Hashing | Web Crypto API (PBKDF2) |
 | Email | Resend |
 | Storage | Cloudflare R2 |
 | Image Processing | Canvas API (WebP conversion) |
-| Build Tool | Vite 5.x |
+| Build Tool | Vite 6.x |
 | Adapter | @sveltejs/adapter-cloudflare |
 | Deployment | Cloudflare Pages |
 
@@ -90,7 +90,7 @@ The application provides a complete authentication system with user management, 
 ├── vite.config.ts                 # Vite configuration
 ├── drizzle.config.ts              # Drizzle Kit configuration
 ├── wrangler.toml                  # Cloudflare Wrangler configuration
-├── tailwind.config.js             # Tailwind CSS configuration
+├── src/app.css                    # Global styles (Tailwind CSS 4)
 └── tsconfig.json                  # TypeScript configuration
 ```
 
@@ -436,6 +436,46 @@ curl -X POST http://localhost:5173/auth/login \
 2. **Type errors**: Run `npm run cf:typegen`
 3. **OAuth errors**: Verify Google credentials and redirect URIs
 4. **Session issues**: Clear cookies and try again
+
+## Important Version Updates (2025-02)
+
+### Breaking Changes in Dependencies
+
+Project ini telah diupdate ke versi major baru. Berikut perubahan penting:
+
+| Package | Old | New | Notes |
+|---------|-----|-----|-------|
+| **Svelte** | 4.x | **5.20.0** | Runes syntax: `$state()`, `$props()`, `$derived()` |
+| **Tailwind CSS** | 3.4 | **4.1.18** | CSS-first config, no `tailwind.config.js` needed |
+| **Drizzle ORM** | 0.29 | **0.40.0** | API improvements |
+| **Zod** | 3.x | **4.3.6** | New features & performance |
+| **Vite** | 5.x | **6.2.0** | Build improvements |
+
+### Svelte 5 Runes (New Syntax)
+
+```svelte
+<script>
+  // Old (Svelte 4)
+  export let data;
+  let count = 0;
+  $: doubled = count * 2;
+  
+  // New (Svelte 5)
+  let { data } = $props();
+  let count = $state(0);
+  let doubled = $derived(count * 2);
+</script>
+```
+
+### Tailwind 4 Changes
+
+- **CSS-first configuration** - Konfigurasi di `app.css`, bukan `tailwind.config.js`
+- **No `@tailwind` directives** - Gunakan `@import "tailwindcss"`
+- **Built-in CSS imports** - Support native CSS `@import`
+
+Lihat [Tailwind 4 Docs](https://tailwindcss.com/docs/v4-beta) untuk detail.
+
+---
 
 ## Workflow Agents
 

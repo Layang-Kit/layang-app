@@ -146,7 +146,7 @@ export const load = async ({ setHeaders }) => {
   import { stream } from '$lib/streaming';
   
   // Data streams in as it becomes available
-  export let data;
+  let { data } = $props();
 </script>
 
 {#await data.users}
@@ -261,7 +261,7 @@ export const load = async ({ setHeaders }) => {
   let items = [];
   
   // Jalan tiap kali items berubah
-  $: sortedItems = items.sort((a, b) => 
+  let sortedItems = $derived(items.sort((a, b) => 
     complexComparison(a, b)
   );
 </script>
@@ -279,7 +279,7 @@ export const load = async ({ setHeaders }) => {
     (items) => items.length // cache key
   );
   
-  $: sortedItems = sortItems(items);
+  let sortedItems = $derived(sortItems(items));
 </script>
 ```
 

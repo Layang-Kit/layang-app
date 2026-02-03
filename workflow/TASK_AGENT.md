@@ -159,7 +159,7 @@ For each feature, ensure:
 ### Frontend (Page/Component)
 
 - [ ] Create/modify `+page.svelte`
-- [ ] Use Svelte 4 runes (`$state`, `$props`)
+- [ ] Use Svelte 5 runes (`$state`, `$props`, `$derived`)
 - [ ] Use `$derived` untuk computed values
 - [ ] Import dari `$app/stores`, `$app/navigation` jika perlu
 - [ ] Use `goto()` dari `$app/navigation` untuk redirect

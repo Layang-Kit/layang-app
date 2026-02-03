@@ -77,7 +77,7 @@ export const load = async ({ locals }) => {
 
 ```svelte
 <script>
-  export let data; // Data dari server
+  let { data } = $props(); // Data dari server
 </script>
 ```
 
@@ -240,7 +240,7 @@ export const actions = {
 ```svelte
 <!-- Child.svelte -->
 <script>
-  export let items;
+  let { items } = $props();
   
   function addItem() {
     items.push('new item'); // ❌ Mutating props!
@@ -251,7 +251,7 @@ export const actions = {
 **✅ Solusi:**
 ```svelte
 <script>
-  export let items;
+  let { items } = $props();
   
   function addItem() {
     items = [...items, 'new item']; // ✅ New reference
@@ -297,7 +297,7 @@ export const load = async ({ locals }) => {
 
 ```svelte
 <script>
-  export let data;
+  let { data } = $props();
 </script>
 
 {#each data.users as user}
@@ -369,7 +369,7 @@ export const load = async ({ locals, url }) => {
   let items = [];
   
   // Jalan tiap kali items berubah, bahkan jika filter sama!
-  $: filteredItems = items.filter(item => 
+  let filteredItems = $derived(items.filter(item => 
     complexCalculation(item)
   );
 </script>
@@ -384,7 +384,7 @@ export const load = async ({ locals, url }) => {
   let searchQuery = '';
   
   // Hanya re-compute jika dependency berubah
-  $: filteredItems = searchQuery 
+  let filteredItems = $derived(searchQuery 
     ? items.filter(item => item.name.includes(searchQuery))
     : items;
 </script>
