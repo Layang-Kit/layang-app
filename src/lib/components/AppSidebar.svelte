@@ -186,7 +186,7 @@
       <button
         type="button"
         onclick={() => theme.toggle()}
-        class="w-full flex items-center justify-center p-2 rounded-xl transition-colors"
+        class="w-full flex items-center justify-center p-2 rounded-xl transition-colors cursor-pointer"
         style="color: var(--text-tertiary);"
         title="Toggle theme"
         aria-label="Toggle theme"
@@ -201,7 +201,7 @@
       <button
         type="button"
         onclick={() => theme.toggle()}
-        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer"
         style="color: var(--text-tertiary);"
         aria-label="Toggle theme"
       >

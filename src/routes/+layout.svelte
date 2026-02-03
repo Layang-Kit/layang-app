@@ -52,7 +52,7 @@
             <button
               type="button"
               onclick={() => theme.toggle()}
-              class="p-2 rounded-lg transition-colors"
+              class="p-2 rounded-lg transition-colors cursor-pointer"
               style="color: var(--text-secondary); hover:color: var(--text-primary);"
               aria-label="Toggle theme"
             >
