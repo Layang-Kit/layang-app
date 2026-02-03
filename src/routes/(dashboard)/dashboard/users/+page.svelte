@@ -109,11 +109,11 @@
         <p class="mt-1" style="color: var(--text-secondary);">Manage and monitor user accounts in your system.</p>
       </div>
       <div class="flex items-center gap-3">
-        <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl transition-colors text-sm font-medium" style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary); color: var(--text-secondary);">
+        <button class="btn-primary cursor-pointer">
           <Download class="w-4 h-4" />
           Export
         </button>
-        <button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl transition-colors text-sm font-medium" style="background-color: var(--accent-primary); color: #0a0a0a;">
+        <button class="btn-primary cursor-pointer">
           <Plus class="w-4 h-4" />
           Add User
         </button>
@@ -123,7 +123,7 @@
   
   <!-- Stats Row -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="rounded-xl p-4" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+    <div class="card-elevated p-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: var(--success-bg);">
           <UserCheck class="w-5 h-5" style="color: var(--success);" />
@@ -134,7 +134,7 @@
         </div>
       </div>
     </div>
-    <div class="rounded-xl p-4" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+    <div class="card-elevated p-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: var(--accent-bg);">
           <Shield class="w-5 h-5" style="color: var(--accent-primary);" />
@@ -147,7 +147,7 @@
         </div>
       </div>
     </div>
-    <div class="rounded-xl p-4" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+    <div class="card-elevated p-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: rgba(59, 130, 246, 0.1);">
           <Mail class="w-5 h-5" style="color: #3b82f6;" />
@@ -163,7 +163,7 @@
   </div>
   
   <!-- Filters & Search -->
-  <div class="rounded-2xl mb-6" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+  <div class="card-elevated mb-6">
     <div class="p-4 flex flex-col sm:flex-row gap-4" style="border-bottom: 1px solid var(--border-primary);">
       <!-- Search -->
       <div class="relative flex-1">
@@ -172,8 +172,7 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Search users by name or email..."
-          class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-colors"
-          style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary);"
+          class="input pl-10"
         />
       </div>
       
@@ -183,8 +182,7 @@
           <Filter class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-tertiary);" />
           <select
             bind:value={selectedFilter}
-            class="pl-10 pr-8 py-2.5 rounded-xl text-sm appearance-none cursor-pointer transition-colors"
-            style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-secondary);"
+            class="input pl-10 appearance-none cursor-pointer"
           >
             <option value="all">All Providers</option>
             <option value="email">Email</option>

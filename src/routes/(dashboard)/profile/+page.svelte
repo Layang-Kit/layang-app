@@ -181,7 +181,7 @@
   {:else if user}
     <div class="space-y-6">
       <!-- Profile Card -->
-      <div class="rounded-2xl p-6" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+      <div class="card-elevated p-6">
         <div class="flex flex-col sm:flex-row items-start gap-6">
           <div class="relative">
             {#if avatarPreview}
@@ -286,7 +286,7 @@
       {/if}
       
       <!-- Edit Form -->
-      <div class="rounded-2xl p-6" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+      <div class="card-elevated p-6">
         <h3 class="font-semibold mb-6" style="color: var(--text-primary);">Edit Profile</h3>
         
         <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-6">
@@ -301,8 +301,7 @@
                 type="text"
                 bind:value={name}
                 required
-                class="w-full px-4 py-3 rounded-xl transition-colors"
-                style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary);"
+                class="input"
               />
             </div>
             
@@ -316,8 +315,7 @@
                 type="text"
                 bind:value={location}
                 maxlength="100"
-                class="w-full px-4 py-3 rounded-xl transition-colors"
-                style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary);"
+                class="input"
                 placeholder="City, Country"
               />
             </div>
@@ -333,8 +331,7 @@
               bind:value={bio}
               rows="3"
               maxlength="160"
-              class="w-full px-4 py-3 rounded-xl transition-colors resize-none"
-              style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary);"
+              class="input resize-none"
               placeholder="Tell us about yourself..."
             ></textarea>
             <p class="text-xs mt-2 text-right" style="color: var(--text-muted);">{bio?.length || 0}/160</p>
@@ -349,8 +346,7 @@
               id="website"
               type="url"
               bind:value={website}
-              class="w-full px-4 py-3 rounded-xl transition-colors"
-              style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary);"
+              class="input"
               placeholder="https://yourwebsite.com"
             />
           </div>
@@ -359,8 +355,7 @@
             <button
               type="submit"
               disabled={saving}
-              class="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
-              style="background-color: var(--accent-primary); color: #0a0a0a;"
+              class="btn-primary cursor-pointer"
             >
               {#if saving}
                 <Loader2 class="w-5 h-5 animate-spin" />
@@ -374,7 +369,7 @@
       </div>
       
       <!-- Security -->
-      <div class="rounded-2xl p-6" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+      <div class="card-elevated p-6">
         <h3 class="font-semibold mb-4" style="color: var(--text-primary);">Security</h3>
         <div class="space-y-4">
           <div class="flex items-center justify-between py-3" style="border-bottom: 1px solid var(--border-primary);">

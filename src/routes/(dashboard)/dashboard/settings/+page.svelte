@@ -74,8 +74,7 @@
       <button 
         onclick={handleSave}
         disabled={saving}
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl transition-colors text-sm font-medium disabled:opacity-50"
-        style="background-color: var(--accent-primary); color: #0a0a0a;"
+        class="btn-primary cursor-pointer"
       >
         {#if saving}
           <Loader2 class="w-4 h-4 animate-spin" />
@@ -92,7 +91,7 @@
   <div class="space-y-6">
     {#each settingsSections as section}
       {@const Icon = section.icon}
-      <div class="rounded-2xl overflow-hidden" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+      <div class="card-elevated overflow-hidden">
         <div class="px-6 py-4 flex items-center gap-4" style="border-bottom: 1px solid var(--border-primary);">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: var(--bg-tertiary);">
             <Icon class="w-5 h-5" style="color: var(--text-secondary);" />
@@ -128,16 +127,14 @@
                     id={setting.id}
                     bind:value={setting.value}
                     rows="2"
-                    class="w-full px-4 py-2.5 rounded-xl text-sm resize-none transition-colors"
-                    style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary);"
+                    class="input resize-none"
                   ></textarea>
                 {:else}
                   <input
                     id={setting.id}
                     type={setting.type === 'number' ? 'number' : 'text'}
                     bind:value={setting.value}
-                    class="w-full px-4 py-2.5 rounded-xl text-sm transition-colors"
-                    style="background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary);"
+                    class="input"
                   />
                 {/if}
               </div>
@@ -150,7 +147,7 @@
   
   <!-- Info Cards -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-    <div class="p-4 rounded-xl" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+    <div class="p-4 rounded-xl card-elevated">
       <div class="flex items-center gap-3 mb-2">
         <Database class="w-5 h-5" style="color: var(--text-secondary);" />
         <span class="text-sm font-medium" style="color: var(--text-secondary);">Database</span>
@@ -159,7 +156,7 @@
       <p class="text-xs mt-1" style="color: var(--success);">Connected</p>
     </div>
     
-    <div class="p-4 rounded-xl" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+    <div class="p-4 rounded-xl card-elevated">
       <div class="flex items-center gap-3 mb-2">
         <Mail class="w-5 h-5" style="color: var(--text-secondary);" />
         <span class="text-sm font-medium" style="color: var(--text-secondary);">Email Provider</span>
@@ -168,7 +165,7 @@
       <p class="text-xs mt-1" style="color: var(--success);">Active</p>
     </div>
     
-    <div class="p-4 rounded-xl" style="background-color: var(--bg-card); border: 1px solid var(--border-primary);">
+    <div class="p-4 rounded-xl card-elevated">
       <div class="flex items-center gap-3 mb-2">
         <Globe class="w-5 h-5" style="color: var(--text-secondary);" />
         <span class="text-sm font-medium" style="color: var(--text-secondary);">Region</span>

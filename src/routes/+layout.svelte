@@ -35,7 +35,7 @@
 {:else}
   <!-- Public pages: Standard layout with header -->
   <div class="min-h-screen flex flex-col grain" style="background-color: var(--bg-primary);">
-    <header class="sticky top-0 z-50 backdrop-blur-xl" style="background-color: rgba(var(--bg-primary-rgb, 10, 10, 10), 0.8); border-bottom: 1px solid var(--border-primary);">
+    <header class="sticky top-0 z-50 backdrop-blur-xl" style="background-color: color-mix(in srgb, var(--bg-primary), transparent 20%); border-bottom: 1px solid var(--border-primary);">
       <div class="container-wide">
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->

@@ -43,7 +43,7 @@
         </div>
         
         <!-- Headline -->
-        <h1 class="font-display text-display-lg sm:text-display-xl mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+        <h1 class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
           <span style="color: var(--text-primary);">Build at the</span>
           <br />
           <span class="text-gradient">speed of thought</span>
@@ -86,7 +86,7 @@
   <section class="section" style="border-top: 1px solid var(--border-primary);">
     <div class="container-tight">
       <div class="text-center mb-16">
-        <h2 class="font-display text-display-sm mb-4" style="color: var(--text-primary);">
+        <h2 class="font-display text-2xl sm:text-3xl md:text-4xl mb-4" style="color: var(--text-primary);">
           Everything you need
         </h2>
         <p class="max-w-lg mx-auto" style="color: var(--text-secondary);">
@@ -125,7 +125,7 @@
     <div class="container-tight">
       <div class="card-elevated p-8 sm:p-12">
         <div class="max-w-2xl mx-auto text-center mb-10">
-          <h2 class="font-display text-display-sm mb-4" style="color: var(--text-primary);">
+          <h2 class="font-display text-2xl sm:text-3xl md:text-4xl mb-4" style="color: var(--text-primary);">
             Quick Start
           </h2>
           <p style="color: var(--text-secondary);">
