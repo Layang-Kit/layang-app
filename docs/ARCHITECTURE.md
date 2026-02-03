@@ -541,7 +541,7 @@ Development                          Production
 
 ## 📚 Next Steps
 
-- [Setup Guide](setup/01-quick-start.md) - Start building
-- [Data Patterns](guides/04-sveltekit-patterns.md) - Learn best practices
-- [Performance](PERFORMANCE.md) - Optimize your app
-- [Security](SECURITY.md) - Harden production
+- [Setup Guide](setup/quick-start.md) - Start building
+- [Data Patterns](guides/patterns.md) - Learn best practices
+- [Performance](performance.md) - Optimize your app
+- [Security](security.md) - Harden production

@@ -9,17 +9,17 @@ Selamat datang di dokumentasi SvelteKit Cloudflare D1 Boilerplate!
 ### 👶 For Beginners
 Baru pertama kali dengan SvelteKit atau edge development? Mulai dari sini:
 
-1. **[Quick Start](setup/01-quick-start.md)** - Setup dalam 5 menit
-2. **[Glossary](GLOSSARY.md)** - Pelajari istilah teknis
-3. **[Common Mistakes](COMMON_MISTAKES.md)** - Hindari kesalahan umum
+1. **[Quick Start](setup/quick-start.md)** - Setup dalam 5 menit
+2. **[Glossary](glossary.md)** - Pelajari istilah teknis
+3. **[Common Mistakes](common-mistakes.md)** - Hindari kesalahan umum
 
 ### 🚀 For Experienced Developers
 Sudah familiar dengan web dev? Lihat ini:
 
-1. **[Architecture](ARCHITECTURE.md)** - Understand the system design
-2. **[ADR](ADR.md)** - Architecture decisions explained
-3. **[Performance](PERFORMANCE.md)** - Optimization techniques
-4. **[Security](SECURITY.md)** - Hardening guide
+1. **[Architecture](architecture.md)** - Understand the system design
+2. **[ADR](adr.md)** - Architecture decisions explained
+3. **[Performance](performance.md)** - Optimization techniques
+4. **[Security](security.md)** - Hardening guide
 
 ---
 
@@ -29,40 +29,40 @@ Sudah familiar dengan web dev? Lihat ini:
 
 | Document | Description | For |
 |----------|-------------|-----|
-| [Quick Start](setup/01-quick-start.md) | Setup project dalam 5 menit | Beginners |
-| [Environment Variables](setup/02-environment-variables.md) | Konfigurasi `.env` lengkap | Everyone |
-| [Database Setup](setup/03-database-d1.md) | Setup Cloudflare D1 | Everyone |
-| [Google OAuth](setup/04-google-oauth.md) | Login dengan Google | Optional |
-| [Resend Email](setup/05-resend-email.md) | Email verification | Optional |
-| [Cloudflare R2](setup/06-cloudflare-r2.md) | File upload | Optional |
+| [Quick Start](setup/quick-start.md) | Setup project dalam 5 menit | Beginners |
+| [Environment Variables](setup/environment-variables.md) | Konfigurasi `.env` lengkap | Everyone |
+| [Database Setup](setup/database.md) | Setup Cloudflare D1 | Everyone |
+| [Google OAuth](setup/google-oauth.md) | Login dengan Google | Optional |
+| [Email Setup](setup/email.md) | Email verification | Optional |
+| [File Storage](setup/file-storage.md) | File upload dengan R2 | Optional |
 
 ### 🎓 Learning Resources
 
 | Document | Description | For |
 |----------|-------------|-----|
-| [Glossary](GLOSSARY.md) | Istilah teknis dijelaskan | Beginners |
-| [Common Mistakes](COMMON_MISTAKES.md) | Kesalahan umum & solusi | Beginners |
-| [Architecture](ARCHITECTURE.md) | System design & diagrams | Everyone |
-| [SvelteKit Patterns](guides/04-sveltekit-patterns.md) | Best practices patterns | Intermediate |
+| [Glossary](glossary.md) | Istilah teknis dijelaskan | Beginners |
+| [Common Mistakes](common-mistakes.md) | Kesalahan umum & solusi | Beginners |
+| [Architecture](architecture.md) | System design & diagrams | Everyone |
+| [SvelteKit Patterns](guides/patterns.md) | Best practices patterns | Intermediate |
 
 ### 🛠️ Feature Guides
 
 | Document | Description | For |
 |----------|-------------|-----|
-| [Authentication](guides/01-authentication.md) | Login, register, OAuth | Everyone |
-| [File Uploads](guides/02-file-uploads.md) | Upload avatar & files | Everyone |
-| [Profile Management](guides/03-profile-management.md) | Edit profil & settings | Everyone |
-| [Local vs Production DB](guides/05-local-vs-production-database.md) | Switch database mode | Everyone |
-| [Customizing Schema](CUSTOMIZING_SCHEMA.md) | Modify database schema | Advanced |
+| [Authentication](guides/authentication.md) | Login, register, OAuth | Everyone |
+| [File Uploads](guides/file-uploads.md) | Upload avatar & files | Everyone |
+| [Profile Management](guides/profile-management.md) | Edit profil & settings | Everyone |
+| [Database Workflow](guides/database-workflow.md) | Local vs Production DB | Everyone |
+| [Customizing Schema](customizing-schema.md) | Modify database schema | Advanced |
 
 ### 🏗️ Advanced Topics
 
 | Document | Description | For |
 |----------|-------------|-----|
-| [ADR](ADR.md) | Architecture Decision Records | Advanced |
-| [Performance](PERFORMANCE.md) | Optimization guide | Advanced |
-| [Security](SECURITY.md) | Hardening & best practices | Advanced |
-| [API Reference](API_REFERENCE.md) | Complete API docs | Developers |
+| [ADR](adr.md) | Architecture Decision Records | Advanced |
+| [Performance](performance.md) | Optimization guide | Advanced |
+| [Security](security.md) | Hardening & best practices | Advanced |
+| [API Reference](api-reference.md) | Complete API docs | Developers |
 
 ### 🐛 Troubleshooting
 
@@ -70,7 +70,7 @@ Sudah familiar dengan web dev? Lihat ini:
 |----------|-------------|
 | [Database Issues](troubleshooting/database.md) | Database problems & solutions |
 | [Authentication Issues](troubleshooting/authentication.md) | Auth problems & solutions |
-| [Upload Issues](troubleshooting/upload.md) | File upload problems |
+| [File Upload Issues](troubleshooting/file-upload.md) | File upload problems |
 | [Deployment Issues](troubleshooting/deployment.md) | Deployment problems |
 
 ---
@@ -79,35 +79,35 @@ Sudah familiar dengan web dev? Lihat ini:
 
 ```
 docs/
-├── README.md                          # You are here
-├── GLOSSARY.md                        # Technical terms explained
-├── ARCHITECTURE.md                    # System architecture
-├── ADR.md                             # Architecture decisions
-├── PERFORMANCE.md                     # Optimization guide
-├── SECURITY.md                        # Security hardening
-├── CUSTOMIZING_SCHEMA.md              # Database modifications
-├── API_REFERENCE.md                   # API documentation
-├── COMMON_MISTAKES.md                 # Common pitfalls
+├── readme.md                    # You are here
+├── glossary.md                  # Technical terms explained
+├── architecture.md              # System architecture
+├── adr.md                       # Architecture decisions
+├── performance.md               # Optimization guide
+├── security.md                  # Security hardening
+├── customizing-schema.md        # Database modifications
+├── api-reference.md             # API documentation
+├── common-mistakes.md           # Common pitfalls
 │
-├── setup/                             # Setup & configuration
-│   ├── 01-quick-start.md
-│   ├── 02-environment-variables.md
-│   ├── 03-database-d1.md
-│   ├── 04-google-oauth.md
-│   ├── 05-resend-email.md
-│   └── 06-cloudflare-r2.md
+├── setup/                       # Setup & configuration
+│   ├── quick-start.md
+│   ├── environment-variables.md
+│   ├── database.md
+│   ├── google-oauth.md
+│   ├── email.md
+│   └── file-storage.md
 │
-├── guides/                            # Feature guides
-│   ├── 01-authentication.md
-│   ├── 02-file-uploads.md
-│   ├── 03-profile-management.md
-│   ├── 04-sveltekit-patterns.md
-│   └── 05-local-vs-production-database.md
+├── guides/                      # Feature guides
+│   ├── authentication.md
+│   ├── file-uploads.md
+│   ├── profile-management.md
+│   ├── patterns.md
+│   └── database-workflow.md
 │
-└── troubleshooting/                   # Problem solving
+└── troubleshooting/             # Problem solving
     ├── database.md
     ├── authentication.md
-    ├── upload.md
+    ├── file-upload.md
     └── deployment.md
 ```
 
@@ -118,40 +118,40 @@ docs/
 ### Path 1: Quick Start (30 minutes)
 For: Mau langsung jalan
 
-1. [Quick Start](setup/01-quick-start.md)
-2. [Environment Variables](setup/02-environment-variables.md)
+1. [Quick Start](setup/quick-start.md)
+2. [Environment Variables](setup/environment-variables.md)
 3. Start coding! 💻
 
 ### Path 2: Deep Understanding (2 hours)
 For: Mau paham konsep
 
-1. [Glossary](GLOSSARY.md)
-2. [Architecture](ARCHITECTURE.md)
-3. [SvelteKit Patterns](guides/04-sveltekit-patterns.md)
-4. [Common Mistakes](COMMON_MISTAKES.md)
+1. [Glossary](glossary.md)
+2. [Architecture](architecture.md)
+3. [SvelteKit Patterns](guides/patterns.md)
+4. [Common Mistakes](common-mistakes.md)
 
 ### Path 3: Production Ready (1 day)
 For: Mau deploy ke production
 
 1. Semua setup guides
-2. [Security](SECURITY.md)
-3. [Performance](PERFORMANCE.md)
-4. [Local vs Production DB](guides/05-local-vs-production-database.md)
+2. [Security](security.md)
+3. [Performance](performance.md)
+4. [Database Workflow](guides/database-workflow.md)
 
 ---
 
 ## 💡 Quick Tips
 
 ### For Beginners
-- 📖 Baca [Glossary](GLOSSARY.md) kalau ketemu istilah asing
-- ⚠️ Check [Common Mistakes](COMMON_MISTAKES.md) sebelum debug
-- 🎨 Lihat [SvelteKit Patterns](guides/04-sveltekit-patterns.md) untuk best practices
+- 📖 Baca [Glossary](glossary.md) kalau ketemu istilah asing
+- ⚠️ Check [Common Mistakes](common-mistakes.md) sebelum debug
+- 🎨 Lihat [SvelteKit Patterns](guides/patterns.md) untuk best practices
 
 ### For Experts
-- 🏗️ Review [ADR](ADR.md) untuk understand design decisions
-- ⚡ Check [Performance](PERFORMANCE.md) untuk optimization
-- 🔐 Follow [Security](SECURITY.md) untuk production hardening
-- 📚 Use [API Reference](API_REFERENCE.md) untuk development
+- 🏗️ Review [ADR](adr.md) untuk understand design decisions
+- ⚡ Check [Performance](performance.md) untuk optimization
+- 🔐 Follow [Security](security.md) untuk production hardening
+- 📚 Use [API Reference](api-reference.md) untuk development
 
 ---
 

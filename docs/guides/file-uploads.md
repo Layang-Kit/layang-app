@@ -190,6 +190,6 @@ src/
 
 ## 📖 Lanjutan
 
-- [Setup Cloudflare R2](../setup/06-cloudflare-r2.md)
-- [Profile Management](03-profile-management.md)
-- [Troubleshooting Upload](../troubleshooting/upload.md)
+- [Setup Cloudflare R2](../setup/file-storage.md)
+- [Profile Management](profile-management.md)
+- [Troubleshooting Upload](../troubleshooting/file-upload.md)

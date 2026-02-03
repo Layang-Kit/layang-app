@@ -170,5 +170,5 @@ console.log(data);
 ## 📞 Masih Bermasalah?
 
 Check:
-- [R2 Setup Guide](../setup/06-cloudflare-r2.md)
+- [R2 Setup Guide](../setup/file-storage.md)
 - [Cloudflare R2 Docs](https://developers.cloudflare.com/r2/)

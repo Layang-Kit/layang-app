@@ -1,2 +1,0 @@
--- Seed data for development (UUIDs are generated dynamically in actual seed script)
--- This file is kept for reference, use scripts/seed.ts instead

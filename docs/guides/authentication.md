@@ -127,6 +127,6 @@ src/
 
 ## 📖 Lanjutan
 
-- [Setup Google OAuth](../setup/04-google-oauth.md)
-- [Setup Email Verification](../setup/05-resend-email.md)
-- [Profile Management](03-profile-management.md)
+- [Setup Google OAuth](../setup/google-oauth.md)
+- [Setup Email Verification](../setup/email.md)
+- [Profile Management](profile-management.md)

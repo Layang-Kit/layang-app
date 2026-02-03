@@ -139,6 +139,6 @@ src/
 
 ## 📖 Lanjutan
 
-- [Authentication Guide](01-authentication.md)
-- [File Uploads](02-file-uploads.md)
-- [Setup Resend Email](../setup/05-resend-email.md)
+- [Authentication Guide](authentication.md)
+- [File Uploads](file-uploads.md)
+- [Setup Resend Email](../setup/email.md)

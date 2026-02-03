@@ -56,7 +56,7 @@ nano .env  # atau code .env, vim .env, dll
 | `GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials |
 | `GOOGLE_CLIENT_SECRET` | Google Cloud Console → Credentials |
 
-**Setup:** [Google OAuth Setup Guide](04-google-oauth.md)
+**Setup:** [Google OAuth Setup Guide](google-oauth.md)
 
 ```env
 GOOGLE_CLIENT_ID=123456789-abc123.apps.googleusercontent.com
@@ -72,7 +72,7 @@ GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxxx
 | `RESEND_API_TOKEN` | Resend Dashboard → API Keys |
 | `FROM_EMAIL` | Domain yang diverifikasi di Resend |
 
-**Setup:** [Resend Email Setup](05-resend-email.md)
+**Setup:** [Resend Email Setup](email.md)
 
 ```env
 RESEND_API_TOKEN=re_xxxxxxxx
@@ -93,7 +93,7 @@ FROM_EMAIL=noreply@yourdomain.com
 | `R2_BUCKET_NAME` | Nama bucket yang dibuat |
 | `R2_PUBLIC_URL` | R2 → Bucket → Settings → Public URL |
 
-**Setup:** [R2 Setup Guide](06-cloudflare-r2.md)
+**Setup:** [R2 Setup Guide](file-storage.md)
 
 ```env
 R2_ACCOUNT_ID=1a2b3c4d5e6f7g8h9i0j

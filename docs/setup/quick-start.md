@@ -90,9 +90,9 @@ Anda sekarang punya:
 
 Tambahkan fitur opsional:
 
-1. **[Google Login](04-google-oauth.md)** - Login dengan Google
-2. **[Email Verification](05-resend-email.md)** - Verifikasi email user
-3. **[File Upload](06-cloudflare-r2.md)** - Upload avatar dan file
+1. **[Google Login](google-oauth.md)** - Login dengan Google
+2. **[Email Verification](email.md)** - Verifikasi email user
+3. **[File Upload](file-storage.md)** - Upload avatar dan file
 
 ## 🐛 Troubleshooting
 
@@ -104,6 +104,6 @@ Tambahkan fitur opsional:
 
 ## 📖 Dokumentasi Lanjutan
 
-- [Environment Variables Lengkap](02-environment-variables.md)
-- [Database Setup Detail](03-database-d1.md)
-- [Authentication Guide](../guides/01-authentication.md)
+- [Environment Variables Lengkap](environment-variables.md)
+- [Database Setup Detail](database.md)
+- [Authentication Guide](../guides/authentication.md)
