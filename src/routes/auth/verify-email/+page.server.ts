@@ -1,5 +1,4 @@
 import type { PageServerLoad } from './$types';
-import { error, redirect } from '@sveltejs/kit';
 import { emailVerificationTokens, users } from '$lib/db/schema';
 import { eq, and, gt } from 'drizzle-orm';
 
@@ -25,10 +24,14 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   }
   
   try {
-    // Find user by email
-    const user = await locals.db.query.users.findFirst({
-      where: eq(users.email, email)
-    });
+    // Find user by email using select
+    const userResult = await locals.db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    
+    const user = userResult[0];
     
     if (!user) {
       return {
@@ -49,15 +52,21 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     // Hash the provided token
     const tokenHash = await hashToken(token);
     
-    // Find valid token
-    const verificationToken = await locals.db.query.emailVerificationTokens.findFirst({
-      where: and(
-        eq(emailVerificationTokens.userId, user.id),
-        eq(emailVerificationTokens.tokenHash, tokenHash),
-        eq(emailVerificationTokens.used, false),
-        gt(emailVerificationTokens.expiresAt, Date.now())
+    // Find valid token using select
+    const tokenResult = await locals.db
+      .select()
+      .from(emailVerificationTokens)
+      .where(
+        and(
+          eq(emailVerificationTokens.userId, user.id),
+          eq(emailVerificationTokens.tokenHash, tokenHash),
+          eq(emailVerificationTokens.used, false),
+          gt(emailVerificationTokens.expiresAt, Date.now())
+        )
       )
-    });
+      .limit(1);
+    
+    const verificationToken = tokenResult[0];
     
     if (!verificationToken) {
       return {

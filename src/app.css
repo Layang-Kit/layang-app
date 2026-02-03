@@ -190,6 +190,47 @@
 }
 
 @layer utilities {
+  /* Font family utilities */
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Display typography sizes */
+  .text-display-xl {
+    font-size: var(--font-size-display-xl);
+    line-height: var(--line-height-display-xl);
+    letter-spacing: var(--letter-spacing-display-xl);
+    font-weight: 800;
+  }
+
+  .text-display-lg {
+    font-size: var(--font-size-display-lg);
+    line-height: var(--line-height-display-lg);
+    letter-spacing: var(--letter-spacing-display-lg);
+    font-weight: 800;
+  }
+
+  .text-display {
+    font-size: var(--font-size-display);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-display);
+    font-weight: 700;
+  }
+
+  .text-display-sm {
+    font-size: var(--font-size-display-sm);
+    line-height: var(--line-height-display-sm);
+    letter-spacing: var(--letter-spacing-display-sm);
+    font-weight: 700;
+  }
+
+  .text-display-xs {
+    font-size: var(--font-size-display-xs);
+    line-height: var(--line-height-display-xs);
+    letter-spacing: var(--letter-spacing-display-xs);
+    font-weight: 600;
+  }
+
   /* Subtle grain texture overlay */
   .grain {
     position: relative;
@@ -217,19 +258,66 @@
 
   /* Smooth scrollbar */
   .scrollbar-smooth::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   .scrollbar-smooth::-webkit-scrollbar-track {
-    @apply bg-neutral-900;
+    @apply bg-transparent;
   }
 
   .scrollbar-smooth::-webkit-scrollbar-thumb {
-    @apply bg-neutral-700 rounded-full;
+    @apply bg-neutral-800 rounded-full;
   }
 
   .scrollbar-smooth::-webkit-scrollbar-thumb:hover {
-    @apply bg-neutral-600;
+    @apply bg-neutral-700;
+  }
+
+  /* Dashboard specific utilities */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
+  }
+
+  .sidebar-link-active {
+    @apply bg-accent-500/10 text-accent-500;
+  }
+
+  .sidebar-link-inactive {
+    @apply text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900;
+  }
+
+  /* Table styles */
+  .table-container {
+    @apply overflow-x-auto;
+  }
+
+  .data-table {
+    @apply w-full text-left;
+  }
+
+  .data-table th {
+    @apply text-xs font-medium text-neutral-500 uppercase tracking-wider px-6 py-3;
+  }
+
+  .data-table td {
+    @apply px-6 py-4;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-emerald-500/10 text-emerald-400;
+  }
+
+  .badge-warning {
+    @apply bg-amber-500/10 text-amber-400;
+  }
+
+  .badge-neutral {
+    @apply bg-neutral-800 text-neutral-400;
   }
 }
