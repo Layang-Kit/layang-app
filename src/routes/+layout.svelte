@@ -1,15 +1,17 @@
 <script lang="ts">
   import '../app.css';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { User, LayoutDashboard, Hexagon, Menu, X } from 'lucide-svelte';
   
-  let mobileMenuOpen = false;
+  let mobileMenuOpen = $state(false);
   
-  $: isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].some(
-    path => $page.url.pathname.startsWith(path)
+  let isAuthPage = $derived(
+    ['/login', '/register', '/forgot-password', '/reset-password'].some(
+      path => page.url.pathname.startsWith(path)
+    )
   );
   
-  $: isHomePage = $page.url.pathname === '/';
+  let isHomePage = $derived(page.url.pathname === '/');
 </script>
 
 {#if isAuthPage}
@@ -32,7 +34,7 @@
             <nav class="hidden md:flex items-center gap-1">
               <a 
                 href="/dashboard" 
-                class="nav-link {$page.url.pathname === '/dashboard' ? 'nav-link-active' : ''}"
+                class="nav-link {page.url.pathname === '/dashboard' ? 'nav-link-active' : ''}"
               >
                 <LayoutDashboard class="w-4 h-4 mr-2" />
                 Dashboard
@@ -40,7 +42,7 @@
               
               <a 
                 href="/profile" 
-                class="nav-link {$page.url.pathname === '/profile' ? 'nav-link-active' : ''}"
+                class="nav-link {page.url.pathname === '/profile' ? 'nav-link-active' : ''}"
               >
                 <User class="w-4 h-4 mr-2" />
                 Profile
@@ -50,9 +52,13 @@
             <!-- Mobile Menu Button -->
             <button
               class="md:hidden p-2 rounded-lg text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900 transition"
-              on:click={() => mobileMenuOpen = !mobileMenuOpen}
+              onclick={() => mobileMenuOpen = !mobileMenuOpen}
             >
-              <svelte:component this={mobileMenuOpen ? X : Menu} class="w-5 h-5" />
+              {#if mobileMenuOpen}
+                <X class="w-5 h-5" />
+              {:else}
+                <Menu class="w-5 h-5" />
+              {/if}
             </button>
           </div>
         </div>
@@ -63,8 +69,8 @@
             <div class="container-wide py-3 space-y-1">
               <a 
                 href="/dashboard" 
-                class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors {$page.url.pathname === '/dashboard' ? 'text-neutral-100 bg-neutral-800' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
-                on:click={() => mobileMenuOpen = false}
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors {page.url.pathname === '/dashboard' ? 'text-neutral-100 bg-neutral-800' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
+                onclick={() => mobileMenuOpen = false}
               >
                 <LayoutDashboard class="w-4 h-4" />
                 Dashboard
@@ -72,8 +78,8 @@
               
               <a 
                 href="/profile" 
-                class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors {$page.url.pathname === '/profile' ? 'text-neutral-100 bg-neutral-800' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
-                on:click={() => mobileMenuOpen = false}
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors {page.url.pathname === '/profile' ? 'text-neutral-100 bg-neutral-800' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
+                onclick={() => mobileMenuOpen = false}
               >
                 <User class="w-4 h-4" />
                 Profile

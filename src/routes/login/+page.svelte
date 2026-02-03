@@ -2,13 +2,14 @@
   import { goto } from '$app/navigation';
   import { Chrome, Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, Hexagon } from 'lucide-svelte';
   
-  let email = '';
-  let password = '';
-  let showPassword = false;
-  let loading = false;
-  let errorMsg = '';
+  let email = $state('');
+  let password = $state('');
+  let showPassword = $state(false);
+  let loading = $state(false);
+  let errorMsg = $state('');
   
-  async function handleSubmit() {
+  async function handleSubmit(event: SubmitEvent) {
+    event.preventDefault();
     loading = true;
     errorMsg = '';
     
@@ -66,7 +67,7 @@
       {/if}
       
       <button
-        on:click={loginWithGoogle}
+        onclick={loginWithGoogle}
         disabled={loading}
         class="w-full flex items-center justify-center gap-3 bg-neutral-100 text-neutral-950 py-3 px-4 rounded-xl font-semibold hover:bg-white transition disabled:opacity-50 mb-6"
       >
@@ -83,7 +84,7 @@
         </div>
       </div>
       
-      <form on:submit|preventDefault={handleSubmit} class="space-y-5">
+      <form onsubmit={handleSubmit} class="space-y-5">
         <div>
           <label for="email" class="block text-sm font-medium text-neutral-400 mb-2">
             Email Address
@@ -133,10 +134,14 @@
             {/if}
             <button
               type="button"
-              on:click={() => showPassword = !showPassword}
+              onclick={() => showPassword = !showPassword}
               class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-400 transition"
             >
-              <svelte:component this={showPassword ? EyeOff : Eye} class="w-5 h-5" />
+              {#if showPassword}
+                <EyeOff class="w-5 h-5" />
+              {:else}
+                <Eye class="w-5 h-5" />
+              {/if}
             </button>
           </div>
         </div>

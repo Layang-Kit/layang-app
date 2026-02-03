@@ -7,10 +7,10 @@
     Settings, Users, Loader2, Shield, Hexagon, Mail
   } from 'lucide-svelte';
   
-  let user: User | null = null;
-  let users: User[] = [];
-  let loading = true;
-  let usersLoading = true;
+  let user = $state<User | null>(null);
+  let users = $state<User[]>([]);
+  let loading = $state(true);
+  let usersLoading = $state(true);
   
   onMount(async () => {
     await Promise.all([
@@ -94,7 +94,7 @@
             </a>
             
             <button
-              on:click={handleLogout}
+              onclick={handleLogout}
               class="p-2.5 rounded-xl text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
               title="Logout"
             >

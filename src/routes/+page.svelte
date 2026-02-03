@@ -96,13 +96,14 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {#each features as feature, i}
+          {@const Icon = feature.icon}
           <div 
             class="group p-6 rounded-2xl bg-neutral-900/30 border border-neutral-800/50 hover:border-neutral-700/50 hover:bg-neutral-900/50 transition-all duration-300"
             style="animation-delay: {i * 0.1}s"
           >
             <div class="flex items-start gap-4">
               <div class="w-11 h-11 rounded-xl bg-neutral-800 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-500/10 transition-colors duration-300">
-                <svelte:component this={feature.icon} class="w-5 h-5 text-neutral-400 group-hover:text-accent-500 transition-colors duration-300" />
+                <Icon class="w-5 h-5 text-neutral-400 group-hover:text-accent-500 transition-colors duration-300" />
               </div>
               <div>
                 <h3 class="font-display font-semibold text-neutral-200 mb-1">

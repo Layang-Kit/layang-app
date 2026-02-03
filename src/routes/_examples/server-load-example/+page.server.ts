@@ -18,7 +18,7 @@
 //
 // ============================================================================
 
-import type { PageServerLoad } from './\$types';
+import type { PageServerLoad, Actions } from './\$types';
 import { users } from '\$lib/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
@@ -65,7 +65,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 };
 
 // Bisa juga export actions untuk form submission!
-export const actions = {
+export const actions: Actions = {
   // POST /server-load-example?/deleteUser
   deleteUser: async ({ request, locals }) => {
     const formData = await request.formData();

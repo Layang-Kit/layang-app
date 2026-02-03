@@ -437,6 +437,86 @@ curl -X POST http://localhost:5173/auth/login \
 3. **OAuth errors**: Verify Google credentials and redirect URIs
 4. **Session issues**: Clear cookies and try again
 
+## Workflow Agents
+
+Project ini menggunakan **3 Workflow Agents** untuk manajemen pengembangan yang terstruktur:
+
+### 1. INIT_AGENT - Project Initialization
+
+**Gunakan saat:** Memulai project baru dari starter kit ini
+
+**Responsibilities:**
+- Setup project infrastructure
+- Create documentation (README, PRD, TDD, PROGRESS, ui-kit)
+- Setup database migrations
+- Customize auth pages
+- Git init and first commit
+
+**Cara pakai:**
+```
+"Hai @workflow/INIT_AGENT.md, yuk kita mulai project baru"
+```
+
+**Dokumentasi:** [workflow/INIT_AGENT.md](workflow/INIT_AGENT.md)
+
+### 2. TASK_AGENT - Feature Implementation
+
+**Gunakan saat:** Implementasi fitur, fix bug, atau modifikasi fitur
+
+**Responsibilities:**
+- Implement features (pages, API routes, components)
+- Fix bugs
+- Update PROGRESS.md
+- Commit & push changes
+
+**Cara pakai:**
+```
+"Hai @workflow/TASK_AGENT.md, yuk kita kerja"
+```
+
+**Dokumentasi:** [workflow/TASK_AGENT.md](workflow/TASK_AGENT.md)
+
+### 3. MANAGER_AGENT - Change Management
+
+**Gunakan saat:** Menerima change request, update dokumentasi, atau approve deployment
+
+**Responsibilities:**
+- Manage change requests (bug, feature, modification)
+- Update PRD.md, TDD.md, PROGRESS.md
+- Approve deployment readiness
+- Create release notes (CHANGELOG.md)
+
+**Cara pakai:**
+```
+"Hai @workflow/MANAGER_AGENT.md, ada change request"
+```
+
+**Dokumentasi:** [workflow/MANAGER_AGENT.md](workflow/MANAGER_AGENT.md)
+
+### Workflow Overview
+
+```
+INIT_AGENT (Setup)
+    ↓
+TASK_AGENT (Implement Features)
+    ↓
+Cloudflare Deployment (Automated)
+    ↓
+MANAGER_AGENT (Release Notes)
+```
+
+### Project Documentation
+
+| File | Purpose |
+|------|---------|
+| `workflow/PRD.md` | Product Requirements Document |
+| `workflow/TDD.md` | Technical Design Document |
+| `workflow/PROGRESS.md` | Development Progress Tracking |
+| `workflow/ui-kit.html` | UI Design System |
+| `workflow/AGENT-GUIDE.md` | Complete Agent Usage Guide |
+
+---
+
 ## Useful Resources
 
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
