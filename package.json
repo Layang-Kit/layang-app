@@ -44,7 +44,7 @@
     "lucia": "^3.2.2",
     "lucide-svelte": "^0.475.0",
     "resend": "^4.0.0",
-    "zod": "^3.24.0"
+    "zod": "^4.3.6"
   },
   "type": "module"
 }
