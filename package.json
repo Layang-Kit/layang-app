@@ -14,7 +14,7 @@
     "db:seed": "npx tsx scripts/seed.ts",
     "db:seed:local": "wrangler d1 execute DB --local --file=./drizzle/seed.sql",
     "db:studio": "drizzle-kit studio",
-    "db:refresh:local": "rm -rf .wrangler/state/d1 && wrangler d1 migrations apply DB --local",
+    "db:refresh:local": "rm -rf .wrangler/state && wrangler d1 migrations apply DB --local",
     "cf:typegen": "wrangler types"
   },
   "devDependencies": {

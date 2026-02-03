@@ -113,15 +113,20 @@ R2_BUCKET_NAME=your_bucket
 R2_PUBLIC_URL=https://pub-xxx.r2.dev
 ```
 
-### 4. Run Migrations
+### 4. Generate & Apply Migrations
 
 ```bash
-# Apply database migrations (local)
+# Generate migrations from schema (run this first if drizzle/ folder is empty)
+npm run db:generate
+
+# Apply migrations to local database
 npm run db:migrate:local
 
-# Or apply to production
+# Or apply to production database
 npm run db:migrate
 ```
+
+> **Note:** Run `db:generate` whenever you make changes to `src/lib/db/schema.ts`
 
 ### 5. Start Development Server
 
@@ -165,9 +170,10 @@ npm run build            # Build for production
 npm run preview          # Preview production build
 
 # Database
-npm run db:migrate       # Apply migrations (production)
-npm run db:migrate:local # Apply migrations (local)
-npm run db:generate      # Generate Drizzle migrations
+npm run db:generate      # Generate migrations from schema.ts
+npm run db:migrate:local # Apply migrations to local DB
+npm run db:migrate       # Apply migrations to production DB
+npm run db:refresh:local # Reset local DB + reapply migrations
 npm run db:studio        # Open Drizzle Studio GUI
 
 # Deployment

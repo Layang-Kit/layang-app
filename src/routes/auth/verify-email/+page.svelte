@@ -1,16 +1,20 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
+  import { onMount } from 'svelte';
   import { CheckCircle, XCircle, Mail, Hexagon } from 'lucide-svelte';
   import type { PageData } from './$types';
   
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
   
-  // Redirect to login after 5 seconds if success
-  $: if (data.success) {
-    setTimeout(() => {
-      goto('/login');
-    }, 5000);
-  }
+  // Redirect to login after 5 seconds if success (browser only)
+  onMount(() => {
+    if (data.success && browser) {
+      setTimeout(() => {
+        goto('/login');
+      }, 5000);
+    }
+  });
 </script>
 
 <div class="min-h-screen flex items-center justify-center px-4 grain">
