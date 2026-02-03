@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import { onMount } from 'svelte';
   import { 
     LayoutDashboard, 
     User, 
@@ -9,9 +10,11 @@
     LogOut,
     ChevronLeft,
     ChevronRight,
-    type Icon
+    Sun,
+    Moon
   } from 'lucide-svelte';
   import type { User as UserType } from '$lib/db/types';
+  import { theme } from '$lib/stores/theme.svelte';
 
   interface Props {
     user: UserType | null;
@@ -52,13 +55,18 @@
       .toUpperCase()
       .slice(0, 2);
   }
+
+  onMount(() => {
+    theme.init();
+  });
 </script>
 
 <!-- Mobile Overlay -->
 {#if mobileOpen}
   <button
     type="button"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+    class="fixed inset-0 z-40 lg:hidden"
+    style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);"
     onclick={() => mobileOpen = false}
     aria-label="Close sidebar"
   ></button>
@@ -67,7 +75,8 @@
 <!-- Mobile Toggle Button -->
 <button
   type="button"
-  class="fixed top-4 left-4 z-30 lg:hidden p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-neutral-200"
+  class="fixed top-4 left-4 z-30 lg:hidden p-2 rounded-xl transition-colors"
+  style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary); color: var(--text-secondary);"
   onclick={() => mobileOpen = !mobileOpen}
   aria-label="Toggle menu"
 >
@@ -78,18 +87,19 @@
 
 <!-- Sidebar -->
 <aside
-  class="fixed lg:static inset-y-0 left-0 z-40 bg-neutral-950 border-r border-neutral-800/50 flex flex-col transition-all duration-300 ease-out {mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} {collapsed ? 'w-20' : 'w-64'}"
+  class="fixed lg:static inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-out {mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} {collapsed ? 'w-20' : 'w-64'}"
+  style="background-color: var(--bg-secondary); border-right: 1px solid var(--border-primary);"
 >
   <!-- Logo -->
-  <div class="h-16 flex items-center px-4 border-b border-neutral-800/50">
+  <div class="h-16 flex items-center px-4" style="border-bottom: 1px solid var(--border-primary);">
     <a href="/dashboard" class="flex items-center gap-3 group overflow-hidden">
-      <div class="w-10 h-10 rounded-xl bg-accent-500 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
-        <Hexagon class="w-5 h-5 text-neutral-950" strokeWidth={2.5} />
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style="background-color: var(--accent-primary);">
+        <Hexagon class="w-5 h-5" style="color: #0a0a0a;" strokeWidth={2.5} />
       </div>
       {#if !collapsed}
         <div class="overflow-hidden">
-          <span class="font-display font-bold text-lg text-neutral-100 whitespace-nowrap">Studio</span>
-          <span class="block text-[10px] text-neutral-500 -mt-1 whitespace-nowrap">Admin Panel</span>
+          <span class="font-display font-bold text-lg whitespace-nowrap" style="color: var(--text-primary);">Studio</span>
+          <span class="block text-[10px] -mt-1 whitespace-nowrap" style="color: var(--text-tertiary);">Admin Panel</span>
         </div>
       {/if}
     </a>
@@ -97,7 +107,8 @@
     <!-- Collapse Toggle (Desktop) -->
     <button
       type="button"
-      class="hidden lg:flex ml-auto p-1.5 rounded-lg text-neutral-500 hover:text-neutral-300 hover:bg-neutral-900 transition-colors"
+      class="hidden lg:flex ml-auto p-1.5 rounded-lg transition-colors"
+      style="color: var(--text-tertiary);"
       onclick={toggleSidebar}
       aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
     >
@@ -115,9 +126,9 @@
     <div class="space-y-1">
       <div class="px-3 mb-2">
         {#if !collapsed}
-          <span class="text-xs font-medium text-neutral-500 uppercase tracking-wider">Main</span>
+          <span class="text-xs font-medium uppercase tracking-wider" style="color: var(--text-tertiary);">Main</span>
         {:else}
-          <div class="h-px bg-neutral-800 mx-auto w-8"></div>
+          <div class="mx-auto w-8" style="height: 1px; background-color: var(--border-primary);"></div>
         {/if}
       </div>
       
@@ -125,10 +136,12 @@
         {@const isActive = page.url.pathname === item.href}
         <a
           href={item.href}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group {isActive ? 'bg-accent-500/10 text-accent-500' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
+          class:sidebar-link-active={isActive}
+          class:sidebar-link-inactive={!isActive}
           title={collapsed ? item.label : ''}
         >
-          <item.icon class="w-5 h-5 shrink-0 {isActive ? 'text-accent-500' : 'text-neutral-500 group-hover:text-neutral-400'}" />
+          <item.icon class="w-5 h-5 shrink-0" style={isActive ? 'color: var(--accent-primary);' : 'color: var(--text-tertiary);'} />
           {#if !collapsed}
             <span class="truncate">{item.label}</span>
           {/if}
@@ -140,9 +153,9 @@
     <div class="mt-6 space-y-1">
       <div class="px-3 mb-2">
         {#if !collapsed}
-          <span class="text-xs font-medium text-neutral-500 uppercase tracking-wider">Management</span>
+          <span class="text-xs font-medium uppercase tracking-wider" style="color: var(--text-tertiary);">Management</span>
         {:else}
-          <div class="h-px bg-neutral-800 mx-auto w-8"></div>
+          <div class="mx-auto w-8" style="height: 1px; background-color: var(--border-primary);"></div>
         {/if}
       </div>
       
@@ -150,14 +163,16 @@
         {@const isActive = page.url.pathname === item.href || page.url.pathname.startsWith(item.href + '/')}
         <a
           href={item.href}
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group {isActive ? 'bg-accent-500/10 text-accent-500' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group"
+          class:sidebar-link-active={isActive}
+          class:sidebar-link-inactive={!isActive}
           title={collapsed ? item.label : ''}
         >
-          <item.icon class="w-5 h-5 shrink-0 {isActive ? 'text-accent-500' : 'text-neutral-500 group-hover:text-neutral-400'}" />
+          <item.icon class="w-5 h-5 shrink-0" style={isActive ? 'color: var(--accent-primary);' : 'color: var(--text-tertiary);'} />
           {#if !collapsed}
             <span class="flex-1 truncate">{item.label}</span>
             {#if item.badge}
-              <span class="px-2 py-0.5 text-[10px] font-semibold bg-neutral-800 text-neutral-400 rounded-full">{item.badge}</span>
+              <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full" style="background-color: var(--bg-tertiary); color: var(--text-secondary);">{item.badge}</span>
             {/if}
           {/if}
         </a>
@@ -165,29 +180,66 @@
     </div>
   </nav>
 
+  <!-- Theme Toggle -->
+  <div class="px-3 pb-3">
+    {#if collapsed}
+      <button
+        type="button"
+        onclick={() => theme.toggle()}
+        class="w-full flex items-center justify-center p-2 rounded-xl transition-colors"
+        style="color: var(--text-tertiary);"
+        title="Toggle theme"
+        aria-label="Toggle theme"
+      >
+        {#if theme.current === 'dark'}
+          <Sun class="w-4 h-4" />
+        {:else}
+          <Moon class="w-4 h-4" />
+        {/if}
+      </button>
+    {:else}
+      <button
+        type="button"
+        onclick={() => theme.toggle()}
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+        style="color: var(--text-tertiary);"
+        aria-label="Toggle theme"
+      >
+        {#if theme.current === 'dark'}
+          <Sun class="w-5 h-5" />
+          <span>Light Mode</span>
+        {:else}
+          <Moon class="w-5 h-5" />
+          <span>Dark Mode</span>
+        {/if}
+      </button>
+    {/if}
+  </div>
+
   <!-- User Section -->
-  <div class="border-t border-neutral-800/50 p-3">
+  <div class="p-3" style="border-top: 1px solid var(--border-primary);">
     {#if user}
       <div class="relative group">
         <!-- User Card -->
-        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-neutral-900 transition-colors cursor-pointer">
+        <div class="flex items-center gap-3 p-2 rounded-xl transition-colors cursor-pointer" style="hover:background-color: var(--bg-hover);">
           <!-- Avatar -->
           {#if user.avatar}
             <img 
               src={user.avatar} 
               alt={user.name}
-              class="w-9 h-9 rounded-xl ring-2 ring-neutral-800 object-cover shrink-0"
+              class="w-9 h-9 rounded-xl object-cover shrink-0"
+              style="border: 2px solid var(--border-primary);"
             />
           {:else}
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center text-sm font-bold text-neutral-950 shrink-0">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0" style="background: linear-gradient(135deg, var(--accent-primary), #d97706); color: #0a0a0a;">
               {getInitials(user.name)}
             </div>
           {/if}
           
           {#if !collapsed}
             <div class="flex-1 min-w-0 overflow-hidden">
-              <p class="text-sm font-medium text-neutral-200 truncate">{user.name}</p>
-              <p class="text-xs text-neutral-500 truncate">{user.email}</p>
+              <p class="text-sm font-medium truncate" style="color: var(--text-primary);">{user.name}</p>
+              <p class="text-xs truncate" style="color: var(--text-tertiary);">{user.email}</p>
             </div>
           {/if}
         </div>
@@ -197,7 +249,8 @@
           <div class="mt-2 space-y-1">
             <a
               href="/profile"
-              class="flex items-center justify-center p-2 rounded-xl text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900 transition-colors"
+              class="flex items-center justify-center p-2 rounded-xl transition-colors"
+              style="color: var(--text-tertiary);"
               title="Profile"
             >
               <User class="w-4 h-4" />
@@ -205,18 +258,20 @@
             <button
               type="button"
               onclick={onLogout}
-              class="w-full flex items-center justify-center p-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+              class="w-full flex items-center justify-center p-2 rounded-xl transition-colors"
+              style="color: var(--error);"
               title="Logout"
             >
               <LogOut class="w-4 h-4" />
             </button>
           </div>
         {:else}
-          <div class="absolute bottom-full left-0 right-0 mb-2 p-2 bg-neutral-900 border border-neutral-800 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl">
+          <div class="absolute bottom-full left-0 right-0 mb-2 p-2 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-xl" style="background-color: var(--bg-secondary); border: 1px solid var(--border-primary);">
             <div class="space-y-1">
               <a
                 href="/profile"
-                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-colors"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+                style="color: var(--text-secondary);"
               >
                 <User class="w-4 h-4" />
                 Profile
@@ -224,7 +279,8 @@
               <button
                 type="button"
                 onclick={onLogout}
-                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+                style="color: var(--error);"
               >
                 <LogOut class="w-4 h-4" />
                 Logout
@@ -235,7 +291,7 @@
       </div>
     {:else}
       <div class="flex items-center justify-center py-2">
-        <div class="w-8 h-8 rounded-xl bg-neutral-800 animate-pulse"></div>
+        <div class="w-8 h-9 rounded-xl animate-pulse" style="background-color: var(--bg-tertiary);"></div>
       </div>
     {/if}
   </div>
