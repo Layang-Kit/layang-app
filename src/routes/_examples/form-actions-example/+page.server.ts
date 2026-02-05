@@ -21,7 +21,7 @@
 import type { Actions, PageServerLoad } from './\$types';
 import { users } from '\$lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { generateId } from '\$lib/auth/lucia';
+import { generateId } from '\$lib/auth/session';
 import { hashPassword } from '\$lib/auth/password';
 import { fail, redirect } from '@sveltejs/kit';
 

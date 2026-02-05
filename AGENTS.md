@@ -7,7 +7,7 @@ This is a full-stack edge-ready boilerplate application built with:
 - **SvelteKit** - Full-stack framework with file-based routing
 - **Cloudflare D1** - SQLite edge database running on Cloudflare's edge network
 - **Drizzle ORM** - Type-safe SQL-like ORM for database operations
-- **Lucia Auth** - Session-based authentication with Google OAuth
+- **Custom Session Auth** - Session-based authentication with Google OAuth
 - **Tailwind CSS** - Utility-first CSS framework
 - **TypeScript** - Type-safe JavaScript
 
@@ -22,7 +22,7 @@ The application provides a complete authentication system with user management, 
 | Styling | Tailwind CSS 4.x (Custom "Dark Elegance" theme) |
 | Database | Cloudflare D1 (SQLite) |
 | ORM | Drizzle ORM 0.40 |
-| Auth | Lucia Auth 3.x + Arctic |
+| Auth | Custom Session Auth 3.x + Arctic |
 | Password Hashing | Web Crypto API (PBKDF2) |
 | Email | Resend |
 | Storage | Cloudflare R2 |
@@ -38,7 +38,7 @@ The application provides a complete authentication system with user management, 
 ├── src/
 │   ├── lib/
 │   │   ├── auth/
-│   │   │   ├── lucia.ts           # Lucia auth configuration
+│   ├── session.ts         # Session management (custom implementation)
 │   │   │   ├── google.ts          # Google OAuth setup
 │   │   │   └── password.ts        # Web Crypto password hashing
 │   │   ├── db/
@@ -111,7 +111,7 @@ The application provides a complete authentication system with user management, 
 - `created_at` - INTEGER (timestamp)
 - `updated_at` - INTEGER (timestamp)
 
-### sessions (Lucia Auth)
+### sessions (Custom Session Auth)
 - `id` - TEXT PRIMARY KEY
 - `user_id` - TEXT NOT NULL (FK to users.id)
 - `expires_at` - INTEGER (timestamp)
@@ -344,9 +344,9 @@ export const handle: Handle = async ({ event, resolve }) => {
     event.locals.db = drizzle(event.platform.env.DB, { schema });
   }
   
-  // Inject Auth (Lucia)
+  // Inject Auth (Custom Session)
   const adapter = createAuthAdapter(event.platform.env.DB);
-  const lucia = createLucia(adapter);
+  // Session validation handled in hooks
   // ... validate session
   
   return resolve(event);
@@ -499,15 +499,15 @@ Project ini menggunakan **3 Workflow Agents** untuk manajemen pengembangan yang 
 
 **Dokumentasi:** [workflow/INIT_AGENT.md](workflow/INIT_AGENT.md)
 
-### 2. TASK_AGENT - Feature Implementation
+### 2. TASK_AGENT - Feature Implementation (Per Task)
 
-**Gunakan saat:** Implementasi fitur, fix bug, atau modifikasi fitur
+**Gunakan saat:** Implementasi fitur satu per satu, fix bug, atau modifikasi fitur dengan konfirmasi user
 
 **Responsibilities:**
 - Implement features (pages, API routes, components)
 - Fix bugs
 - Update PROGRESS.md
-- Commit & push changes
+- Commit & push changes (per task)
 
 **Cara pakai:**
 ```
@@ -516,7 +516,44 @@ Project ini menggunakan **3 Workflow Agents** untuk manajemen pengembangan yang 
 
 **Dokumentasi:** [workflow/TASK_AGENT.md](workflow/TASK_AGENT.md)
 
-### 3. MANAGER_AGENT - Change Management
+### 3. BATCH_TASK_AGENT - Batch Feature Implementation (All Tasks)
+
+**Gunakan saat:** Implementasi SEMUA pending tasks dalam PROGRESS.md sekaligus tanpa berhenti
+
+**Responsibilities:**
+- Read ALL pending tasks from PROGRESS.md
+- Execute ALL tasks in sequence (1 shoot, continuous)
+- Auto-create feature branch
+- Update PROGRESS.md after each task
+- **Commit modes:**
+  - **Atomic** (default): Commit per fitur ✅
+  - **Batch**: Single commit di akhir
+- Push to trigger CI/CD
+
+**Commit Strategy:**
+| Mode | Kapan Digunakan |
+|------|-----------------|
+| **Atomic** (per task) | Team projects, production, perlu code review |
+| **Batch** (single) | Solo projects, MVP, prototype |
+
+**Best for:**
+- MVP development dengan banyak fitur awal
+- Bootstrap project baru
+- Deadline ketat
+- Prototype dengan fitur lengkap
+
+**Cara pakai:**
+```bash
+# Default: Atomic commits (commit per fitur)
+"@workflow/BATCH_TASK_AGENT.md, execute all pending tasks"
+
+# Batch mode: Single commit di akhir
+"@workflow/BATCH_TASK_AGENT.md, execute all pending tasks with batch commit"
+```
+
+**Dokumentasi:** [workflow/BATCH_TASK_AGENT.md](workflow/BATCH_TASK_AGENT.md)
+
+### 4. MANAGER_AGENT - Change Management
 
 **Gunakan saat:** Menerima change request, update dokumentasi, atau approve deployment
 
@@ -538,12 +575,19 @@ Project ini menggunakan **3 Workflow Agents** untuk manajemen pengembangan yang 
 ```
 INIT_AGENT (Setup)
     ↓
-TASK_AGENT (Implement Features)
+TASK_AGENT / BATCH_TASK_AGENT (Implement Features)
     ↓
 Cloudflare Deployment (Automated)
     ↓
 MANAGER_AGENT (Release Notes)
 ```
+
+**Choose Your Execution Mode:**
+
+| Agent | Use When |
+|-------|----------|
+| `TASK_AGENT` | Incremental development, per task, with user confirmation |
+| `BATCH_TASK_AGENT` | MVP build, all pending tasks in one shot, continuous execution |
 
 ### Project Documentation
 
@@ -554,13 +598,14 @@ MANAGER_AGENT (Release Notes)
 | `workflow/PROGRESS.md` | Development Progress Tracking |
 | `workflow/ui-kit.html` | UI Design System |
 | `workflow/AGENT-GUIDE.md` | Complete Agent Usage Guide |
+| `workflow/BATCH_TASK_AGENT.md` | Batch Task Execution Guide |
 
 ---
 
 ## Useful Resources
 
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
-- [Lucia Auth Docs](https://lucia-auth.com/)
+
 - [Cloudflare D1 Docs](https://developers.cloudflare.com/d1/)
 - [Drizzle ORM Docs](https://orm.drizzle.team/docs)
 - [Arctic OAuth](https://arcticjs.dev/)

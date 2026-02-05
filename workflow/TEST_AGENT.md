@@ -2,19 +2,20 @@
 
 ## Purpose
 
-This agent is responsible for **ensuring code quality through comprehensive testing**. It bridges the gap between feature implementation and production deployment by writing, maintaining, and analyzing tests.
+This agent is responsible for **ensuring code quality through comprehensive testing** for LayangKit (SvelteKit + Cloudflare D1 + Drizzle ORM). It bridges the gap between feature implementation and production deployment by writing, maintaining, and analyzing tests.
 
 ## Scope Enforcement
 
 **TEST_AGENT CAN:**
-- ✅ Write unit tests for services, repositories, validators
-- ✅ Write integration tests for controllers and API flows
-- ✅ Write E2E tests using Playwright for critical user paths
+- ✅ Write unit tests for lib modules (auth, db, email, storage, image)
+- ✅ Write integration tests for API routes (+server.ts files)
+- ✅ Write E2E tests using Playwright for critical user paths (login, register, profile)
+- ✅ Test SvelteKit form actions (+page.server.ts)
 - ✅ Analyze test coverage and identify gaps
 - ✅ Fix broken tests after code changes
 - ✅ Update PROGRESS.md test status
 - ✅ Create/Update test documentation
-- ✅ Mock external dependencies for isolated testing
+- ✅ Mock external dependencies (Resend, R2, Google OAuth) for isolated testing
 - ✅ Run tests locally and interpret results
 
 **TEST_AGENT CANNOT:**
@@ -75,9 +76,10 @@ TEST_AGENT can be triggered by:
 2. Read PROGRESS.md - check for untested features
 3. Run `npm run test:coverage` - identify coverage gaps
 4. Analyze:
-   - Services without unit tests
-   - Controllers without integration tests
-   - Critical paths without E2E tests
+   - Lib modules without unit tests (auth/, db/, email/, storage/)
+   - API routes without integration tests (src/routes/api/)
+   - Form actions without tests (src/routes/**/+page.server.ts)
+   - Critical paths without E2E tests (auth flows)
 5. Filter out locked tasks (exclude [LOCKED: ...])
 6. Display top 3 testing priorities
 7. Ask user which to work on
@@ -104,105 +106,121 @@ Look for these patterns:
 
 ### 4. Testing Checklist by Feature Type
 
-#### For New Service (e.g., PaymentService)
+#### For Auth Module (e.g., password.ts, lucia.ts)
 ```markdown
 **Testing Requirements:**
-- [ ] Unit tests: `tests/unit/services/PaymentService.test.ts`
-  - [ ] Test all public methods
-  - [ ] Mock external APIs
-  - [ ] Test error handling
-  - [ ] Test edge cases
+- [ ] Unit tests: `tests/unit/lib/auth/password.test.ts`
+  - [ ] Test hashPassword() generates valid hash
+  - [ ] Test verifyPassword() matches correct password
+  - [ ] Test verifyPassword() rejects wrong password
+  - [ ] Test timing attack resistance
 - [ ] Coverage target: > 90%
 ```
 
-#### For New Controller (e.g., OrderController)
+#### For API Route (e.g., src/routes/api/profile/+server.ts)
 ```markdown
 **Testing Requirements:**
-- [ ] Unit tests: `tests/unit/controllers/OrderController.test.ts` (if applicable)
-- [ ] Integration tests: `tests/integration/order.test.ts`
-  - [ ] CRUD operations
-  - [ ] Validation errors
-  - [ ] Authentication/Authorization
-- [ ] E2E tests: `tests/e2e/order.spec.ts` (if critical feature)
-  - [ ] User flow: create order → payment → confirmation
+- [ ] Integration tests: `tests/integration/api/profile.test.ts`
+  - [ ] GET /api/profile - returns user data with valid session
+  - [ ] GET /api/profile - 401 without session
+  - [ ] PUT /api/profile - updates user data
+  - [ ] PUT /api/profile - validates input (Zod)
+  - [ ] Test with mock D1 database
 ```
 
-#### For Repository Pattern
+#### For Form Actions (e.g., src/routes/login/+page.server.ts)
 ```markdown
 **Testing Requirements:**
-- [ ] Unit tests: `tests/unit/repositories/OrderRepository.test.ts`
-  - [ ] Test all query methods
-  - [ ] Mock DB for isolation
-  - [ ] Test transactions (if any)
+- [ ] Integration tests: `tests/integration/routes/login.test.ts`
+  - [ ] Login action with valid credentials
+  - [ ] Login action with invalid credentials
+  - [ ] Login action validation errors
+  - [ ] Redirect after successful login
+```
+
+#### For Database Operations (e.g., src/lib/db/schema.ts)
+```markdown
+**Testing Requirements:**
+- [ ] Unit tests: `tests/unit/lib/db/schema.test.ts`
+  - [ ] Test table definitions
+  - [ ] Test relationships
+  - [ ] Test Drizzle queries with mock data
 ```
 
 ## Test Categories
 
 ### 1. Unit Tests
 
-**Location:** `tests/unit/services/`, `tests/unit/repositories/`, `tests/unit/validators/`
+**Location:** `tests/unit/lib/{auth,db,email,storage,image}/`
 
 **Focus:**
 - Single function/method in isolation
 - Mock all dependencies
 - Fast execution (< 10ms per test)
-- High coverage (> 90% for services)
+- High coverage (> 90% for core modules)
 
 **Example:**
 ```typescript
-// tests/unit/services/CacheService.test.ts
+// tests/unit/lib/auth/password.test.ts
 import { describe, it, expect } from 'vitest';
-import { CacheService } from '../../../app/services/CacheService';
+import { hashPassword, verifyPassword } from '../../../../src/lib/auth/password';
 
-describe('CacheService', () => {
-  it('should store and retrieve value', () => {
-    const cache = new CacheService();
-    cache.put('key', 'value', 5);
-    expect(cache.get('key')).toBe('value');
+describe('password', () => {
+  it('should hash password correctly', async () => {
+    const password = 'mysecretpassword';
+    const hash = await hashPassword(password);
+    expect(hash).toContain(':'); // format: salt:hash
   });
   
-  it('should return null for expired key', async () => {
-    const cache = new CacheService();
-    cache.put('key', 'value', 0.01); // 0.6 seconds
-    await new Promise(r => setTimeout(r, 700));
-    expect(cache.get('key')).toBeNull();
+  it('should verify correct password', async () => {
+    const password = 'mysecretpassword';
+    const hash = await hashPassword(password);
+    const isValid = await verifyPassword(password, hash);
+    expect(isValid).toBe(true);
+  });
+  
+  it('should reject incorrect password', async () => {
+    const password = 'mysecretpassword';
+    const hash = await hashPassword(password);
+    const isValid = await verifyPassword('wrongpassword', hash);
+    expect(isValid).toBe(false);
   });
 });
 ```
 
 ### 2. Integration Tests
 
-**Location:** `tests/integration/`
+**Location:** `tests/integration/{api,routes}/`
 
 **Focus:**
-- Controller + Database + Services together
-- Real database (test.sqlite3)
-- API endpoint testing
-- Authentication flows
+- API routes with mocked D1 database
+- Form actions with request/response cycle
+- Authentication flows (session validation)
 
 **Example:**
 ```typescript
-// tests/integration/order.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import DB from '../../app/services/DB';
-import { OrderRepository } from '../../app/repositories/OrderRepository';
+// tests/integration/api/users.test.ts
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-describe('Order Integration', () => {
-  beforeEach(async () => {
-    await DB.deleteFrom('orders').execute();
-  });
-  
-  it('should create order with items', async () => {
-    const order = await OrderRepository.create({
-      userId: 'user-123',
-      items: [{ productId: 'p1', quantity: 2 }],
-      total: 100
+describe('GET /api/users', () => {
+  it('should return list of users', async () => {
+    const mockDB = {
+      query: {
+        users: {
+          findMany: vi.fn().mockResolvedValue([
+            { id: '1', email: 'test@example.com', name: 'Test User' }
+          ])
+        }
+      }
+    };
+    
+    const response = await fetch('/api/users', {
+      headers: { 'Cookie': 'session=valid-session-id' }
     });
     
-    expect(order.id).toBeDefined();
-    
-    const found = await OrderRepository.findById(order.id);
-    expect(found?.total).toBe(100);
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toHaveLength(1);
   });
 });
 ```
@@ -213,23 +231,38 @@ describe('Order Integration', () => {
 
 **Focus:**
 - Full browser automation
-- Critical user paths only
+- Critical user paths only (login, register, profile, logout)
 - Cross-browser testing (Chrome, Firefox)
+
+**Critical Paths for LayangKit:**
+1. **Auth Flow**: Register → Verify Email → Login → Logout
+2. **Profile Flow**: Login → Edit Profile → Upload Avatar → Save
+3. **Password Reset**: Forgot Password → Receive Email → Reset → Login
 
 **Example:**
 ```typescript
-// tests/e2e/checkout.spec.ts
+// tests/e2e/auth.spec.ts
 import { test, expect } from '@playwright/test';
 
-test('complete checkout flow', async ({ page }) => {
-  await page.goto('/products');
-  await page.click('[data-testid="add-to-cart"]');
-  await page.goto('/cart');
-  await page.click('[data-testid="checkout"]');
+test('complete registration and login flow', async ({ page }) => {
+  // Register
+  await page.goto('/register');
   await page.fill('[name="email"]', 'test@example.com');
-  await page.click('[data-testid="place-order"]');
+  await page.fill('[name="name"]', 'Test User');
+  await page.fill('[name="password"]', 'password123');
+  await page.click('[type="submit"]');
   
-  await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
+  // Should redirect to login or show verification message
+  await expect(page).toHaveURL(/login|verify/);
+  
+  // Login
+  await page.goto('/login');
+  await page.fill('[name="email"]', 'test@example.com');
+  await page.fill('[name="password"]', 'password123');
+  await page.click('[type="submit"]');
+  
+  // Should redirect to dashboard
+  await expect(page).toHaveURL('/dashboard');
 });
 ```
 
@@ -238,20 +271,24 @@ test('complete checkout flow', async ({ page }) => {
 ```
 What needs testing?
     ↓
-New Service created?
+New lib module created? (auth, email, storage, etc.)
     ↓ YES
-Write unit tests in tests/unit/services/
+Write unit tests in tests/unit/lib/
     ↓
 Coverage > 90%?
     ↓ YES → Done
     ↓ NO → Add more test cases
     
     ↓ NO
-New Controller/API created?
+New API route created? (src/routes/api/)
     ↓ YES
-Write integration tests in tests/integration/
+Write integration tests in tests/integration/api/
     ↓
-Critical user path?
+New form action created? (src/routes/**/+page.server.ts)
+    ↓ YES
+Write integration tests in tests/integration/routes/
+    ↓
+Critical user path modified? (login, register, profile)
     ↓ YES
 Write E2E tests in tests/e2e/
     ↓
@@ -268,48 +305,94 @@ Identify uncovered code, add tests
 
 | Component | Target Coverage | Minimum Coverage |
 |-----------|-----------------|------------------|
-| Services | 90% | 80% |
-| Repositories | 85% | 75% |
-| Validators | 95% | 90% |
-| Controllers | 70% | 60% |
+| lib/auth | 90% | 80% |
+| lib/db | 85% | 75% |
+| lib/email | 80% | 70% |
+| lib/storage | 80% | 70% |
+| lib/image | 80% | 70% |
+| API Routes | 70% | 60% |
+| Form Actions | 70% | 60% |
 | Overall | 80% | 70% |
 
 ## Testing Patterns
 
-### Mocking Database
+### Mocking D1 Database
+
 ```typescript
-// For unit tests, mock DB
-vi.mock('../../../app/services/DB', () => ({
-  default: {
-    selectFrom: vi.fn(),
-    insertInto: vi.fn(),
-  }
+// For unit tests, mock D1
+vi.mock('../../../src/lib/db', () => ({
+  createDB: () => ({
+    query: {
+      users: {
+        findFirst: vi.fn(),
+        findMany: vi.fn(),
+      },
+      sessions: {
+        findFirst: vi.fn(),
+      }
+    },
+    insert: vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn() })) })),
+    update: vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn() })) })),
+    delete: vi.fn(() => ({ where: vi.fn() })),
+  })
 }));
 ```
 
 ### Mocking External Services
+
 ```typescript
-// Mock Redis
-vi.mock('../../../app/services/Redis', () => ({
-  default: {
-    get: vi.fn(),
-    set: vi.fn(),
-  }
+// Mock Resend email
+vi.mock('../../../src/lib/email/resend', () => ({
+  sendVerificationEmail: vi.fn().mockResolvedValue(true),
+  sendPasswordResetEmail: vi.fn().mockResolvedValue(true),
 }));
 
-// Mock Email
-vi.mock('../../../app/services/Resend', () => ({
-  sendEmail: vi.fn(),
+// Mock R2 storage
+vi.mock('../../../src/lib/storage/r2', () => ({
+  uploadFile: vi.fn().mockResolvedValue({ url: 'https://example.com/file.jpg' }),
+  deleteFile: vi.fn().mockResolvedValue(true),
+  getPresignedUrl: vi.fn().mockResolvedValue('https://presigned-url.example.com'),
+}));
+
+// Mock Google OAuth
+vi.mock('../../../src/lib/auth/google', () => ({
+  google: {
+    createAuthorizationURL: vi.fn().mockResolvedValue('https://accounts.google.com/oauth'),
+    validateAuthorizationCode: vi.fn().mockResolvedValue({
+      accessToken: 'mock-token',
+      idToken: 'mock-id-token',
+    }),
+  },
 }));
 ```
 
 ### Test Data Factories
+
 ```typescript
 // tests/factories/user.ts
+import { randomUUID } from 'crypto';
+
 export const createUser = (overrides = {}) => ({
   id: randomUUID(),
-  name: 'Test User',
   email: 'test@example.com',
+  name: 'Test User',
+  bio: null,
+  location: null,
+  website: null,
+  passwordHash: 'salt:hash',
+  provider: 'email',
+  googleId: null,
+  avatar: null,
+  emailVerified: 0,
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+  ...overrides
+});
+
+export const createSession = (userId: string, overrides = {}) => ({
+  id: randomUUID(),
+  userId,
+  expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days
   ...overrides
 });
 ```
@@ -322,17 +405,23 @@ When completing test work, update PROGRESS.md:
 ### Feature Name (Added: YYYY-MM-DD, Completed: YYYY-MM-DD)
 - [x] Implementation completed
 - [x] Tests written (TEST_AGENT_1706072400 @ 2025-01-30)
-  - [x] Unit tests: tests/unit/services/FeatureService.test.ts (95% coverage)
-  - [x] Integration tests: tests/integration/feature.test.ts (85% coverage)
-  - [x] E2E tests: tests/e2e/feature.spec.ts
+  - [x] Unit tests: tests/unit/lib/auth/password.test.ts (95% coverage)
+  - [x] Integration tests: tests/integration/api/profile.test.ts (85% coverage)
+  - [x] E2E tests: tests/e2e/auth.spec.ts
 - [x] Coverage > 80% (actual: 87%)
 ```
 
 ## Commands
 
 ```bash
+# Setup testing (one-time)
+npm install -D vitest @playwright/test jsdom @testing-library/svelte
+
+# Run all tests
+npm run test
+
 # Run specific test file
-npm run test:run -- tests/unit/services/CacheService.test.ts
+npm run test -- tests/unit/lib/auth/password.test.ts
 
 # Run with coverage
 npm run test:coverage
@@ -342,6 +431,9 @@ npm run test:e2e
 
 # Run E2E with UI
 npm run test:e2e:ui
+
+# Run tests in watch mode (development)
+npm run test:watch
 ```
 
 ## Communication Protocol
@@ -353,7 +445,7 @@ npm run test:e2e:ui
 ### Feature Name (Added: YYYY-MM-DD)
 - [x] Implementation
 - [ ] Tests [LOCKED: TEST_AGENT_1706072400 @ 2025-01-30]
-  *Note: Missing unit tests for PaymentService, integration tests for checkout flow*
+  *Note: Missing unit tests for lib/email/resend.ts, integration tests for /api/upload/image*
 ```
 
 2. **Report to user:**
@@ -361,9 +453,9 @@ npm run test:e2e:ui
 🧪 Testing Analysis Complete
 
 Found untested code in:
-1. PaymentService (0% coverage) - [HIGH]
-2. OrderController (45% coverage) - [MEDIUM]  
-3. Checkout flow (no E2E tests) - [HIGH]
+1. lib/auth/password.ts (0% coverage) - [HIGH]
+2. /api/profile/+server.ts (45% coverage) - [MEDIUM]  
+3. Login form action (no tests) - [HIGH]
 
 Which should I work on first?
 ```
@@ -373,8 +465,8 @@ Which should I work on first?
 1. **Update PROGRESS.md:**
 ```markdown
 ### Bug Fix: Broken Tests (Fixed: YYYY-MM-DD)
-- [x] Fixed: CacheService tests failing after TTL change
-- [x] Updated mocks for new DB schema
+- [x] Fixed: password.test.ts failing after hash algorithm change
+- [x] Updated mocks for new Drizzle ORM version
 - [x] All tests passing (TEST_AGENT_1706072400 @ 2025-01-30)
 ```
 
@@ -383,8 +475,8 @@ Which should I work on first?
 ✅ Test Fixes Complete
 
 Fixed:
-- tests/unit/services/CacheService.test.ts (3 failing tests)
-- tests/integration/auth.test.ts (2 failing tests due to schema change)
+- tests/unit/lib/auth/password.test.ts (3 failing tests)
+- tests/integration/api/users.test.ts (2 failing tests due to schema change)
 
 Coverage: 87% → 89%
 ```
@@ -393,7 +485,7 @@ Coverage: 87% → 89%
 
 1. **Always run tests before committing:**
    ```bash
-   npm run test:run
+   npm run test
    ```
 
 2. **Check coverage report:**
@@ -402,11 +494,12 @@ Coverage: 87% → 89%
 
 3. **Test naming convention:**
    - `should [expected behavior] when [condition]`
-   - Example: `should return null when key expired`
+   - Example: `should return 401 when session is invalid`
 
 4. **Mock external dependencies:**
-   - Never call real APIs in tests
-   - Never use production database
+   - Never call real Resend API in tests
+   - Never upload real files to R2 in tests
+   - Never use production D1 database
 
 5. **Keep tests fast:**
    - Unit tests: < 10ms
@@ -418,17 +511,19 @@ Coverage: 87% → 89%
    - Unlock after completion
    - Include coverage numbers
 
+7. **SvelteKit specific:**
+   - Test `+server.ts` files by mocking Request objects
+   - Test `+page.server.ts` actions by simulating form submissions
+   - Use `locals` mocking for auth/session testing
+
 ---
 
 ## Technical Reference
 
 For detailed testing patterns, code examples, and best practices, refer to:
 
-**`skills/testing-guide.md`** - Comprehensive testing reference covering:
-- Unit test examples with Vitest
-- Integration test patterns
-- E2E test examples with Playwright
-- Test mocking strategies
-- Coverage configuration
-- Common testing patterns
-- Bug verification workflows
+**LayangKit Stack:**
+- [Vitest Docs](https://vitest.dev/) - Unit testing
+- [Playwright Docs](https://playwright.dev/) - E2E testing
+- [SvelteKit Testing](https://kit.svelte.dev/docs/integrations#vitest) - SvelteKit specific
+- [Drizzle ORM Testing](https://orm.drizzle.team/docs/guides/testing) - Database testing

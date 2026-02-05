@@ -1,6 +1,8 @@
-# ⚡ Tepi Kilat
+# 🪁 LayangKit
 
 **Edge-first full-stack starter template** — SvelteKit + Cloudflare D1 + Drizzle ORM with authentication, email verification, and file uploads. Deployed on Cloudflare's edge network for maximum speed.
+
+> 💰 **100% GRATIS untuk project kecil hingga menengah!** Semua layanan yang digunakan punya free tier yang sangat besar — bisa jalan bertahun-tahun tanpa keluar biaya sepeser pun.
 
 ![SvelteKit](https://img.shields.io/badge/SvelteKit-5.0-orange?style=flat-square&logo=svelte)
 ![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white)
@@ -62,18 +64,37 @@ Lihat folder [`docs/`](docs/) untuk dokumentasi lengkap:
 - (Optional) Resend account for email
 - (Optional) Google Cloud Console for OAuth
 
-### 1. Clone & Install
+### ⚡ Super Cepat dengan `npm create layang`
+
+Install dan setup project dalam 1 command:
+
+```bash
+npm create layang my-app
+```
+
+Command ini akan:
+1. Membuat folder `my-app` dengan starter template
+2. Install semua dependencies
+3. Setup project siap pakai
+
+Lanjut ke **Step 3** untuk setup database 👇
+
+---
+
+### 🔄 Cara Manual (Alternative)
+
+Jika prefer clone manual:
 
 ```bash
 # Clone the repository
-git clone https://github.com/maulanashalihin/svelte-kit-cloudflare-starter.git
-cd svelte-kit-cloudflare-starter
+git clone https://github.com/maulanashalihin/svelte-kit-cloudflare-starter.git my-app
+cd my-app
 
 # Install dependencies
 npm install
 ```
 
-### 2. Setup Database
+### 3. Setup Database
 
 ```bash
 # Create D1 database
@@ -85,7 +106,7 @@ npx wrangler d1 create my-database
 # database_id = "your-database-id-here"
 ```
 
-### 3. Configure Environment
+### 4. Configure Environment
 
 ```bash
 # Copy environment template
@@ -117,7 +138,7 @@ R2_BUCKET_NAME=your_bucket
 R2_PUBLIC_URL=https://pub-xxx.r2.dev
 ```
 
-### 4. Generate & Apply Migrations
+### 5. Generate & Apply Migrations
 
 ```bash
 # Generate migrations from schema (run this first if drizzle/ folder is empty)
@@ -132,7 +153,7 @@ npm run db:migrate
 
 > **Note:** Run `db:generate` whenever you make changes to `src/lib/db/schema.ts`
 
-### 5. Start Development Server
+### 6. Start Development Server
 
 ```bash
 npm run dev
@@ -270,6 +291,20 @@ export const actions: Actions = {
   }
 };
 ```
+
+## 💰 Free Tier (Gratis!)
+
+Proyek ini dibangun di atas stack **100% free tier** yang super besar:
+
+| Layanan | Free Tier | Estimasi Penggunaan |
+|---------|-----------|---------------------|
+| **Cloudflare Pages** | Unlimited requests, 500 builds/bulan | Website unlimited traffic |
+| **Cloudflare D1** | 500k rows/query per hari, 5 GB storage | Database 500rb query/hari |
+| **Cloudflare R2** | 10 GB storage, 1 juta Class A ops/bulan | File storage 10 GB |
+| **Workers (Functions)** | 100k requests/hari | API 100rb request/hari |
+| **Resend** | 100 email/hari | Email verification 100/hari |
+
+**Bottom line:** Untuk project kecil-menengah (startup, portfolio, side project), ini **GRATIS TOTAL** dengan limit yang sangat longgar. Bisa jalan bertahun-tahun tanpa biaya!
 
 ## 🌐 Deployment
 

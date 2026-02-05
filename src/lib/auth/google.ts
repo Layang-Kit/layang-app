@@ -1,15 +1,10 @@
 import { Google } from 'arctic';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '$env/static/private';
+
 import { dev } from '$app/environment';
+import { BASE_URL as ENV_BASE_URL } from '$env/static/private';
 
-const GOOGLE_CLIENT_ID = dev 
-  ? process.env.GOOGLE_CLIENT_ID || '' 
-  : (import.meta.env?.GOOGLE_CLIENT_ID as string) || '';
-
-const GOOGLE_CLIENT_SECRET = dev 
-  ? process.env.GOOGLE_CLIENT_SECRET || '' 
-  : (import.meta.env?.GOOGLE_CLIENT_SECRET as string) || '';
-
-const BASE_URL = dev ? 'http://localhost:5173' : 'https://your-production-url.pages.dev';
+const BASE_URL = dev ? 'http://localhost:5173' : (ENV_BASE_URL || 'https://layangkit.pages.dev');
 
 // Create Google OAuth client
 export function createGoogleOAuthClient(): Google | null {

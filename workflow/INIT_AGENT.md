@@ -58,16 +58,16 @@ Silakan mention @workflow/TASK_AGENT.md untuk implementasi fitur."
 
 Ikuti urutan ini saat memulai project baru:
 
-### 1. Initialize Project
+### 1. Listen to user
 
-Project ini adalah starter kit yang sudah ter-setup. User tinggal clone dan jalankan:
+Tanyakan user untuk:
+- Nama project
+- Deskripsi project
+- Fitur utama
 
-```bash
-# Clone starter kit
-git clone <repo-url> project-name
-cd project-name
-npm install
-```
+Konfirmasi ke user setelah mendapatkan informasi. Jangan lanjut ke step selanjutnya sebelum mendapatkan konfirmasi.
+
+ 
 
 ### 2. Create/Replace README.md
 

@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import * as schema from '$lib/db/schema';
 import type { RequestHandler } from './$types';
-import { generateId } from '$lib/auth/lucia';
+import { generateId } from '$lib/auth/session';
 
 // GET /api/users
 export const GET: RequestHandler = async ({ locals }) => {

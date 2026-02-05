@@ -10,7 +10,28 @@ Setup project SvelteKit Cloudflare D1 dalam 5 menit.
 
 ## 🚀 Langkah Setup
 
-### 1. Clone & Install (1 menit)
+### ⚡ Cara Super Cepat (30 detik)
+
+Gunakan `create-layang` CLI:
+
+```bash
+npm create layang my-app
+```
+
+Command ini otomatis:
+- Clone template
+- Install dependencies
+- Setup project
+
+Lanjut ke **Langkah 2** untuk setup database.
+
+---
+
+### 🔄 Cara Manual (Alternative)
+
+Jika ingin clone manual:
+
+#### 1. Clone & Install (1 menit)
 
 ```bash
 # Clone repository

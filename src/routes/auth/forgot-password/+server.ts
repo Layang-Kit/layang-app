@@ -1,5 +1,5 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
-import { generateId } from '$lib/auth/lucia';
+import { generateId } from '$lib/auth/session';
 import { users, passwordResetTokens } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
