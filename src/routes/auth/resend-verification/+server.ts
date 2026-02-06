@@ -1,4 +1,5 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { generateId } from '$lib/auth/session';
 import { emailVerificationTokens, users } from '$lib/db/schema';
 import { eq, and, gt } from 'drizzle-orm';
@@ -119,7 +120,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
       success: true,
       message: 'If an account exists, a verification email has been sent.',
       // For development only
-      ...(process.env.NODE_ENV === 'development' && {
+      ...(dev && {
         devLink: verificationUrl
       })
     });

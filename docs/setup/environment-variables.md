@@ -105,14 +105,6 @@ R2_PUBLIC_URL=https://pub-abc123.r2.dev
 
 ---
 
-### Node Environment
-
-```env
-NODE_ENV=development  # atau production
-```
-
----
-
 ## 📝 Contoh .env Lengkap
 
 ```bash
@@ -143,11 +135,6 @@ R2_ACCESS_KEY_ID=abc123...
 R2_SECRET_ACCESS_KEY=xyz789...
 R2_BUCKET_NAME=my-app-uploads
 R2_PUBLIC_URL=https://pub-abc123.r2.dev
-
-# ============================================================================
-# Environment
-# ============================================================================
-NODE_ENV=development
 ```
 
 ---
