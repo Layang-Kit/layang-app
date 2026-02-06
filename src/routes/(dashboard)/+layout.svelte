@@ -5,6 +5,7 @@
   import AppSidebar from '$lib/components/AppSidebar.svelte';
   import { theme } from '$lib/stores/theme.svelte';
   
+  let { children } = $props();
   let user = $state<User | null>(null);
   let loading = $state(true);
   
@@ -51,7 +52,7 @@
       </div>
     {:else if user}
       <div class="h-full">
-        <slot />
+        {@render children()}
       </div>
     {:else}
       <div class="flex items-center justify-center h-screen">
