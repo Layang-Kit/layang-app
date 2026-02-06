@@ -5,6 +5,8 @@
   import { onMount } from 'svelte';
   import { theme } from '$lib/stores/theme.svelte';
   
+  let { children } = $props();
+  
   // Routes that use full-width layout without header
   let isDashboardRoute = $derived(
     page.url.pathname.startsWith('/dashboard') || 
@@ -28,10 +30,10 @@
 
 {#if isAuthPage}
   <!-- Auth pages: Clean layout, no header/footer -->
-  <slot />
+  {@render children()}
 {:else if isDashboardRoute}
   <!-- Dashboard routes: Managed by (dashboard) group layout -->
-  <slot />
+  {@render children()}
 {:else}
   <!-- Public pages: Standard layout with header -->
   <div class="min-h-screen flex flex-col grain" style="background-color: var(--bg-primary);">
@@ -85,7 +87,7 @@
     </header>
     
     <main class="flex-1">
-      <slot />
+      {@render children()}
     </main>
     
     {#if isHomePage}
