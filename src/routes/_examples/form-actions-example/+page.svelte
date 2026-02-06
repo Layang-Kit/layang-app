@@ -57,15 +57,15 @@
       }}>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
-            <input type="text" name="name" value={form?.values?.name || ''} required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="John Doe" />
+            <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+            <input type="text" id="name" name="name" value={form?.values?.name || ''} required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="John Doe" />
             {#if nameError}
               <p class="text-red-400 text-sm mt-1">{nameError}</p>
             {/if}
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
-            <input type="email" name="email" value={form?.values?.email || ''} required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="john@example.com" />
+            <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <input type="email" id="email" name="email" value={form?.values?.email || ''} required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="john@example.com" />
             {#if emailError}
               <p class="text-red-400 text-sm mt-1">{emailError}</p>
             {/if}
@@ -73,12 +73,12 @@
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+          <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
           <div class="relative">
             {#if showPassword}
-              <input type="text" name="password" required minlength="8" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="Min 8 characters" />
+              <input type="text" id="password" name="password" required minlength="8" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="Min 8 characters" />
             {:else}
-              <input type="password" name="password" required minlength="8" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="Min 8 characters" />
+              <input type="password" id="password" name="password" required minlength="8" class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none" placeholder="Min 8 characters" />
             {/if}
             <button type="button" on:click={() => showPassword = !showPassword} class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
               {showPassword ? 'Hide' : 'Show'}
