@@ -1,12 +1,12 @@
-name = "layangkit"
-compatibility_date = "2024-01-01"
+name = "layang-app"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
 # D1 Database Binding
 [[d1_databases]]
-binding = "DB"
-database_name = "DB"
-database_id = "83111ad0-7fa8-4723-b8d2-96ad00e60e04"
-# preview_database_id = "DB"  # Uncomment for local dev, comment for production
+binding = "layang_app"
+database_name = "layang-app"
+database_id = "3ea20719-74e2-49ca-8791-3db8810d2ae6"
+preview_database_id = "layang_app"
 migrations_dir = "drizzle"
-
+ 
