@@ -2,6 +2,8 @@
 
 Panduan lengkap mengisi file `.env` untuk semua layanan.
 
+---
+
 ## 📋 File .env.example
 
 Project ini sudah include `.env.example` dengan semua variabel yang dibutuhkan.
@@ -56,12 +58,31 @@ nano .env  # atau code .env, vim .env, dll
 | `GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials |
 | `GOOGLE_CLIENT_SECRET` | Google Cloud Console → Credentials |
 
-**Setup:** [Google OAuth Setup Guide](google-oauth.md)
-
 ```env
 GOOGLE_CLIENT_ID=123456789-abc123.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxxx
 ```
+
+#### Setup Google OAuth:
+
+1. Buka [Google Cloud Console](https://console.cloud.google.com)
+2. Buat project baru atau pilih existing
+3. APIs & Services → Credentials
+4. Create Credentials → OAuth client ID
+5. Configure consent screen:
+   - User Type: External
+   - App name: Nama aplikasi Anda
+   - User support email: Email Anda
+   - Developer contact: Email Anda
+6. Create OAuth client ID:
+   - Application type: Web application
+   - Name: SvelteKit App
+   - Authorized redirect URIs:
+     ```
+     http://localhost:5173/auth/google/callback
+     https://yourdomain.pages.dev/auth/google/callback
+     ```
+7. Copy Client ID dan Client Secret ke `.env`
 
 ---
 
@@ -72,14 +93,20 @@ GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxxx
 | `RESEND_API_TOKEN` | Resend Dashboard → API Keys |
 | `FROM_EMAIL` | Domain yang diverifikasi di Resend |
 
-**Setup:** [Resend Email Setup](email.md)
-
 ```env
 RESEND_API_TOKEN=re_xxxxxxxx
 FROM_EMAIL=noreply@yourdomain.com
 ```
 
 **Note:** Untuk development bisa pakai `onboarding@resend.dev`
+
+#### Setup Resend:
+
+1. Buat akun di [Resend](https://resend.com)
+2. Dashboard → API Keys → Create API Key
+3. Copy API key ke `.env`
+4. (Optional) Add dan verify domain Anda untuk production
+5. Untuk development, gunakan `onboarding@resend.dev`
 
 ---
 
@@ -93,8 +120,6 @@ FROM_EMAIL=noreply@yourdomain.com
 | `R2_BUCKET_NAME` | Nama bucket yang dibuat |
 | `R2_PUBLIC_URL` | R2 → Bucket → Settings → Public URL |
 
-**Setup:** [R2 Setup Guide](file-storage.md)
-
 ```env
 R2_ACCOUNT_ID=1a2b3c4d5e6f7g8h9i0j
 R2_ACCESS_KEY_ID=abc123...
@@ -102,6 +127,17 @@ R2_SECRET_ACCESS_KEY=xyz789...
 R2_BUCKET_NAME=my-app-uploads
 R2_PUBLIC_URL=https://pub-abc123.r2.dev
 ```
+
+#### Setup R2:
+
+1. Dashboard Cloudflare → R2
+2. Create bucket → Beri nama (contoh: `my-app-uploads`)
+3. Settings → Public Access → Allow Access
+4. Copy Public URL ke `.env`
+5. Manage R2 API Tokens → Create API Token:
+   - Permission: Object Read & Write
+   - Select bucket: my-app-uploads
+6. Copy Access Key ID dan Secret Access Key ke `.env`
 
 ---
 
@@ -177,3 +213,13 @@ Untuk production di Cloudflare Pages:
 | "API token invalid" | Token expired/salah | Buat token baru |
 | "Cannot access R2" | Access key salah | Check R2 API Tokens |
 | "Email not sent" | Resend token salah | Verifikasi token di Resend dashboard |
+| "redirect_uri_mismatch" | Redirect URI belum didaftarkan | Tambahkan di Google Cloud Console |
+
+---
+
+## 📖 Lanjutan
+
+- [Quick Start](quick-start.md) - Setup 5 menit
+- [Database Setup](database.md) - D1 configuration
+- [Authentication Guide](../guides/authentication.md) - Auth implementation
+- [File Uploads Guide](../guides/file-uploads.md) - R2 upload implementation

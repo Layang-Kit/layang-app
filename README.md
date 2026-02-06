@@ -47,14 +47,16 @@
 
 ## 📚 Documentation
 
-Lihat folder [`docs/`](docs/) untuk dokumentasi lengkap:
-
-- **[Quick Start](docs/setup/quick-start.md)** - Setup dalam 5 menit
-- **[Environment Variables](docs/setup/environment-variables.md)** - Konfigurasi lengkap
-- **[Architecture](docs/architecture.md)** - Arsitektur project
-- **[Setup Guides](docs/setup/)** - Panduan setup semua layanan
-- **[Feature Guides](docs/guides/)** - Panduan menggunakan fitur
-- **[Troubleshooting](docs/troubleshooting/)** - Solusi masalah umum
+| Document | Description |
+|----------|-------------|
+| [Quick Start](docs/setup/quick-start.md) | Setup dalam 5 menit |
+| [Deployment](docs/deployment.md) | **Deploy ke Cloudflare Pages** 🚀 |
+| [Environment Variables](docs/setup/environment-variables.md) | Konfigurasi `.env` lengkap |
+| [Database Setup](docs/setup/database.md) | Setup Cloudflare D1 |
+| [Wrangler Commands](docs/wrangler-commands.md) | CLI reference & monitoring |
+| [Troubleshooting](docs/troubleshooting/) | Solusi masalah umum |
+| [Architecture](docs/architecture.md) | System design |
+| [API Reference](docs/api-reference.md) | API documentation |
 
 ## 🚀 Quick Start
 
@@ -215,6 +217,7 @@ npm run db:studio            # Open Drizzle Studio GUI
 # Cloudflare
 npm run cf:typegen           # Generate Cloudflare Workers types
 npm run deploy               # Deploy to Cloudflare Pages
+npm run logs                 # View production logs (real-time)
 ```
 
 ## 📖 Usage Guide

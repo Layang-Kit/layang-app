@@ -14,7 +14,7 @@ Cloudflare D1 adalah database SQLite yang berjalan di edge network Cloudflare.
 
 ## 🚀 Setup Database
 
-> 📖 **Switching Local ↔ Production?** Lihat [Local vs Production Database](../guides/database-workflow.md)
+> 📖 **Local vs Production?** Gunakan `preview_database_id` di `wrangler.toml` untuk switch. Lihat command `wrangler d1 execute --local` vs `--remote` di [Wrangler Commands](../wrangler-commands.md)
 
 ### 1. Create Database
 
@@ -226,6 +226,34 @@ npx wrangler d1 delete DB
 | "Database does not exist" | Pastikan database sudah dibuat |
 | "Migration failed" | Check SQL syntax di `drizzle/` folder |
 | "Permission denied" | Check API token punya permission D1:Edit |
+
+---
+
+## 📡 Monitoring Production
+
+### View Logs Real-time
+
+```bash
+# Monitor logs dari deployment production
+npx wrangler pages deployment tail --project-name=layang-app --format=pretty
+```
+
+Berguna untuk:
+- Debug error di production
+- Melihat database query errors
+- Monitor authentication failures
+
+### Check Database Production
+
+```bash
+# Cek data users di production
+npx wrangler d1 execute DB --remote --command="SELECT email, name, created_at FROM users"
+
+# Cek tabel yang ada
+npx wrangler d1 execute DB --remote --command="SELECT name FROM sqlite_master WHERE type='table'"
+```
+
+See [Wrangler Commands Reference](../wrangler-commands.md) untuk command lengkap.
 
 ---
 

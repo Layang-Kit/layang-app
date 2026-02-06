@@ -2,12 +2,16 @@
 
 Panduan upload file dan gambar di aplikasi.
 
+---
+
 ## 📁 Dua Jenis Upload
 
 | Tipe | API | Use Case | Convert |
 |------|-----|----------|---------|
 | **Image** | `/api/upload/image` | Avatar, photos | WebP |
 | **File** | `/api/upload/presign` | PDF, ZIP, DOC | - |
+
+---
 
 ## 🖼️ Image Upload (Avatar)
 
@@ -68,6 +72,8 @@ const { url, size } = await res.json();
 - ✅ Format: JPG, PNG, GIF, WebP
 - ❌ Tidak accept: SVG, BMP, TIFF
 
+---
+
 ## 📄 File Upload (PDF, ZIP, etc)
 
 ### Cara Kerja (Presigned URL)
@@ -117,6 +123,8 @@ await fetch(uploadUrl, {
 | Excel | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
 | Word | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
 
+---
+
 ## 🗂️ Struktur Folder di R2
 
 ```
@@ -131,6 +139,8 @@ bucket/
     └── {user-id}/
         └── photo.webp
 ```
+
+---
 
 ## 🔒 Security
 
@@ -147,6 +157,8 @@ bucket/
 - Size limit
 - Malware scan (via R2)
 
+---
+
 ## 🐛 Troubleshooting Upload
 
 | Masalah | Solusi |
@@ -156,6 +168,12 @@ bucket/
 | "Upload failed" | Check R2 credentials di .env |
 | "Image not showing" | Check R2_PUBLIC_URL benar |
 | "403 Forbidden" | Bucket public access belum enable |
+| "Storage not configured" | Check `.env` R2 variables terisi |
+| "Access Key ID does not exist" | Buat API Token baru di R2 dashboard |
+
+Lihat juga [Common Issues](../troubleshooting/common-issues.md#-file-upload)
+
+---
 
 ## 💡 Best Practices
 
@@ -172,24 +190,29 @@ bucket/
 2. **Use WebP** jika bisa (smaller size)
 3. **Avatar:** Gunakan square image untuk hasil terbaik
 
+---
+
 ## 📁 Files Terkait
 
 ```
 src/
 ├── lib/
 │   ├── image/
-│   │   └── convert.ts       # WebP conversion
+│   │   └── convert.ts       # WebP conversion (Canvas API)
 │   └── storage/
-│       └── r2.ts            # R2 helpers
+│       └── r2.ts            # R2 helpers & presigned URLs
 └── routes/
+    ├── profile/
     └── api/
         └── upload/
-            ├── image/+server.ts     # Image upload
-            └── presign/+server.ts   # Presigned URL
+            ├── image/+server.ts     # Image upload & WebP conversion
+            └── presign/+server.ts   # Presigned URL generation
 ```
+
+---
 
 ## 📖 Lanjutan
 
-- [Setup Cloudflare R2](../setup/file-storage.md)
-- [Profile Management](profile-management.md)
-- [Troubleshooting Upload](../troubleshooting/file-upload.md)
+- [Environment Variables](../setup/environment-variables.md) - Setup R2 credentials
+- [Common Issues](../troubleshooting/common-issues.md) - Troubleshooting
+- [Wrangler Commands](../wrangler-commands.md) - Manage R2 via CLI

@@ -2,11 +2,15 @@
 
 Setup project SvelteKit Cloudflare D1 dalam 5 menit.
 
+---
+
 ## ✅ Prerequisites
 
 - Node.js 18+ (check: `node --version`)
 - npm atau pnpm
 - Akun Cloudflare (gratis)
+
+---
 
 ## 🚀 Langkah Setup
 
@@ -84,6 +88,8 @@ Cara dapatkan API Token:
    - Zone: (tidak perlu)
 4. Copy token ke `.env`
 
+Lihat [Environment Variables Lengkap](environment-variables.md) untuk detail.
+
 ### 4. Apply Database Migration (1 menit)
 
 ```bash
@@ -99,6 +105,8 @@ npm run dev
 
 Buka browser: http://localhost:5173
 
+---
+
 ## 🎉 Selesai!
 
 Anda sekarang punya:
@@ -107,13 +115,17 @@ Anda sekarang punya:
 - ✅ Authentication system (register/login)
 - ✅ Dashboard page
 
+---
+
 ## 🔄 Next Steps
 
 Tambahkan fitur opsional:
 
-1. **[Google Login](google-oauth.md)** - Login dengan Google
-2. **[Email Verification](email.md)** - Verifikasi email user
-3. **[File Upload](file-storage.md)** - Upload avatar dan file
+1. **Google Login** - Lihat [Environment Variables](environment-variables.md#google-oauth-login-dengan-google)
+2. **Email Verification** - Lihat [Environment Variables](environment-variables.md#resend-email-email-verification)
+3. **File Upload** - Lihat [Environment Variables](environment-variables.md#cloudflare-r2-file-upload)
+
+---
 
 ## 🐛 Troubleshooting
 
@@ -123,8 +135,11 @@ Tambahkan fitur opsional:
 | "Database not available" | Pastikan `npm run db:migrate:local` sudah dijalankan |
 | "Cannot find module" | Jalankan `npm install` ulang |
 
+---
+
 ## 📖 Dokumentasi Lanjutan
 
 - [Environment Variables Lengkap](environment-variables.md)
 - [Database Setup Detail](database.md)
 - [Authentication Guide](../guides/authentication.md)
+- [Wrangler Commands](../wrangler-commands.md) - CLI reference

@@ -542,6 +542,6 @@ Development                          Production
 ## 📚 Next Steps
 
 - [Setup Guide](setup/quick-start.md) - Start building
-- [Data Patterns](guides/patterns.md) - Learn best practices
-- [Performance](performance.md) - Optimize your app
+- [Authentication Guide](../guides/authentication.md) - Auth implementation
 - [Security](security.md) - Harden production
+- [Wrangler Commands](../wrangler-commands.md) - CLI reference
