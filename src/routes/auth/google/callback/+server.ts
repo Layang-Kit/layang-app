@@ -1,8 +1,6 @@
 import { redirect, error, type RequestHandler } from '@sveltejs/kit';
 import { createGoogleOAuthClient, getGoogleUserInfo } from '$lib/auth/google';
 import { generateId, createSession, createSessionCookie } from '$lib/auth/session';
-import { users } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
 
 export const GET: RequestHandler = async ({ url, cookies, locals, platform }) => {
 	try {
@@ -36,23 +34,28 @@ export const GET: RequestHandler = async ({ url, cookies, locals, platform }) =>
 			throw error(400, { message: 'Google email not verified' });
 		}
 
-		// Check if user already exists
-		let user = await locals.db.query.users.findFirst({
-			where: eq(users.googleId, googleUser.sub)
-		});
+		// Check if user already exists by Google ID
+		let user = await locals.db
+			.selectFrom('users')
+			.where('google_id', '=', googleUser.sub)
+			.selectAll()
+			.executeTakeFirst();
 
 		// If not found by Google ID, check by email
 		if (!user) {
-			user = await locals.db.query.users.findFirst({
-				where: eq(users.email, googleUser.email)
-			});
+			user = await locals.db
+				.selectFrom('users')
+				.where('email', '=', googleUser.email)
+				.selectAll()
+				.executeTakeFirst();
 
 			if (user) {
 				// Link Google account to existing user
 				await locals.db
-					.update(users)
-					.set({ googleId: googleUser.sub })
-					.where(eq(users.id, user.id));
+					.updateTable('users')
+					.set({ google_id: googleUser.sub })
+					.where('id', '=', user.id)
+					.execute();
 			}
 		}
 
@@ -61,14 +64,21 @@ export const GET: RequestHandler = async ({ url, cookies, locals, platform }) =>
 		if (!user) {
 			userId = generateId();
 
-			await locals.db.insert(users).values({
-				id: userId,
-				email: googleUser.email,
-				name: googleUser.name,
-				googleId: googleUser.sub,
-				provider: 'google',
-				avatar: null // Use default avatar instead of Google profile picture
-			});
+			await locals.db
+				.insertInto('users')
+				.values({
+					id: userId,
+					email: googleUser.email,
+					name: googleUser.name,
+					google_id: googleUser.sub,
+					provider: 'google',
+					avatar: null, // Use default avatar instead of Google profile picture
+					email_verified: 1,
+					is_admin: 0,
+					created_at: Date.now(),
+					updated_at: Date.now()
+				})
+				.execute();
 		} else {
 			userId = user.id;
 		}

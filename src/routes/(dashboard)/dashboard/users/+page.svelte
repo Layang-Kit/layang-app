@@ -141,7 +141,7 @@
         </div>
         <div>
           <p class="text-2xl font-bold" style="color: var(--text-primary);">
-            {users.filter(u => u.emailVerified).length}
+            {users.filter(u => u.email_verified).length}
           </p>
           <p class="text-sm" style="color: var(--text-secondary);">Verified</p>
         </div>
@@ -249,7 +249,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4">
-                  {#if user.emailVerified}
+                  {#if user.email_verified}
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium" style="background-color: var(--success-bg); color: var(--success);">
                       <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--success);"></span>
                       Active
@@ -262,7 +262,7 @@
                   {/if}
                 </td>
                 <td class="px-6 py-4 text-sm" style="color: var(--text-tertiary);">
-                  {formatDate(user.createdAt)}
+                  {formatDate(user.created_at)}
                 </td>
                 <td class="px-6 py-4 text-right">
                   <button class="p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100" style="color: var(--text-tertiary); hover:color: var(--text-secondary);" aria-label="More actions">

@@ -1,8 +1,6 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { generateId } from '$lib/auth/session';
-import { emailVerificationTokens, users } from '$lib/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
 import { sendEmail } from '$lib/email/resend';
 import { generateVerificationEmail } from '$lib/email/templates/verification';
 
@@ -41,9 +39,11 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
     }
     
     // Find user
-    const user = await locals.db.query.users.findFirst({
-      where: eq(users.email, email)
-    });
+    const user = await locals.db
+      .selectFrom('users')
+      .where('email', '=', email)
+      .select(['id', 'name', 'email_verified'])
+      .executeTakeFirst();
     
     if (!user) {
       // Don't reveal if user exists
@@ -54,7 +54,7 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
     }
     
     // Check if already verified
-    if (user.emailVerified) {
+    if (user.email_verified) {
       return json({
         success: true,
         message: 'Email is already verified.'
@@ -63,12 +63,12 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
     
     // Check for recent token (rate limiting - 1 minute)
     const oneMinuteAgo = Date.now() - 60 * 1000;
-    const recentToken = await locals.db.query.emailVerificationTokens.findFirst({
-      where: and(
-        eq(emailVerificationTokens.userId, user.id),
-        gt(emailVerificationTokens.createdAt, oneMinuteAgo)
-      )
-    });
+    const recentToken = await locals.db
+      .selectFrom('email_verification_tokens')
+      .where('user_id', '=', user.id)
+      .where('created_at', '>', oneMinuteAgo)
+      .select('id')
+      .executeTakeFirst();
     
     if (recentToken) {
       throw error(429, { 
@@ -81,18 +81,25 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
     const tokenHash = await hashToken(token);
     
     // Delete old unused tokens for this user
-    await locals.db.delete(emailVerificationTokens)
-      .where(eq(emailVerificationTokens.userId, user.id));
+    await locals.db
+      .deleteFrom('email_verification_tokens')
+      .where('user_id', '=', user.id)
+      .execute();
     
     // Create new token (expires in 24 hours)
     const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
     
-    await locals.db.insert(emailVerificationTokens).values({
-      id: generateId(),
-      userId: user.id,
-      tokenHash,
-      expiresAt
-    });
+    await locals.db
+      .insertInto('email_verification_tokens')
+      .values({
+        id: generateId(),
+        user_id: user.id,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+        used: 0,
+        created_at: Date.now()
+      })
+      .execute();
     
     // Generate verification URL
     const verificationUrl = `${url.origin}/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;

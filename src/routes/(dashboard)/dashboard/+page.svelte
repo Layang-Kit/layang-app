@@ -201,7 +201,7 @@
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right text-sm" style="color: var(--text-tertiary);">
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                    {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
                   </td>
                 </tr>
               {:else}

@@ -1,7 +1,6 @@
 import { dev } from '$app/environment';
-import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import * as schema from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
+import type { Kysely } from 'kysely';
+import type { Database } from '$lib/db/kysely-types';
 
 // Session duration: 30 days (in milliseconds)
 const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000;
@@ -70,17 +69,20 @@ export function generateSessionToken(): string {
  * Create new session for user
  */
 export async function createSession(
-	db: DrizzleD1Database<typeof schema>,
+	db: Kysely<Database>,
 	userId: string
 ): Promise<Session> {
 	const sessionId = generateSessionToken();
 	const expiresAt = Date.now() + SESSION_DURATION;
 
-	await db.insert(schema.sessions).values({
-		id: sessionId,
-		userId,
-		expiresAt
-	});
+	await db
+		.insertInto('sessions')
+		.values({
+			id: sessionId,
+			user_id: userId,
+			expires_at: expiresAt
+		})
+		.execute();
 
 	return {
 		id: sessionId,
@@ -95,7 +97,7 @@ export async function createSession(
  * Returns user and session if valid, null otherwise
  */
 export async function validateSession(
-	db: DrizzleD1Database<typeof schema>,
+	db: Kysely<Database>,
 	sessionId: string
 ): Promise<{ user: SessionUser | null; session: Session | null }> {
 	if (!sessionId) {
@@ -103,22 +105,35 @@ export async function validateSession(
 	}
 
 	try {
-		// Get session with user data using query (with relations)
-		const result = await db.query.sessions.findFirst({
-			where: eq(schema.sessions.id, sessionId),
-			with: {
-				user: true
-			}
-		});
+		// Get session with user data using join
+		const result = await db
+			.selectFrom('sessions')
+			.innerJoin('users', 'sessions.user_id', 'users.id')
+			.where('sessions.id', '=', sessionId)
+			.select([
+				'sessions.id as session_id',
+				'sessions.user_id',
+				'sessions.expires_at',
+				'users.id as user_id',
+				'users.email',
+				'users.name',
+				'users.provider',
+				'users.avatar',
+				'users.created_at'
+			])
+			.executeTakeFirst();
 
-		if (!result || !result.user) {
+		if (!result) {
 			return { user: null, session: null };
 		}
 
 		// Check if session expired
-		if (Date.now() > result.expiresAt) {
+		if (Date.now() > result.expires_at) {
 			// Delete expired session
-			await db.delete(schema.sessions).where(eq(schema.sessions.id, sessionId));
+			await db
+				.deleteFrom('sessions')
+				.where('id', '=', sessionId)
+				.execute();
 			return { user: null, session: null };
 		}
 
@@ -126,30 +141,31 @@ export async function validateSession(
 		const fifteenDays = 15 * 24 * 60 * 60 * 1000;
 		let fresh = false;
 
-		if (result.expiresAt - Date.now() < fifteenDays) {
+		if (result.expires_at - Date.now() < fifteenDays) {
 			// Extend session
 			const newExpiresAt = Date.now() + SESSION_DURATION;
 			await db
-				.update(schema.sessions)
-				.set({ expiresAt: newExpiresAt })
-				.where(eq(schema.sessions.id, sessionId));
-			result.expiresAt = newExpiresAt;
+				.updateTable('sessions')
+				.set({ expires_at: newExpiresAt })
+				.where('id', '=', sessionId)
+				.execute();
+			result.expires_at = newExpiresAt;
 			fresh = true;
 		}
 
 		const user: SessionUser = {
-			id: result.user.id,
-			email: result.user.email,
-			name: result.user.name,
-			provider: result.user.provider,
-			avatar: result.user.avatar ?? null,
-			createdAt: result.user.createdAt ?? Date.now()
+			id: result.user_id,
+			email: result.email,
+			name: result.name,
+			provider: result.provider as 'email' | 'google',
+			avatar: result.avatar ?? null,
+			createdAt: result.created_at ?? Date.now()
 		};
 
 		const session: Session = {
-			id: result.id,
-			userId: result.userId,
-			expiresAt: result.expiresAt,
+			id: result.session_id,
+			userId: result.user_id,
+			expiresAt: result.expires_at,
 			fresh
 		};
 
@@ -164,13 +180,16 @@ export async function validateSession(
  * Invalidate (delete) session
  */
 export async function invalidateSession(
-	db: DrizzleD1Database<typeof schema>,
+	db: Kysely<Database>,
 	sessionId: string
 ): Promise<void> {
 	if (!sessionId) return;
-	
+
 	try {
-		await db.delete(schema.sessions).where(eq(schema.sessions.id, sessionId));
+		await db
+			.deleteFrom('sessions')
+			.where('id', '=', sessionId)
+			.execute();
 	} catch (error) {
 		console.error('Session invalidation error:', error);
 	}
@@ -180,11 +199,14 @@ export async function invalidateSession(
  * Invalidate all sessions for a user
  */
 export async function invalidateUserSessions(
-	db: DrizzleD1Database<typeof schema>,
+	db: Kysely<Database>,
 	userId: string
 ): Promise<void> {
 	try {
-		await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
+		await db
+			.deleteFrom('sessions')
+			.where('user_id', '=', userId)
+			.execute();
 	} catch (error) {
 		console.error('User sessions invalidation error:', error);
 	}
@@ -231,32 +253,32 @@ export function getSessionCookieName(): string {
  */
 export function serializeCookie(cookie: SessionCookie): string {
 	const { name, value, attributes } = cookie;
-	
+
 	let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
-	
+
 	if (attributes.path) {
 		cookieString += `; Path=${attributes.path}`;
 	}
-	
+
 	if (attributes.httpOnly) {
 		cookieString += '; HttpOnly';
 	}
-	
+
 	if (attributes.secure) {
 		cookieString += '; Secure';
 	}
-	
+
 	if (attributes.sameSite) {
 		cookieString += `; SameSite=${attributes.sameSite}`;
 	}
-	
+
 	if (attributes.maxAge !== undefined) {
 		cookieString += `; Max-Age=${attributes.maxAge}`;
 	}
-	
+
 	if (attributes.expires) {
 		cookieString += `; Expires=${attributes.expires.toUTCString()}`;
 	}
-	
+
 	return cookieString;
 }

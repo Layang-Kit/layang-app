@@ -1,7 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import type * as schema from '$lib/db/schema';
+import type { Kysely } from 'kysely';
+import type { Database } from '$lib/db/kysely-types';
 import type { SessionUser, Session } from '$lib/auth/session';
 
 declare module '$env/static/private' {
@@ -27,7 +27,7 @@ declare global {
 		}
 
 		interface Locals {
-			db: DrizzleD1Database<typeof schema>;
+			db: Kysely<Database>;
 			user: SessionUser | null;
 			session: Session | null;
 		}

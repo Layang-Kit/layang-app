@@ -1,6 +1,4 @@
 import type { PageServerLoad } from './$types';
-import { emailVerificationTokens, users } from '$lib/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
 
 // Hash token using SHA-256
 async function hashToken(token: string): Promise<string> {
@@ -24,14 +22,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   }
   
   try {
-    // Find user by email using select
-    const userResult = await locals.db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-    
-    const user = userResult[0];
+    // Find user by email
+    const user = await locals.db
+      .selectFrom('users')
+      .where('email', '=', email)
+      .select(['id', 'email_verified'])
+      .executeTakeFirst();
     
     if (!user) {
       return {
@@ -41,7 +37,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     }
     
     // Check if already verified
-    if (user.emailVerified) {
+    if (user.email_verified) {
       return {
         success: true,
         alreadyVerified: true,
@@ -52,21 +48,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     // Hash the provided token
     const tokenHash = await hashToken(token);
     
-    // Find valid token using select
-    const tokenResult = await locals.db
-      .select()
-      .from(emailVerificationTokens)
-      .where(
-        and(
-          eq(emailVerificationTokens.userId, user.id),
-          eq(emailVerificationTokens.tokenHash, tokenHash),
-          eq(emailVerificationTokens.used, false),
-          gt(emailVerificationTokens.expiresAt, Date.now())
-        )
-      )
-      .limit(1);
-    
-    const verificationToken = tokenResult[0];
+    // Find valid token
+    const verificationToken = await locals.db
+      .selectFrom('email_verification_tokens')
+      .where('user_id', '=', user.id)
+      .where('token_hash', '=', tokenHash)
+      .where('used', '=', 0)
+      .where('expires_at', '>', Date.now())
+      .select('id')
+      .executeTakeFirst();
     
     if (!verificationToken) {
       return {
@@ -76,17 +66,21 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     }
     
     // Mark email as verified
-    await locals.db.update(users)
+    await locals.db
+      .updateTable('users')
       .set({ 
-        emailVerified: true,
-        updatedAt: Date.now()
+        email_verified: 1,
+        updated_at: Date.now()
       })
-      .where(eq(users.id, user.id));
+      .where('id', '=', user.id)
+      .execute();
     
     // Mark token as used
-    await locals.db.update(emailVerificationTokens)
-      .set({ used: true })
-      .where(eq(emailVerificationTokens.id, verificationToken.id));
+    await locals.db
+      .updateTable('email_verification_tokens')
+      .set({ used: 1 })
+      .where('id', '=', verificationToken.id)
+      .execute();
     
     return {
       success: true,

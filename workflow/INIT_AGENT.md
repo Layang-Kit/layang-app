@@ -1,6 +1,6 @@
 # Project Initialization Workflow - SvelteKit Cloudflare Starter
 
-Panduan lengkap untuk memulai project baru dengan SvelteKit + Cloudflare D1 + Drizzle ORM.
+Panduan lengkap untuk memulai project baru dengan SvelteKit + Cloudflare D1 + Drizzle (schema) + Kysely (query).
 
 ## Scope Enforcement
 
@@ -43,7 +43,8 @@ Silakan mention @workflow/TASK_AGENT.md untuk implementasi fitur."
 | UI Library | Svelte 5.x |
 | Styling | Tailwind CSS 4.x |
 | Database | Cloudflare D1 (SQLite) |
-| ORM | Drizzle ORM 0.40 |
+| Schema/Migrations | Drizzle ORM 0.40 |
+| Query Builder | Kysely |
 | Auth | Lucia Auth 3.x + Arctic |
 | Password Hashing | Web Crypto API (PBKDF2) |
 | Email | Resend |
@@ -304,7 +305,10 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
   const user = locals.user;
-  const posts = await locals.db.query.posts.findMany();
+  const posts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
   return { user, posts };
 };
 ```
@@ -355,13 +359,20 @@ export const actions: Actions = {
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ locals }) => {
-  const posts = await locals.db.query.posts.findMany();
+  const posts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
   return json(posts);
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   const body = await request.json();
-  const post = await locals.db.insert(posts).values(body).returning();
+  const post = await locals.db
+    .insertInto('posts')
+    .values(body)
+    .returningAll()
+    .executeTakeFirst();
   return json(post);
 };
 ```
@@ -426,7 +437,10 @@ npm run db:generate
 ```typescript
 // Access via locals (injected by hooks.server.ts)
 export const load = async ({ locals }) => {
-  const posts = await locals.db.query.posts.findMany();
+  const posts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
   return { posts };
 };
 ```

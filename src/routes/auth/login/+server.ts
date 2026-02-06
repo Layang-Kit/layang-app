@@ -1,6 +1,4 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
-import { users } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { verifyPassword } from '$lib/auth/password';
 import { createSession, createSessionCookie } from '$lib/auth/session';
 import { z } from 'zod';
@@ -29,31 +27,33 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
 		const { email, password } = result.data;
 
-		// Find user
-		const user = await locals.db.query.users.findFirst({
-			where: eq(users.email, email)
-		});
+		// Find user by email
+		const user = await locals.db
+			.selectFrom('users')
+			.where('email', '=', email)
+			.selectAll()
+			.executeTakeFirst();
 
 		if (!user) {
 			throw error(401, { message: 'Invalid email or password' });
 		}
 
 		// Check if user has password (OAuth users might not have one)
-		if (!user.passwordHash) {
+		if (!user.password_hash) {
 			throw error(401, {
 				message: 'Please use Google login for this account'
 			});
 		}
 
 		// Verify password
-		const validPassword = await verifyPassword(password, user.passwordHash);
+		const validPassword = await verifyPassword(password, user.password_hash);
 
 		if (!validPassword) {
 			throw error(401, { message: 'Invalid email or password' });
 		}
 
 		// Check if email is verified
-		if (!user.emailVerified) {
+		if (!user.email_verified) {
 			throw error(403, {
 				message: 'Please verify your email before logging in. Check your inbox or request a new verification email.'
 			});

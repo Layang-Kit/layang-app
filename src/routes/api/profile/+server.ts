@@ -1,6 +1,4 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
-import { users } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 // Get current user profile
@@ -12,21 +10,22 @@ export const GET: RequestHandler = async ({ locals }) => {
     }
     
     // Get user from database (to get full profile data)
-    const user = await locals.db.query.users.findFirst({
-      where: eq(users.id, locals.user.id),
-      columns: {
-        id: true,
-        email: true,
-        name: true,
-        bio: true,
-        location: true,
-        website: true,
-        avatar: true,
-        provider: true,
-        emailVerified: true,
-        createdAt: true
-      }
-    });
+    const user = await locals.db
+      .selectFrom('users')
+      .where('id', '=', locals.user.id)
+      .select([
+        'id',
+        'email',
+        'name',
+        'bio',
+        'location',
+        'website',
+        'avatar',
+        'provider',
+        'email_verified',
+        'created_at'
+      ])
+      .executeTakeFirst();
     
     if (!user) {
       throw error(404, { message: 'User not found' });
@@ -69,8 +68,8 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
     const { name, bio, location, website } = result.data;
     
     // Build update object (only include defined fields)
-    const updateData: any = {
-      updatedAt: Date.now()
+    const updateData: Record<string, unknown> = {
+      updated_at: Date.now()
     };
     
     if (name !== undefined) updateData.name = name;
@@ -79,9 +78,11 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
     if (website !== undefined) updateData.website = website || null;
     
     // Update user
-    await locals.db.update(users)
+    await locals.db
+      .updateTable('users')
       .set(updateData)
-      .where(eq(users.id, locals.user.id));
+      .where('id', '=', locals.user.id)
+      .execute();
     
     return json({
       success: true,

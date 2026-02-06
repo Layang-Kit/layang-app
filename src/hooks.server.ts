@@ -1,12 +1,17 @@
-import { drizzle } from 'drizzle-orm/d1';
-import * as schema from '$lib/db/schema';
+import { Kysely } from 'kysely';
+import { D1Dialect } from 'kysely-d1';
+import type { Database } from '$lib/db/kysely-types';
 import { validateSession, getSessionCookieName } from '$lib/auth/session';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// Initialize database
+	// Initialize Kysely database
 	if (event.platform?.env.DB) {
-		event.locals.db = drizzle(event.platform.env.DB, { schema });
+		event.locals.db = new Kysely<Database>({
+			dialect: new D1Dialect({
+				database: event.platform.env.DB,
+			}),
+		});
 	} else {
 		throw new Error('D1 Database binding not found');
 	}

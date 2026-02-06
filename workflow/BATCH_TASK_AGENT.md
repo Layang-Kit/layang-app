@@ -339,7 +339,10 @@ Report completion to user
 ### Pattern 1: Server Load (GET)
 ```typescript
 export const load: PageServerLoad = async ({ locals }) => {
-  const data = await locals.db.select().from(table);
+  const data = await locals.db
+    .selectFrom('users')
+    .selectAll()
+    .execute();
   return { data };
 };
 ```

@@ -10,7 +10,7 @@ Project ini menggunakan 3 agent yang bekerja sama untuk membangun aplikasi denga
 
 **Tech Stack:**
 - SvelteKit 2.x + Svelte 5.x (with Runes)
-- Cloudflare D1 (SQLite) + Drizzle ORM 0.40
+- Cloudflare D1 (SQLite) + Drizzle ORM 0.40 (schema/migrations) + Kysely (query builder)
 - Tailwind CSS 4.x
 - Lucia Auth 3.x
 - Cloudflare Pages (deployment)

@@ -1,8 +1,6 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
-import { users, passwordResetTokens } from '$lib/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
-import { z } from 'zod';
 import { hashPassword } from '$lib/auth/password';
+import { z } from 'zod';
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Token is required'),
@@ -34,9 +32,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const { token, email, password } = result.data;
 
     // Find user by email
-    const user = await locals.db.query.users.findFirst({
-      where: eq(users.email, email)
-    });
+    const user = await locals.db
+      .selectFrom('users')
+      .where('email', '=', email)
+      .select('id')
+      .executeTakeFirst();
 
     if (!user) {
       throw error(400, { message: 'Invalid or expired reset token' });
@@ -46,14 +46,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const tokenHash = await hashToken(token);
 
     // Find valid token
-    const resetToken = await locals.db.query.passwordResetTokens.findFirst({
-      where: and(
-        eq(passwordResetTokens.userId, user.id),
-        eq(passwordResetTokens.tokenHash, tokenHash),
-        eq(passwordResetTokens.used, false),
-        gt(passwordResetTokens.expiresAt, Date.now())
-      )
-    });
+    const resetToken = await locals.db
+      .selectFrom('password_reset_tokens')
+      .where('user_id', '=', user.id)
+      .where('token_hash', '=', tokenHash)
+      .where('used', '=', 0)
+      .where('expires_at', '>', Date.now())
+      .select('id')
+      .executeTakeFirst();
 
     if (!resetToken) {
       throw error(400, { message: 'Invalid or expired reset token' });
@@ -63,20 +63,27 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const passwordHash = await hashPassword(password);
 
     // Update user password
-    await locals.db.update(users)
+    await locals.db
+      .updateTable('users')
       .set({ 
-        passwordHash,
-        updatedAt: Date.now()
+        password_hash: passwordHash,
+        updated_at: Date.now()
       })
-      .where(eq(users.id, user.id));
+      .where('id', '=', user.id)
+      .execute();
 
     // Mark token as used
-    await locals.db.update(passwordResetTokens)
-      .set({ used: true })
-      .where(eq(passwordResetTokens.id, resetToken.id));
+    await locals.db
+      .updateTable('password_reset_tokens')
+      .set({ used: 1 })
+      .where('id', '=', resetToken.id)
+      .execute();
 
     // Delete all sessions for this user (force re-login)
-    // Note: You might want to keep this optional depending on your security requirements
+    await locals.db
+      .deleteFrom('sessions')
+      .where('user_id', '=', user.id)
+      .execute();
 
     return json({
       success: true,

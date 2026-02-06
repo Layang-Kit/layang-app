@@ -1,14 +1,23 @@
-import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
-import type { users, posts, sessions, passwordResetTokens, emailVerificationTokens } from './schema';
+// Database Types for Kysely
+// These are derived from the Kysely Database interface
 
-export type User = InferSelectModel<typeof users>;
-export type NewUser = InferInsertModel<typeof users>;
-export type Post = InferSelectModel<typeof posts>;
-export type NewPost = InferInsertModel<typeof posts>;
-export type Session = InferSelectModel<typeof sessions>;
-export type NewSession = InferInsertModel<typeof sessions>;
-export type PasswordResetToken = InferSelectModel<typeof passwordResetTokens>;
-export type EmailVerificationToken = InferSelectModel<typeof emailVerificationTokens>;
+import type { Database } from './kysely-types';
+
+// User types
+export type User = Database['users'];
+export type NewUser = Omit<Database['users'], 'id'> & { id?: string };
+
+// Post types
+export type Post = Database['posts'];
+export type NewPost = Omit<Database['posts'], 'id'> & { id?: number };
+
+// Session types
+export type DbSession = Database['sessions'];
+export type NewSession = Database['sessions'];
+
+// Token types
+export type PasswordResetToken = Database['password_reset_tokens'];
+export type EmailVerificationToken = Database['email_verification_tokens'];
 
 // Auth types
 export type AuthProvider = 'email' | 'google';

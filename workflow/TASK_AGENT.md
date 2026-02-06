@@ -195,10 +195,11 @@ For each feature, ensure:
 ```typescript
 // src/routes/posts/+page.server.ts
 import type { PageServerLoad } from './$types';
-import { posts } from '$lib/db/schema';
-
 export const load: PageServerLoad = async ({ locals }) => {
-  const allPosts = await locals.db.select().from(posts);
+  const allPosts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
   return { posts: allPosts };
 };
 ```
@@ -221,7 +222,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 ```typescript
 // src/routes/posts/+page.server.ts
 import type { Actions } from './$types';
-import { posts } from '$lib/db/schema';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const actions: Actions = {
@@ -233,7 +233,10 @@ export const actions: Actions = {
       return fail(400, { error: 'Title must be at least 3 characters' });
     }
     
-    await locals.db.insert(posts).values({ title });
+    await locals.db
+      .insertInto('posts')
+      .values({ title })
+      .execute();
     
     throw redirect(303, '/posts');
   },
@@ -242,7 +245,10 @@ export const actions: Actions = {
     const form = await request.formData();
     const id = form.get('id') as string;
     
-    await locals.db.delete(posts).where(eq(posts.id, parseInt(id)));
+    await locals.db
+      .deleteFrom('posts')
+      .where('id', '=', parseInt(id))
+      .execute();
     
     return { success: true };
   }
@@ -272,19 +278,25 @@ export const actions: Actions = {
 // src/routes/api/posts/+server.ts
 import type { RequestHandler } from './$types';
 import { json } from '@sveltejs/kit';
-import { posts } from '$lib/db/schema';
 
 export const GET: RequestHandler = async ({ locals }) => {
-  const allPosts = await locals.db.select().from(posts);
+  const allPosts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
   return json(allPosts);
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   const body = await request.json();
   
-  const newPost = await locals.db.insert(posts).values(body).returning();
+  const newPost = await locals.db
+    .insertInto('posts')
+    .values(body)
+    .returningAll()
+    .executeTakeFirst();
   
-  return json(newPost[0], { status: 201 });
+  return json(newPost, { status: 201 });
 };
 ```
 
@@ -472,11 +484,11 @@ npm run db:migrate:local
 ```typescript
 // src/routes/posts/+page.server.ts
 import type { PageServerLoad, Actions } from './$types';
-import { posts } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
-
 export const load: PageServerLoad = async ({ locals }) => {
-  const allPosts = await locals.db.select().from(posts);
+  const allPosts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
   return { posts: allPosts };
 };
 
@@ -484,7 +496,10 @@ export const actions: Actions = {
   delete: async ({ request, locals }) => {
     const form = await request.formData();
     const id = form.get('id') as string;
-    await locals.db.delete(posts).where(eq(posts.id, parseInt(id)));
+    await locals.db
+      .deleteFrom('posts')
+      .where('id', '=', parseInt(id))
+      .execute();
     return { success: true };
   }
 };

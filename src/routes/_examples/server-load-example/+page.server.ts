@@ -18,10 +18,8 @@
 //
 // ============================================================================
 
-import type { PageServerLoad, Actions } from './\$types';
-import { users } from '\$lib/db/schema';
+import type { PageServerLoad, Actions } from './$types';
 import { error } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
 
 // Tipe data yang akan di-return
 interface UserData {
@@ -29,7 +27,7 @@ interface UserData {
   name: string;
   email: string;
   provider: string;
-  createdAt: Date | null;
+  created_at: number;
 }
 
 // LOAD FUNCTION - Jalan DI SERVER sebelum page di-render
@@ -40,15 +38,19 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
   try {
     // LANGSUNG query database dari server!
     // Tidak perlu fetch ke API!
-    const usersList = await locals.db.query.users.findMany({
-      orderBy: (users, { desc }) => [desc(users.createdAt)],
-      limit: 10
-    });
+    const usersList = await locals.db
+      .selectFrom('users')
+      .select(['id', 'name', 'email', 'provider', 'created_at'])
+      .orderBy('created_at', 'desc')
+      .limit(10)
+      .execute();
     
     // Bisa juga query dengan filter
-    const emailUsers = await locals.db.query.users.findMany({
-      where: eq(users.provider, 'email')
-    });
+    const emailUsers = await locals.db
+      .selectFrom('users')
+      .where('provider', '=', 'email')
+      .select(['id', 'name', 'email', 'provider', 'created_at'])
+      .execute();
     
     return {
       // Data ini langsung available di +page.svelte sebagai 'data' prop!
@@ -76,7 +78,10 @@ export const actions: Actions = {
     }
     
     try {
-      await locals.db.delete(users).where(eq(users.id, userId));
+      await locals.db
+        .deleteFrom('users')
+        .where('id', '=', userId)
+        .execute();
       return { success: true, message: 'User deleted' };
     } catch (err) {
       return { success: false, error: 'Failed to delete user' };

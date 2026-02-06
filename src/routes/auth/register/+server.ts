@@ -1,8 +1,6 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { generateId } from '$lib/auth/session';
-import { users, emailVerificationTokens } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { hashPassword } from '$lib/auth/password';
 import { sendEmail } from '$lib/email/resend';
 import { generateVerificationEmail } from '$lib/email/templates/verification';
@@ -52,9 +50,11 @@ export const POST: RequestHandler = async ({ request, locals, platform, url }) =
     const { email, name, password } = result.data;
 
     // Check if user already exists
-    const existingUser = await locals.db.query.users.findFirst({
-      where: eq(users.email, email)
-    });
+    const existingUser = await locals.db
+      .selectFrom('users')
+      .where('email', '=', email)
+      .select('id')
+      .executeTakeFirst();
 
     if (existingUser) {
       throw error(409, { message: 'Email already registered' });
@@ -66,15 +66,21 @@ export const POST: RequestHandler = async ({ request, locals, platform, url }) =
     // Generate user ID
     const userId = generateId();
 
-    // Create user (emailVerified = false by default)
-    await locals.db.insert(users).values({
-      id: userId,
-      email,
-      name,
-      passwordHash,
-      provider: 'email',
-      emailVerified: false
-    });
+    // Create user (email_verified = 0 by default)
+    await locals.db
+      .insertInto('users')
+      .values({
+        id: userId,
+        email,
+        name,
+        password_hash: passwordHash,
+        provider: 'email',
+        email_verified: 0,
+        is_admin: 0,
+        created_at: Date.now(),
+        updated_at: Date.now()
+      })
+      .execute();
 
     // Generate verification token
     const token = generateToken();
@@ -83,12 +89,17 @@ export const POST: RequestHandler = async ({ request, locals, platform, url }) =
     // Create verification token (expires in 24 hours)
     const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
-    await locals.db.insert(emailVerificationTokens).values({
-      id: generateId(),
-      userId,
-      tokenHash,
-      expiresAt
-    });
+    await locals.db
+      .insertInto('email_verification_tokens')
+      .values({
+        id: generateId(),
+        user_id: userId,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+        used: 0,
+        created_at: Date.now()
+      })
+      .execute();
 
     // Generate verification URL
     const verificationUrl = `${url.origin}/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;

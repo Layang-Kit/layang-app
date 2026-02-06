@@ -1,4 +1,4 @@
-# AGENTS.md - SvelteKit + Cloudflare D1 + Drizzle ORM Boilerplate
+# AGENTS.md - SvelteKit + Cloudflare D1 + Drizzle/Kysely Boilerplate
 
 ## Project Overview
 
@@ -6,7 +6,8 @@ This is a full-stack edge-ready boilerplate application built with:
 
 - **SvelteKit** - Full-stack framework with file-based routing
 - **Cloudflare D1** - SQLite edge database running on Cloudflare's edge network
-- **Drizzle ORM** - Type-safe SQL-like ORM for database operations
+- **Drizzle ORM** - Schema definition and migrations
+- **Kysely** - Type-safe SQL query builder for runtime queries
 - **Custom Session Auth** - Session-based authentication with Google OAuth
 - **Tailwind CSS** - Utility-first CSS framework
 - **TypeScript** - Type-safe JavaScript
@@ -21,7 +22,8 @@ The application provides a complete authentication system with user management, 
 | UI Library | Svelte 5.x |
 | Styling | Tailwind CSS 4.x (Custom "Dark Elegance" theme) |
 | Database | Cloudflare D1 (SQLite) |
-| ORM | Drizzle ORM 0.40 |
+| Schema/Migrations | Drizzle ORM 0.40 |
+| Query Builder | Kysely |
 | Auth | Custom Session Auth 3.x + Arctic |
 | Password Hashing | Web Crypto API (PBKDF2) |
 | Email | Resend |
@@ -271,7 +273,10 @@ Use `+page.server.ts` `load()` function instead of API + fetch:
 // routes/dashboard/+page.server.ts
 export const load: PageServerLoad = async ({ locals }) => {
   // Query directly from server - no API needed!
-  const users = await locals.db.query.users.findMany();
+  const users = await locals.db
+    .selectFrom('users')
+    .selectAll()
+    .execute();
   return { users };
 };
 ```
@@ -279,7 +284,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 ```svelte
 <!-- routes/dashboard/+page.svelte -->
 <script>
-  export let data; // Data auto-populated from load()
+  let { data } = $props(); // Data auto-populated from load()
 </script>
 
 {#each data.users as user}
@@ -334,23 +339,67 @@ See `SVELTEKIT_DATA_PATTERNS.md` for detailed documentation.
 
 ### Database Access Pattern
 
-Database is accessed through SvelteKit's `locals` object:
+Database is accessed through SvelteKit's `locals` object using **Kysely**:
 
 ```typescript
 // src/hooks.server.ts
+import { Kysely } from 'kysely';
+import { D1Dialect } from 'kysely-d1';
+import type { Database } from '$lib/db/kysely-types';
+
 export const handle: Handle = async ({ event, resolve }) => {
-  // Inject DB
+  // Inject Kysely DB
   if (event.platform?.env.DB) {
-    event.locals.db = drizzle(event.platform.env.DB, { schema });
+    event.locals.db = new Kysely<Database>({
+      dialect: new D1Dialect({
+        database: event.platform.env.DB,
+      }),
+    });
   }
   
-  // Inject Auth (Custom Session)
-  const adapter = createAuthAdapter(event.platform.env.DB);
   // Session validation handled in hooks
   // ... validate session
   
   return resolve(event);
 };
+```
+
+### Kysely Query Examples
+
+```typescript
+// Select
+const users = await locals.db
+  .selectFrom('users')
+  .where('provider', '=', 'email')
+  .selectAll()
+  .execute();
+
+// Insert
+await locals.db
+  .insertInto('users')
+  .values({ id, email, name, provider: 'email' })
+  .execute();
+
+// Update
+await locals.db
+  .updateTable('users')
+  .set({ name: 'New Name' })
+  .where('id', '=', userId)
+  .execute();
+
+// Delete
+await locals.db
+  .deleteFrom('sessions')
+  .where('user_id', '=', userId)
+  .execute();
+
+// Join
+const postsWithAuthor = await locals.db
+  .selectFrom('posts')
+  .innerJoin('users', 'posts.author_id', 'users.id')
+  .where('posts.published', '=', 1)
+  .select(['posts.title', 'users.name as author_name'])
+  .execute();
 ```
 
 ### Password Hashing
@@ -419,7 +468,7 @@ curl -X POST http://localhost:5173/auth/login \
 3. **Password Hashing**: PBKDF2 with salt
 4. **CSRF Protection**: State parameter in OAuth
 5. **Input Validation**: Zod validation on server
-6. **SQL Injection**: Protected by Drizzle ORM
+6. **SQL Injection**: Protected by Kysely (parameterized queries)
 
 ## Development Workflow
 
@@ -605,7 +654,7 @@ MANAGER_AGENT (Release Notes)
 ## Useful Resources
 
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
-
 - [Cloudflare D1 Docs](https://developers.cloudflare.com/d1/)
-- [Drizzle ORM Docs](https://orm.drizzle.team/docs)
+- [Drizzle ORM Docs](https://orm.drizzle.team/docs) - Schema & migrations
+- [Kysely Docs](https://kysely.dev/) - Query builder
 - [Arctic OAuth](https://arcticjs.dev/)

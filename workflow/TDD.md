@@ -10,7 +10,8 @@
 | UI Library | Svelte 5.x |
 | Styling | Tailwind CSS 4.x |
 | Database | Cloudflare D1 (SQLite) |
-| ORM | Drizzle ORM 0.40 |
+| Schema/Migrations | Drizzle ORM 0.40 |
+| Query Builder | Kysely |
 | Auth | Lucia Auth 3.x + Arctic |
 | Password Hashing | Web Crypto API (PBKDF2) |
 | Email | Resend |
@@ -58,7 +59,7 @@
 ├── src/
 │   ├── lib/
 │   │   ├── auth/           # Lucia auth configuration
-│   │   ├── db/             # Drizzle ORM schema dan client
+│   │   ├── db/             # Database schema (Drizzle) & types (Kysely)
 │   │   ├── email/          # Resend email templates
 │   │   ├── image/          # Image processing utilities
 │   │   ├── storage/        # R2 storage utilities
@@ -195,7 +196,10 @@ erDiagram
 ```typescript
 // +page.server.ts
 export const load = async ({ locals }) => {
-  const data = await locals.db.query.table.findMany();
+  const data = await locals.db
+    .selectFrom('users')
+    .selectAll()
+    .execute();
   return { data };
 };
 ```
@@ -384,7 +388,7 @@ Page Request
 +page.server.ts load()
     │
     ▼
-locals.db.query (Drizzle)
+locals.db (Kysely)
     │
     ▼
 Cloudflare D1
@@ -405,7 +409,7 @@ Form Submit
 Validation (Zod)
     │
     ▼
-locals.db operations (Drizzle)
+locals.db operations (Kysely)
     │
     ▼
 Cloudflare D1
@@ -430,7 +434,7 @@ Return result/redirect
 
 - **Password hashing** dengan PBKDF2 (Web Crypto API)
 - **Input validation** dengan Zod
-- **SQL injection prevention** via Drizzle ORM
+- **SQL injection prevention** via Kysely (parameterized queries)
 - **XSS prevention** via Svelte's auto-escaping
 
 ### 5.3 Environment Security
@@ -480,7 +484,10 @@ Return result/redirect
 ```typescript
 // In load function
 try {
-  const data = await locals.db.query.table.findMany();
+  const data = await locals.db
+    .selectFrom('users')
+    .selectAll()
+    .execute();
   return { data };
 } catch (error) {
   console.error('Database error:', error);
@@ -489,7 +496,10 @@ try {
 
 // In form action
 try {
-  await locals.db.insert(table).values(data);
+  await locals.db
+    .insertInto('users')
+    .values(data)
+    .execute();
   return { success: true };
 } catch (error) {
   return fail(500, { error: 'Failed to save data' });
@@ -575,7 +585,8 @@ npm run test:e2e         # E2E tests
 - **D1**: Cloudflare's edge SQLite database
 - **R2**: Cloudflare's object storage (S3-compatible)
 - **Workers**: Cloudflare's serverless compute platform
-- **Drizzle**: Type-safe SQL-like ORM
+- **Drizzle**: Type-safe schema definition and migrations
+- **Kysely**: Type-safe SQL query builder
 - **Lucia**: Session-based authentication library
 
 ### 10.2 References
@@ -583,6 +594,7 @@ npm run test:e2e         # E2E tests
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
 - [Lucia Auth Docs](https://lucia-auth.com/)
 - [Drizzle ORM Docs](https://orm.drizzle.team/)
+- [Kysely Docs](https://kysely.dev/)
 - [Cloudflare D1 Docs](https://developers.cloudflare.com/d1/)
 - [Tailwind CSS Docs](https://tailwindcss.com/docs)
 

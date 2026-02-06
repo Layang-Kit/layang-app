@@ -18,19 +18,19 @@
 //
 // ============================================================================
 
-import type { Actions, PageServerLoad } from './\$types';
-import { users } from '\$lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { generateId } from '\$lib/auth/session';
-import { hashPassword } from '\$lib/auth/password';
+import type { Actions, PageServerLoad } from './$types';
+import { generateId } from '$lib/auth/session';
+import { hashPassword } from '$lib/auth/password';
 import { fail, redirect } from '@sveltejs/kit';
 
 // Load function untuk ambil data awal
 export const load: PageServerLoad = async ({ locals }) => {
-  const usersList = await locals.db.query.users.findMany({
-    orderBy: (users, { desc }) => [desc(users.createdAt)],
-    limit: 10
-  });
+  const usersList = await locals.db
+    .selectFrom('users')
+    .select(['id', 'name', 'email', 'provider', 'created_at'])
+    .orderBy('created_at', 'desc')
+    .limit(10)
+    .execute();
   
   return { users: usersList };
 };
@@ -71,9 +71,11 @@ export const actions: Actions = {
     }
     
     // 3. Check email exists
-    const existing = await locals.db.query.users.findFirst({
-      where: eq(users.email, email)
-    });
+    const existing = await locals.db
+      .selectFrom('users')
+      .where('email', '=', email)
+      .select('id')
+      .executeTakeFirst();
     
     if (existing) {
       return fail(409, {
@@ -86,13 +88,20 @@ export const actions: Actions = {
     try {
       const passwordHash = await hashPassword(password);
       
-      await locals.db.insert(users).values({
-        id: generateId(),
-        name,
-        email,
-        passwordHash,
-        provider: 'email'
-      });
+      await locals.db
+        .insertInto('users')
+        .values({
+          id: generateId(),
+          name,
+          email,
+          password_hash: passwordHash,
+          provider: 'email',
+          email_verified: 0,
+          is_admin: 0,
+          created_at: Date.now(),
+          updated_at: Date.now()
+        })
+        .execute();
       
       // 5. Return success
       // Bisa juga redirect dengan: throw redirect(303, '/success');
@@ -119,7 +128,10 @@ export const actions: Actions = {
     }
     
     try {
-      await locals.db.delete(users).where(eq(users.id, userId));
+      await locals.db
+        .deleteFrom('users')
+        .where('id', '=', userId)
+        .execute();
       return { success: true, message: 'User deleted' };
     } catch (err) {
       return fail(500, { error: 'Failed to delete user' });

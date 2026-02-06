@@ -228,7 +228,7 @@
                 <Globe class="w-3 h-3" />
                 {user.provider === 'google' ? 'Google' : 'Email'}
               </span>
-              {#if user.emailVerified}
+              {#if user.email_verified}
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium" style="background-color: var(--success-bg); color: var(--success);">
                   <Check class="w-3 h-3" />
                   Verified
@@ -391,7 +391,7 @@
             </a>
           </div>
           
-          {#if !user.emailVerified}
+          {#if !user.email_verified}
             <div class="flex items-center justify-between py-3">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: var(--bg-tertiary);">

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This agent is responsible for **ensuring code quality through comprehensive testing** for LayangKit (SvelteKit + Cloudflare D1 + Drizzle ORM). It bridges the gap between feature implementation and production deployment by writing, maintaining, and analyzing tests.
+This agent is responsible for **ensuring code quality through comprehensive testing** for LayangKit (SvelteKit + Cloudflare D1 + Drizzle/Kysely). It bridges the gap between feature implementation and production deployment by writing, maintaining, and analyzing tests.
 
 ## Scope Enforcement
 
@@ -144,7 +144,7 @@ Look for these patterns:
 - [ ] Unit tests: `tests/unit/lib/db/schema.test.ts`
   - [ ] Test table definitions
   - [ ] Test relationships
-  - [ ] Test Drizzle queries with mock data
+  - [ ] Test Kysely queries with mock data
 ```
 
 ## Test Categories
@@ -466,7 +466,7 @@ Which should I work on first?
 ```markdown
 ### Bug Fix: Broken Tests (Fixed: YYYY-MM-DD)
 - [x] Fixed: password.test.ts failing after hash algorithm change
-- [x] Updated mocks for new Drizzle ORM version
+- [x] Updated mocks for Kysely
 - [x] All tests passing (TEST_AGENT_1706072400 @ 2025-01-30)
 ```
 
@@ -526,4 +526,5 @@ For detailed testing patterns, code examples, and best practices, refer to:
 - [Vitest Docs](https://vitest.dev/) - Unit testing
 - [Playwright Docs](https://playwright.dev/) - E2E testing
 - [SvelteKit Testing](https://kit.svelte.dev/docs/integrations#vitest) - SvelteKit specific
-- [Drizzle ORM Testing](https://orm.drizzle.team/docs/guides/testing) - Database testing
+- [Drizzle ORM](https://orm.drizzle.team/) - Schema/migrations
+- [Kysely](https://kysely.dev/) - Query builder

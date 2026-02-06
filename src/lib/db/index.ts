@@ -1,10 +1,21 @@
-import { drizzle } from 'drizzle-orm/d1';
-import * as schema from './schema';
-import type { D1Database } from '@cloudflare/workers-types';
+// Database exports
+// Note: Kysely instance is created in hooks.server.ts
+// Schema is kept for Drizzle Kit migrations only
 
-export { schema };
-export type DB = typeof schema;
-
-export function createDB(d1: D1Database) {
-  return drizzle(d1, { schema });
-}
+export * as schema from './schema';
+export type { Database, DB } from './kysely-types';
+export type {
+  User,
+  NewUser,
+  Post,
+  NewPost,
+  DbSession,
+  NewSession,
+  PasswordResetToken,
+  EmailVerificationToken,
+  AuthProvider,
+  RegisterInput,
+  LoginInput,
+  GoogleUser,
+  ProfileUpdateInput
+} from './types';

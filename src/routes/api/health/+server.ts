@@ -1,12 +1,16 @@
 import { json } from '@sveltejs/kit';
-import * as schema from '$lib/db/schema';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ locals }) => {
   const start = Date.now();
   
   // Test DB connection
-  await locals.db.select().from(schema.users).limit(1).catch(() => null);
+  await locals.db
+    .selectFrom('users')
+    .select('id')
+    .limit(1)
+    .executeTakeFirst()
+    .catch(() => null);
   
   return json({
     status: 'ok',
