@@ -67,7 +67,7 @@ export const GET: RequestHandler = async ({ url, cookies, locals, platform }) =>
 				name: googleUser.name,
 				googleId: googleUser.sub,
 				provider: 'google',
-				avatar: googleUser.picture || null
+				avatar: null // Use default avatar instead of Google profile picture
 			});
 		} else {
 			userId = user.id;
