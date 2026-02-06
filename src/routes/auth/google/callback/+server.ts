@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ url, cookies, locals, platform }) =>
 			throw error(400, { message: 'Invalid OAuth state' });
 		}
 
-		const google = createGoogleOAuthClient();
+		const google = createGoogleOAuthClient(url.origin);
 		if (!google) {
 			throw error(500, { message: 'Google OAuth not configured' });
 		}

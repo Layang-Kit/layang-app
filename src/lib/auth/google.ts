@@ -1,40 +1,56 @@
 import { Google } from 'arctic';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '$env/static/private';
 
-import { dev } from '$app/environment';
-import { BASE_URL as ENV_BASE_URL } from '$env/static/private';
-
-const BASE_URL = dev ? 'http://localhost:5173' : (ENV_BASE_URL || 'https://layangkit.pages.dev');
-
-// Create Google OAuth client
-export function createGoogleOAuthClient(): Google | null {
+/**
+ * Create Google OAuth client
+ * @param baseUrl - Request origin (e.g., 'http://localhost:5173' or 'https://example.com')
+ * @returns Google OAuth client or null if credentials not configured
+ */
+export function createGoogleOAuthClient(baseUrl: string): Google | null {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    console.warn('Google OAuth credentials not configured');
+    console.warn('[Google OAuth] Credentials not configured');
     return null;
   }
-  
-  return new Google(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    `${BASE_URL}/auth/google/callback`
-  );
+
+  // Validate baseUrl
+  try {
+    const url = new URL(baseUrl);
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      throw new Error(`Invalid protocol: ${url.protocol}`);
+    }
+  } catch {
+    throw new Error(`Invalid baseUrl: ${baseUrl}`);
+  }
+
+  const redirectUri = `${baseUrl.replace(/\/$/, '')}/auth/google/callback`;
+
+  return new Google(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectUri);
 }
 
-// Generate state for OAuth
+/** Generate random state for OAuth CSRF protection */
 export function generateState(): string {
-  const state = crypto.randomUUID();
-  return state;
+  return crypto.randomUUID();
 }
 
-// Generate code verifier for PKCE
+/** Generate PKCE code verifier */
 export function generateCodeVerifier(): string {
-  const verifier = crypto.randomUUID() + crypto.randomUUID();
-  return verifier;
+  // PKCE code verifier: 43-128 chars, [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~"
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64UrlEncode(array);
 }
 
-// Google User Info response type
+/** Base64URL encode for PKCE */
+function base64UrlEncode(buffer: Uint8Array): string {
+  return btoa(String.fromCharCode(...buffer))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
+/** Google User Info response */
 export interface GoogleUserInfo {
-  sub: string;        // Google user ID
+  sub: string; // Google user ID
   email: string;
   email_verified: boolean;
   name: string;
@@ -43,17 +59,24 @@ export interface GoogleUserInfo {
   family_name?: string;
 }
 
-// Fetch Google user info
+/**
+ * Fetch Google user info
+ * @param accessToken - OAuth access token
+ * @throws Error if fetch fails
+ */
 export async function getGoogleUserInfo(accessToken: string): Promise<GoogleUserInfo> {
   const response = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
     headers: {
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json'
     }
   });
-  
+
   if (!response.ok) {
-    throw new Error('Failed to fetch Google user info');
+    const errorText = await response.text().catch(() => 'Unknown error');
+    console.error('[Google OAuth] Failed to fetch user info:', response.status, errorText);
+    throw new Error(`Failed to fetch Google user info: ${response.status}`);
   }
-  
+
   return response.json();
 }

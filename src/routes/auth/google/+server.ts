@@ -1,9 +1,9 @@
 import { redirect, error, type RequestHandler } from '@sveltejs/kit';
 import { createGoogleOAuthClient, generateState, generateCodeVerifier } from '$lib/auth/google';
 
-export const GET: RequestHandler = async ({ cookies }) => {
+export const GET: RequestHandler = async ({ url, cookies }) => {
   try {
-    const google = createGoogleOAuthClient();
+    const google = createGoogleOAuthClient(url.origin);
     
     if (!google) {
       throw error(500, { message: 'Google OAuth not configured' });
@@ -13,7 +13,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
     const codeVerifier = generateCodeVerifier();
     
     // Generate authorization URL with PKCE
-    const url = await google.createAuthorizationURL(state, codeVerifier, [
+    const authUrl = await google.createAuthorizationURL(state, codeVerifier, [
       'openid', 'email', 'profile'
     ]);
 
@@ -33,7 +33,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
     });
 
     // Redirect to Google OAuth
-    throw redirect(302, url.toString());
+    throw redirect(302, authUrl.toString());
 
   } catch (err: any) {
     if (err.status === 302) throw err;
