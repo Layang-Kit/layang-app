@@ -4,6 +4,7 @@ import { Resend } from 'resend';
 // In production, API token comes from environment variables
 const RESEND_API_TOKEN = process.env.RESEND_API_TOKEN || '';
 const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+const REPLY_TO_EMAIL = process.env.REPLY_TO_EMAIL; // Optional: real inbox for replies
 
 let resend: Resend | null = null;
 
@@ -26,6 +27,7 @@ export interface EmailOptions {
   html: string;
   text?: string;
   from?: string;
+  replyTo?: string; // Custom reply-to address
 }
 
 export async function sendEmail(options: EmailOptions): Promise<{ success: boolean; error?: string }> {
@@ -45,6 +47,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
       subject: options.subject,
       html: options.html,
       text: options.text,
+      reply_to: options.replyTo || REPLY_TO_EMAIL,
     });
     
     if (error) {
