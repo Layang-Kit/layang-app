@@ -7,43 +7,17 @@ export const GET: RequestHandler = async ({ locals }) => {
   try {
     const users = await locals.db
       .selectFrom('users')
-      .leftJoin('posts', 'users.id', 'posts.author_id')
       .select([
         'users.id',
         'users.email',
         'users.name',
         'users.provider',
-        'users.created_at',
-        'posts.id as post_id',
-        'posts.title as post_title',
-        'posts.published as post_published'
+        'users.created_at'
       ])
       .orderBy('users.created_at', 'desc')
       .execute();
     
-    // Group posts by user
-    const usersMap = new Map();
-    for (const row of users) {
-      if (!usersMap.has(row.id)) {
-        usersMap.set(row.id, {
-          id: row.id,
-          email: row.email,
-          name: row.name,
-          provider: row.provider,
-          created_at: row.created_at,
-          posts: []
-        });
-      }
-      if (row.post_id) {
-        usersMap.get(row.id).posts.push({
-          id: row.post_id,
-          title: row.post_title,
-          published: row.post_published
-        });
-      }
-    }
-    
-    return json({ success: true, data: Array.from(usersMap.values()) });
+    return json({ success: true, data: users });
   } catch (err) {
     console.error(err);
     throw error(500, { message: 'Failed to fetch users' });

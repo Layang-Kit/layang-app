@@ -51,30 +51,13 @@ async function seed() {
     console.log(`✅ User: ${user.name} (${user.provider})`);
   }
   
-  // Insert posts
-  const posts = [
-    { title: 'Hello World', content: 'My first post!', published: 1, author_id: user1Id },
-    { title: 'SvelteKit Tips', content: 'Best practices for SvelteKit', published: 1, author_id: user2Id },
-    { title: 'Draft Post', content: 'Work in progress...', published: 0, author_id: user3Id },
-  ];
-  
-  for (const post of posts) {
-    await query(
-      `INSERT OR IGNORE INTO posts (title, content, published, author_id) VALUES (?, ?, ?, ?)`,
-      [post.title, post.content, post.published, post.author_id]
-    );
-    console.log(`✅ Post: ${post.title}`);
-  }
-  
   console.log('\n🎉 Seeding complete!');
   
   // Verify data
   const usersResult = await query('SELECT * FROM users');
-  const postsResult = await query('SELECT * FROM posts');
   
   console.log('\n📊 Current data:');
   console.log(`Users: ${usersResult.result?.[0]?.results?.length || 0}`);
-  console.log(`Posts: ${postsResult.result?.[0]?.results?.length || 0}`);
 }
 
 seed().catch(console.error);

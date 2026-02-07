@@ -18,17 +18,6 @@ CREATE TABLE `password_reset_tokens` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `posts` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`title` text NOT NULL,
-	`content` text,
-	`published` integer DEFAULT false,
-	`author_id` text,
-	`created_at` integer,
-	`updated_at` integer,
-	FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
 CREATE TABLE `sessions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
@@ -48,6 +37,7 @@ CREATE TABLE `users` (
 	`google_id` text,
 	`avatar` text,
 	`email_verified` integer DEFAULT false,
+	`is_admin` integer DEFAULT false,
 	`created_at` integer,
 	`updated_at` integer
 );

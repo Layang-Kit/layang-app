@@ -7,5 +7,5 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "layang-app"
 database_id = "3ea20719-74e2-49ca-8791-3db8810d2ae6" 
-migrations_dir = "drizzle"
+migrations_dir = "migrations"
  

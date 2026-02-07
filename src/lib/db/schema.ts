@@ -54,24 +54,8 @@ export const emailVerificationTokens = sqliteTable('email_verification_tokens', 
   createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now())
 });
 
-// Posts table (existing)
-export const posts = sqliteTable('posts', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  title: text('title').notNull(),
-  content: text('content'),
-  published: integer('published', { mode: 'boolean' }).default(false),
-  authorId: text('author_id').references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now()),
-  updatedAt: integer('updated_at', { mode: 'number' }).$defaultFn(() => Date.now())
-});
-
-// Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  sessions: many(sessions),
-  passwordResetTokens: many(passwordResetTokens),
-  emailVerificationTokens: many(emailVerificationTokens),
-  posts: many(posts)
-}));
+ 
+ 
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
@@ -93,10 +77,4 @@ export const emailVerificationTokensRelations = relations(emailVerificationToken
     references: [users.id]
   })
 }));
-
-export const postsRelations = relations(posts, ({ one }) => ({
-  author: one(users, {
-    fields: [posts.authorId],
-    references: [users.id]
-  })
-}));
+ 

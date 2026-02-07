@@ -7,10 +7,6 @@ import type { Database } from './kysely-types';
 export type User = Database['users'];
 export type NewUser = Omit<Database['users'], 'id'> & { id?: string };
 
-// Post types
-export type Post = Database['posts'];
-export type NewPost = Omit<Database['posts'], 'id'> & { id?: number };
-
 // Session types
 export type DbSession = Database['sessions'];
 export type NewSession = Database['sessions'];

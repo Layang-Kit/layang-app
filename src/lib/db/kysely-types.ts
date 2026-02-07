@@ -42,16 +42,7 @@ export interface Database {
     used: number; // SQLite boolean = 0/1
     created_at: number;
   };
-
-  posts: {
-    id: number;
-    title: string;
-    content: string | null;
-    published: number; // SQLite boolean = 0/1
-    author_id: string | null;
-    created_at: number;
-    updated_at: number;
-  };
+ 
 }
 
 // Helper type for Kysely instance
