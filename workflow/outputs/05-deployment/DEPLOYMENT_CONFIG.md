@@ -1,91 +1,88 @@
-# Deployment Config - LayangKit
+# Deployment State Tracking
 
-> File ini auto-generated setelah deployment berhasil.
-
----
-
-## Deployment Info
-
-| Field | Value |
-|-------|-------|
-| **Status** | ⭕ Belum Deploy / ✅ Deployed |
-| **Deployed At** | - |
-| **Platform** | Cloudflare Pages |
-| **URL** | https://[project-name].pages.dev |
+File ini digunakan oleh DevOps Agent untuk melacak status deployment.
+**Jangan edit manual** - akan diupdate otomatis oleh agent.
 
 ---
 
-## Access URL
+## Deployment Status
 
-- **Local Dev**: `http://localhost:5173`
-- **Preview**: `http://localhost:8788` (wrangler)
-- **Production**: `https://[project-name].pages.dev`
+| Field | Value | Last Updated |
+|-------|-------|--------------|
+| **Status** | `PENDING` / `IN_PROGRESS` / `COMPLETED` / `FAILED` | - |
+| **Type** | `FIRST_DEPLOY` / `UPDATE` | - |
+| **Environment** | `production` / `staging` | - |
 
 ---
 
-## Deployment Commands
+## Project Info
 
-```bash
-# Build
-npm run build
-
-# Deploy to Cloudflare
-npm run deploy
-
-# View logs
-npm run logs
+```yaml
+project_name: ""
+domain: ""
+repo_url: ""
+branch: "main"
 ```
 
 ---
 
-## Database
+## Deployment History
 
-### Local Development
-```bash
-# Apply migrations locally
-npm run db:migrate:local
+### First Deploy
+- **Date**: -
+- **Status**: NOT_STARTED
+- **Notes**: Initial deployment
 
-# Reset local DB
-npm run db:refresh:local
-```
-
-### Production
-```bash
-# Apply migrations to production
-npm run db:migrate
-```
+### Updates
+| # | Date | Type | Status | Notes |
+|---|------|------|--------|-------|
+| 1 | - | - | - | - |
 
 ---
 
-## Environment Variables
+## Configuration State
 
-Set in Cloudflare Dashboard (Pages > Settings > Environment Variables):
+### D1 Database
+- [ ] Database created
+- [ ] Binding configured (`DB`)
+- [ ] Migrations applied
 
-```bash
-# Required
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
+### Environment Variables
+- [ ] `RESEND_API_TOKEN`
+- [ ] `FROM_EMAIL`
+- [ ] `S3_ENDPOINT`
+- [ ] `S3_ACCESS_KEY_ID`
+- [ ] `S3_SECRET_ACCESS_KEY`
+- [ ] `S3_BUCKET_NAME`
+- [ ] `GOOGLE_CLIENT_ID`
+- [ ] `GOOGLE_CLIENT_SECRET`
 
-# Optional (Email)
-RESEND_API_TOKEN=
-FROM_EMAIL=
+### Storage
+- [ ] R2 bucket created (if using file upload)
+- [ ] Bucket binding configured (`STORAGE`)
 
-# Optional (File Uploads)
-R2_ACCOUNT_ID=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-```
+### Domain
+- [ ] Custom domain configured
+- [ ] SSL active
 
 ---
 
-## Bindings
+## Verification Status
 
-Configured in `wrangler.toml`:
+- [ ] Build successful
+- [ ] Deploy successful
+- [ ] Health check pass
+- [ ] Database connected
+- [ ] Auth working
+- [ ] Email working (if enabled)
+- [ ] File upload working (if enabled)
 
-| Binding | Type | Name |
-|---------|------|------|
-| `DB` | D1 Database | `layang-app` |
-| `STORAGE` | R2 Bucket | `layang-app-storage` (optional) |
+---
+
+## Rollback Info
+
+Last known good deployment: `-`
+Rollback command ready: `NO`
 
 ---
 

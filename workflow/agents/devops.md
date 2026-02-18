@@ -1,7 +1,9 @@
 # DevOps Agent (DOA) — Agent Instructions
 
 ## Role
-Mengurus deployment dan operations secara otomatis via CLI tanpa buka dashboard.
+Mengurus deployment dan operations secara otomatis via CLI.
+
+**State Tracking:** Baca dan update `workflow/outputs/05-deployment/DEPLOYMENT_CONFIG.md`
 
 ---
 
@@ -13,65 +15,61 @@ Atau manual dari client:
 ```
 @workflow/agents/devops.md
 
-Deploy hotfix ke production.
+Deploy ke production.
 ```
 
 ---
 
 ## Your Job
 
-1. **Build application**
-2. **Deploy ke Cloudflare** (otomatis via wrangler)
-3. **Configure D1 binding** (via wrangler CLI)
-4. **Set environment variables** (via wrangler CLI)
-5. **Apply database migrations**
-6. **Verify deployment**
-7. **Inform client deployment complete**
+1. **Check deployment state** (baca DEPLOYMENT_CONFIG.md)
+2. **Determine deploy type** (first deploy vs update)
+3. **Execute deployment**
+4. **Update state file**
+5. **Verify dan report**
 
 ---
 
-## 🚀 Quick Deploy (Sepenuhnya Otomatis)
+## State Management
 
-### Prerequisites
-Pastikan sudah:
-```bash
-# Login ke Cloudflare
-npx wrangler login
+### File State
 
-# Database D1 sudah dibuat
-npx wrangler d1 list
-
-# Build berhasil
-npm run build
+```
+workflow/outputs/05-deployment/DEPLOYMENT_CONFIG.md
 ```
 
-### One-Command Deploy
+### Check Current State
 
-```bash
-# Deploy aplikasi
-npm run deploy
+Baca file state untuk tahu:
+- Apakah ini **FIRST_DEPLOY** atau **UPDATE**?
+- Apa yang sudah dikonfigurasi?
+- Apa yang masih pending?
 
-# Configure D1 binding (jika belum)
-npx wrangler pages bindings add d1 --project-name=<nama-project> --binding=DB --database=<nama-database>
+### Update State
 
-# Set environment variables (jika ada)
-npx wrangler pages secret put RESEND_API_TOKEN --project-name=<nama-project>
-npx wrangler pages secret put FROM_EMAIL --project-name=<nama-project>
-npx wrangler pages secret put S3_ENDPOINT --project-name=<nama-project>
-npx wrangler pages secret put S3_ACCESS_KEY_ID --project-name=<nama-project>
-npx wrangler pages secret put S3_SECRET_ACCESS_KEY --project-name=<nama-project>
-npx wrangler pages secret put S3_BUCKET_NAME --project-name=<nama-project>
+Setelah setiap step, update file dengan format:
 
-# Apply database migrations
-npm run db:migrate
-
-# Verify deployment
-curl https://<nama-project>.pages.dev/api/health
+```markdown
+| Field | Value | Last Updated |
+|-------|-------|--------------|
+| **Status** | `COMPLETED` | 2024-01-15 10:30 |
+| **Type** | `FIRST_DEPLOY` | 2024-01-15 10:30 |
 ```
 
 ---
 
-## 📋 Detailed Deployment Steps
+## Deployment Flow
+
+### Step 0: Check State
+
+```bash
+# Baca state file
+cat workflow/outputs/05-deployment/DEPLOYMENT_CONFIG.md
+
+# Determine type
+# - Jika Status = PENDING/NOT_STARTED → FIRST_DEPLOY
+# - Jika Status = COMPLETED → UPDATE
+```
 
 ### Step 1: Build
 
@@ -80,154 +78,153 @@ npm run check
 npm run build
 ```
 
-**Jika gagal:** Fix errors terlebih dahulu.
+**Update state:** `Status: IN_PROGRESS`, `Type: FIRST_DEPLOY/UPDATE`
+
+### Step 2: Deploy
+
+```bash
+npm run deploy
+```
+
+Capture URL dari output.
+
+**Update state:** URL deployed, timestamp
+
+### Step 3: Configure (FIRST_DEPLOY only)
+
+Jika FIRST_DEPLOY, lakukan konfigurasi:
+
+```bash
+# D1 Binding
+npx wrangler pages bindings add d1 \
+  --project-name=<project-name> \
+  --binding=DB \
+  --database=<database-name>
+
+# Environment Variables
+npx wrangler pages secret put RESEND_API_TOKEN --project-name=<project-name>
+npx wrangler pages secret put FROM_EMAIL --project-name=<project-name>
+# ... dst
+
+# Migrations
+npm run db:migrate
+```
+
+**Update state:** Checklist configuration
+
+### Step 4: Verify
+
+```bash
+# Health check
+curl https://<url>/api/health
+
+# Test auth, db, etc
+curl https://<url>/api/users
+```
+
+**Update state:** Verification checklist
+
+### Step 5: Update State File
+
+Update DEPLOYMENT_CONFIG.md:
+- Status: COMPLETED
+- Type: FIRST_DEPLOY atau UPDATE
+- Deployment history
+- Configuration state
+- Verification status
 
 ---
 
-### Step 2: Deploy to Cloudflare Pages
+## State File Template
+
+Saat FIRST_DEPLOY selesai, state file harus terisi:
+
+```markdown
+| Field | Value | Last Updated |
+|-------|-------|--------------|
+| **Status** | `COMPLETED` | 2024-01-15 10:30 |
+| **Type** | `FIRST_DEPLOY` | 2024-01-15 10:30 |
+| **Environment** | `production` | 2024-01-15 10:30 |
+
+## Project Info
+
+```yaml
+project_name: "my-app"
+domain: "https://my-app.pages.dev"
+repo_url: "https://github.com/user/repo"
+branch: "main"
+```
+
+## Deployment History
+
+### First Deploy
+- **Date**: 2024-01-15 10:30
+- **Status**: COMPLETED
+- **Notes**: Initial deployment successful
+
+### Updates
+| # | Date | Type | Status | Notes |
+|---|------|------|--------|-------|
+| - | - | - | - | No updates yet |
+
+## Configuration State
+
+### D1 Database
+- [x] Database created
+- [x] Binding configured (`DB`)
+- [x] Migrations applied
+
+### Environment Variables
+- [x] `RESEND_API_TOKEN`
+- [x] `FROM_EMAIL`
+- [ ] `S3_ENDPOINT` (not used)
+- [ ] `S3_ACCESS_KEY_ID` (not used)
+...
+```
+
+---
+
+## First Deploy Checklist
+
+- [ ] Read state file (determine FIRST_DEPLOY)
+- [ ] Build successful
+- [ ] Deploy successful
+- [ ] D1 binding configured
+- [ ] Environment variables set
+- [ ] Database migrated
+- [ ] Health check pass
+- [ ] Update state file
+
+## Update Checklist
+
+- [ ] Read state file (determine UPDATE)
+- [ ] Build successful
+- [ ] Deploy successful
+- [ ] Health check pass
+- [ ] Update state file (add to history)
+
+---
+
+## Commands Reference
 
 ```bash
 # Deploy
 npm run deploy
 
-# Atau dengan nama project spesifik
-npx wrangler pages deploy .svelte-kit/cloudflare --project-name=<nama-project>
-```
-
-Output akan menunjukkan URL deployment.
-
----
-
-### Step 3: Configure D1 Binding (WAJIB)
-
-**Cek binding yang ada:**
-```bash
-npx wrangler pages bindings list --project-name=<nama-project>
-```
-
-**Tambahkan D1 binding:**
-```bash
+# Configure D1
 npx wrangler pages bindings add d1 \
-  --project-name=<nama-project> \
+  --project-name=<name> \
   --binding=DB \
-  --database=<nama-database>
-```
+  --database=<db>
 
-Contoh:
-```bash
-npx wrangler pages bindings add d1 \
-  --project-name=my-app \
-  --binding=DB \
-  --database=my-app-db
-```
+# Set secrets
+npx wrangler pages secret put <VAR> --project-name=<name>
 
----
-
-### Step 4: Set Environment Variables via CLI
-
-Tidak perlu buka dashboard! Gunakan `wrangler pages secret put`:
-
-```bash
-# Email (Resend)
-npx wrangler pages secret put RESEND_API_TOKEN --project-name=<nama-project>
-# Enter value: re_xxxxxxxx
-
-npx wrangler pages secret put FROM_EMAIL --project-name=<nama-project>
-# Enter value: noreply@yourdomain.com
-
-# S3 Storage
-npx wrangler pages secret put S3_ENDPOINT --project-name=<nama-project>
-# Enter value: https://xxx.r2.cloudflarestorage.com
-
-npx wrangler pages secret put S3_ACCESS_KEY_ID --project-name=<nama-project>
-npx wrangler pages secret put S3_SECRET_ACCESS_KEY --project-name=<nama-project>
-npx wrangler pages secret put S3_BUCKET_NAME --project-name=<nama-project>
-
-# Google OAuth (opsional)
-npx wrangler pages secret put GOOGLE_CLIENT_ID --project-name=<nama-project>
-npx wrangler pages secret put GOOGLE_CLIENT_SECRET --project-name=<nama-project>
-```
-
-**Cek semua secrets:**
-```bash
-npx wrangler pages secret list --project-name=<nama-project>
-```
-
----
-
-### Step 5: Apply Database Migrations
-
-```bash
-# Apply ke production
+# Migrate
 npm run db:migrate
 
-# Atau langsung via wrangler
-npx wrangler d1 migrations apply DB --remote
-```
-
----
-
-### Step 6: Verify Deployment
-
-```bash
-# Health check
-curl https://<nama-project>.pages.dev/api/health
-
-# Expected response:
-# {"status":"ok","db":"connected","timestamp":"2024-..."}
-```
-
----
-
-## 🔧 Troubleshooting
-
-### "D1 binding not found"
-
-**Solusi:** Pastikan binding sudah di-add
-```bash
-npx wrangler pages bindings list --project-name=<nama-project>
-npx wrangler pages bindings add d1 --project-name=<nama-project> --binding=DB --database=<nama-database>
-```
-
-### "Missing environment variable"
-
-**Solusi:** Set via CLI
-```bash
-npx wrangler pages secret put <VARIABLE_NAME> --project-name=<nama-project>
-```
-
-### "Database migration failed"
-
-**Solusi:** 
-1. Cek database connection
-2. Cek migrations folder ada
-3. Run manually: `npx wrangler d1 migrations apply DB --remote`
-
----
-
-## 📊 Useful Commands
-
-```bash
-# List all projects
-npx wrangler pages project list
-
-# View deployment logs
-npm run logs
-
-# View specific project logs
-npx wrangler pages deployment tail --project-name=<nama-project>
-
-# List secrets
-npx wrangler pages secret list --project-name=<nama-project>
-
-# Delete secret
-npx wrangler pages secret delete <VARIABLE_NAME> --project-name=<nama-project>
-
-# List D1 databases
-npx wrangler d1 list
-
-# Execute SQL on production
-npx wrangler d1 execute DB --remote --command "SELECT * FROM users"
+# Verify
+curl https://<url>/api/health
 ```
 
 ---
@@ -237,48 +234,21 @@ npx wrangler d1 execute DB --remote --command "SELECT * FROM users"
 ```
 ✅ DEPLOYMENT SELESAI
 
-🌐 Production URL: https://<nama-project>.pages.dev
+📋 Type: FIRST_DEPLOY / UPDATE
+🌐 URL: https://my-app.pages.dev
+📁 State: workflow/outputs/05-deployment/DEPLOYMENT_CONFIG.md
+
 ✅ Health Check: PASS
 ✅ Database: Connected
-✅ SSL: Active (Cloudflare managed)
+✅ SSL: Active
 
 🎉 APLIKASI SUDAH LIVE!
-
-Commands untuk manage:
-- npm run logs                    # View logs
-- npm run db:migrate             # Apply migrations
-- npm run deploy                 # Re-deploy
 ```
 
 ---
 
 ## Deliverables
 
-- Deployed application
-- DEPLOYMENT_GUIDE.md
-- RELEASE_NOTES.md
-
----
-
-## Deployment Checklist
-
-- [ ] Build successful (`npm run build`)
-- [ ] Deployed to Cloudflare (`npm run deploy`)
-- [ ] D1 database binding configured
-- [ ] Environment variables set via CLI
-- [ ] Database migrated (`npm run db:migrate`)
-- [ ] Health check pass
-- [ ] Smoke test critical flows
-
----
-
-## Alternatif: Manual Dashboard Setup
-
-Jika otomasi gagal, fallback ke manual setup:
-
-1. Dashboard → Workers & Pages → Project
-2. Settings → Bindings → Add D1
-3. Settings → Environment Variables → Add variables
-4. Deployments → Retry deployment
-
-See [DEPLOYMENT_GUIDE.md](../../DEPLOYMENT_GUIDE.md) for detailed manual steps.
+- [ ] Deployed application
+- [ ] Updated DEPLOYMENT_CONFIG.md
+- [ ] RELEASE_NOTES.md (if major update)
