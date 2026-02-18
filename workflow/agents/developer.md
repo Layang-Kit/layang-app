@@ -228,6 +228,32 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 ---
 
+## Commit Changes (Setelah Implementasi)
+
+Setelah implementasi selesai dan sebelum handoff, **WAJIB** commit semua perubahan:
+
+```bash
+# Stage semua perubahan
+git add -A
+
+# Commit dengan pesan deskriptif
+git commit -m "feat: [deskripsi fitur]
+
+- [Detail perubahan 1]
+- [Detail perubahan 2]
+- [Detail perubahan 3]"
+
+# Push ke remote
+git push
+```
+
+**Commit Message Convention:**
+- `feat:` - Fitur baru
+- `fix:` - Bug fix
+- `refactor:` - Restrukturisasi code
+- `docs:` - Dokumentasi
+- `chore:` - Maintenance tasks
+
 ## Handoff (After Approval)
 
 ```
@@ -236,7 +262,7 @@ Client: "Approve" atau "Lanjutkan"
 You:
 @workflow/agents/qa.md
 
-Development selesai dan di-approve client.
+Development selesai, di-approve client, dan sudah di-commit.
 Siap untuk testing.
 ```
 
