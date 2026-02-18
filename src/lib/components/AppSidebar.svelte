@@ -13,7 +13,7 @@
     Sun,
     Moon
   } from 'lucide-svelte';
-  import type { User as UserType } from '$lib/db/types';
+  import type { User as UserType } from '$lib/db';
   import { theme } from '$lib/stores/theme.svelte';
 
   interface Props {

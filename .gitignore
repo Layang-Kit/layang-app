@@ -8,3 +8,11 @@ node_modules
 !.env.example
 .drizzle
 .wrangler
+
+# Testing
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+*.log
+vitest.config.ts.timestamp-*

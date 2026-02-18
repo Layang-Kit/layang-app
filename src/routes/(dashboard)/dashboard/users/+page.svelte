@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { User } from '$lib/db/types';
+  import type { User } from '$lib/db';
   import { 
     Search, 
     Filter, 

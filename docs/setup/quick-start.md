@@ -67,28 +67,24 @@ database_name = "DB"
 database_id = "paste-database-id-di-sini"  # <-- Ganti ini
 ```
 
-### 3. Setup Environment Variables (1 menit)
+### 3. Setup Environment Variables (OPSIONAL - 1 menit)
 
 ```bash
-# Copy template
+# Copy template untuk fitur tambahan
 cp .env.example .env
-
-# Edit .env dengan editor favorit
-# Isi minimal:
-# - CLOUDFLARE_ACCOUNT_ID
-# - CLOUDFLARE_DATABASE_ID (sama dengan wrangler.toml)
-# - CLOUDFLARE_API_TOKEN
 ```
 
-Cara dapatkan API Token:
-1. [Cloudflare Dashboard](https://dash.cloudflare.com) → My Profile → API Tokens
-2. Create Token → Custom token
-3. Permissions:
-   - Account: D1:Edit
-   - Zone: (tidak perlu)
-4. Copy token ke `.env`
+**Tidak wajib diisi untuk development dasar.**
 
-Lihat [Environment Variables Lengkap](environment-variables.md) untuk detail.
+Isi `.env` hanya jika ingin mengaktifkan:
+
+| Fitur | Variabel yang Diperlukan |
+|-------|-------------------------|
+| **Google Login** | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| **Email Verification** | `RESEND_API_TOKEN`, `FROM_EMAIL` |
+| **File Upload** | `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME` |
+
+Lihat [Environment Variables Lengkap](environment-variables.md) untuk detail setup.
 
 ### 4. Apply Database Migration (1 menit)
 
@@ -131,9 +127,11 @@ Tambahkan fitur opsional:
 
 | Error | Solusi |
 |-------|--------|
-| "D1 binding not found" | Check `wrangler.toml` database_id |
-| "Database not available" | Pastikan `npm run db:migrate:local` sudah dijalankan |
+| "D1 binding not found" | Check `wrangler.toml` database_id sudah benar, lalu jalankan `npm run db:migrate:local` |
+| "Database not available" | Pastikan `database_id` di `wrangler.toml` sesuai dengan output `wrangler d1 create` |
 | "Cannot find module" | Jalankan `npm install` ulang |
+| "Google login error" | Pastikan `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` diisi di `.env` |
+| "Email not sending" | Pastikan `RESEND_API_TOKEN` dan `FROM_EMAIL` diisi di `.env` |
 
 ---
 

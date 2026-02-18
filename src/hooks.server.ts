@@ -1,6 +1,6 @@
 import { Kysely } from 'kysely';
 import { D1Dialect } from 'kysely-d1';
-import type { Database } from '$lib/db/kysely-types';
+import type { Database } from '$lib/db';
 import { validateSession, getSessionCookieName } from '$lib/auth/session';
 import type { Handle } from '@sveltejs/kit';
 

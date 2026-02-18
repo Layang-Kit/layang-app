@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import type { User } from '$lib/db/types';
+  import type { User } from '$lib/db';
   import AppSidebar from '$lib/components/AppSidebar.svelte';
   import { theme } from '$lib/stores/theme.svelte';
   

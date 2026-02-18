@@ -1,6 +1,6 @@
 import { dev } from '$app/environment';
 import type { Kysely } from 'kysely';
-import type { Database } from '$lib/db/kysely-types';
+import type { Database } from '$lib/db';
 
 // Session duration: 30 days (in milliseconds)
 const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000;

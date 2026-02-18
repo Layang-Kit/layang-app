@@ -1,9 +1,19 @@
-import { config } from 'dotenv';
-config();
+#!/usr/bin/env node
+/**
+ * Seed script untuk populate database dengan data awal.
+ * 
+ * Usage:
+ *   npm run db:seed         # Seed ke production database
+ *   npm run db:seed:local   # Seed ke local database
+ * 
+ * Note: Script ini menggunakan wrangler CLI untuk execute SQL.
+ * Pastikan sudah login: npx wrangler login
+ */
 
-const DB_ID = process.env.CLOUDFLARE_DATABASE_ID!;
-const ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID!;
-const TOKEN = process.env.CLOUDFLARE_API_TOKEN!;
+import { execSync } from 'child_process';
+
+const args = process.argv.slice(2);
+const isLocal = args.includes('--local');
 
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -13,51 +23,52 @@ function generateUUID(): string {
   });
 }
 
-async function query(sql: string, params?: any[]) {
-  const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/d1/database/${DB_ID}/query`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ sql, params }),
-    }
-  );
-  return res.json();
+function generateSQL(): string {
+  const user1Id = generateUUID();
+  const user2Id = generateUUID();
+  const user3Id = generateUUID();
+  
+  const now = Date.now();
+  
+  return `
+-- Insert sample users
+INSERT OR IGNORE INTO users (id, email, name, provider, email_verified, created_at, updated_at) VALUES 
+  ('${user1Id}', 'john@example.com', 'John Doe', 'email', 1, ${now}, ${now}),
+  ('${user2Id}', 'jane@example.com', 'Jane Smith', 'google', 1, ${now}, ${now}),
+  ('${user3Id}', 'bob@example.com', 'Bob Wilson', 'email', 0, ${now}, ${now});
+`;
 }
 
 async function seed() {
   console.log('🌱 Seeding database...\n');
   
-  // Generate UUIDs for users
-  const user1Id = generateUUID();
-  const user2Id = generateUUID();
-  const user3Id = generateUUID();
-  
-  // Insert users
-  const users = [
-    { id: user1Id, email: 'john@example.com', name: 'John Doe', provider: 'email' },
-    { id: user2Id, email: 'jane@example.com', name: 'Jane Smith', provider: 'google' },
-    { id: user3Id, email: 'bob@example.com', name: 'Bob Wilson', provider: 'email' },
-  ];
-  
-  for (const user of users) {
-    await query(
-      `INSERT OR IGNORE INTO users (id, email, name, provider) VALUES (?, ?, ?, ?)`,
-      [user.id, user.email, user.name, user.provider]
-    );
-    console.log(`✅ User: ${user.name} (${user.provider})`);
+  try {
+    // Generate SQL
+    const sql = generateSQL();
+    
+    // Write to temp file
+    const fs = await import('fs');
+    const path = await import('path');
+    const tempFile = path.join(process.cwd(), '.temp-seed.sql');
+    fs.writeFileSync(tempFile, sql);
+    
+    // Execute via wrangler
+    const localFlag = isLocal ? '--local' : '--remote';
+    console.log(`Executing ${isLocal ? 'local' : 'production'} database...\n`);
+    
+    execSync(`npx wrangler d1 execute DB ${localFlag} --file=${tempFile}`, {
+      stdio: 'inherit',
+    });
+    
+    // Cleanup
+    fs.unlinkSync(tempFile);
+    
+    console.log('\n🎉 Seeding complete!');
+    
+  } catch (error) {
+    console.error('\n❌ Seeding failed:', error);
+    process.exit(1);
   }
-  
-  console.log('\n🎉 Seeding complete!');
-  
-  // Verify data
-  const usersResult = await query('SELECT * FROM users');
-  
-  console.log('\n📊 Current data:');
-  console.log(`Users: ${usersResult.result?.[0]?.results?.length || 0}`);
 }
 
-seed().catch(console.error);
+seed();

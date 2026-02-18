@@ -1,290 +1,408 @@
-# AGENTS.md - SvelteKit + Cloudflare D1 + Drizzle/Kysely Boilerplate
+# LayangKit - Agent Documentation
+
+> **Edge-first full-stack starter template** — SvelteKit + Cloudflare D1 + Drizzle ORM with authentication, email verification, and file uploads.
+
+This document provides comprehensive information for AI coding agents working on the LayangKit project.
+
+---
 
 ## Project Overview
 
-This is a full-stack edge-ready boilerplate application built with:
+LayangKit (also known as `layang-app`) is a modern full-stack web application starter template built with:
 
-- **SvelteKit** - Full-stack framework with file-based routing
-- **Cloudflare D1** - SQLite edge database running on Cloudflare's edge network
-- **Drizzle ORM** - Schema definition and migrations
-- **Kysely** - Type-safe SQL query builder for runtime queries
-- **Custom Session Auth** - Session-based authentication with Google OAuth
-- **Tailwind CSS** - Utility-first CSS framework
-- **TypeScript** - Type-safe JavaScript
+- **Framework**: [SvelteKit 2.x](https://kit.svelte.dev/) + [Svelte 5.x (Runes)](https://svelte.dev/)
+- **Database**: [Cloudflare D1](https://developers.cloudflare.com/d1/) (SQLite-based edge database)
+- **ORM**: [Drizzle ORM 0.40](https://orm.drizzle.team/) with [Kysely](https://kysely.dev/) query builder
+- **Authentication**: Custom session-based auth using [Arctic](https://arcticjs.dev/) for OAuth
+- **Password Hashing**: Web Crypto API (PBKDF2) - Cloudflare Workers compatible
+- **Email**: [Resend](https://resend.com/) for transactional emails
+- **Storage**: [Cloudflare R2](https://developers.cloudflare.com/r2/) for file uploads
+- **Styling**: [Tailwind CSS 4.x](https://tailwindcss.com/) with custom dark/light themes
+- **Icons**: [Lucide](https://lucide.dev/)
+- **Build Tool**: [Vite 6.x](https://vitejs.dev/)
+- **Testing**: [Vitest](https://vitest.dev/) for unit tests, [Playwright](https://playwright.dev/) for E2E tests
 
-The application provides a complete authentication system with user management, demonstrating best practices for SvelteKit data loading patterns.
-
-## Technology Stack
-
-| Category | Technology |
-|----------|------------|
-| Framework | SvelteKit 2.x |
-| UI Library | Svelte 5.x |
-| Styling | Tailwind CSS 4.x (Custom "Dark Elegance" theme) |
-| Database | Cloudflare D1 (SQLite) |
-| Schema/Migrations | Drizzle ORM 0.40 |
-| Query Builder | Kysely |
-| Auth | Custom Session Auth 3.x + Arctic |
-| Password Hashing | Web Crypto API (PBKDF2) |
-| Email | Resend |
-| Storage | Cloudflare R2 |
-| Image Processing | Canvas API (WebP conversion) |
-| Build Tool | Vite 6.x |
-| Adapter | @sveltejs/adapter-cloudflare |
-| Deployment | Cloudflare Pages |
+---
 
 ## Project Structure
 
 ```
 .
 ├── src/
-│   ├── lib/
-│   │   ├── auth/
-│   ├── session.ts         # Session management (custom implementation)
-│   │   │   ├── google.ts          # Google OAuth setup
-│   │   │   └── password.ts        # Web Crypto password hashing
-│   │   ├── db/
-│   │   ├── email/
-│   │   │   ├── resend.ts          # Resend email client
-│   │   │   └── templates/         # Email templates
-│   │   ├── image/
-│   │   │   └── convert.ts         # Image processing (WebP)
-│   │   └── storage/
-│   │       └── r2.ts              # Cloudflare R2 client
-│   │       ├── schema.ts          # Database schema (users, posts, sessions, tokens)
-│   │       ├── index.ts           # DB client factory function
-│   │       └── types.ts           # TypeScript type definitions
-│   ├── routes/
-│   │   ├── (examples)/            # Example patterns (group route)
-│   │   │   ├── server-load-example/     # Server Load pattern demo
-│   │   │   └── form-actions-example/    # Form Actions pattern demo
-│   │   ├── api/
-│   │   │   ├── health/            # Health check endpoint
-│   │   │   ├── profile/           # Profile API (GET/PUT)
-│   │   │   └── users/             # Users CRUD API
-│   │   ├── auth/
-│   │   │   ├── forgot-password/   # Forgot password API
-│   │   │   ├── google/            # Google OAuth endpoints
-│   │   │   ├── login/             # Login API
-│   │   │   ├── logout/            # Logout API
-│   │   │   ├── register/          # Register API
-│   │   │   └── reset-password/    # Reset password API
-│   │   ├── dashboard/             # Dashboard page (protected)
-│   │   ├── forgot-password/       # Forgot password page
-│   │   ├── login/                 # Login page
-│   │   ├── profile/               # Profile page (protected)
-│   │   ├── register/              # Register page
-│   │   ├── reset-password/        # Reset password page
-│   │   ├── +layout.svelte         # Root layout with navigation
-│   │   └── +page.svelte           # Home page
-│   ├── app.d.ts                   # App type declarations
-│   ├── app.html                   # HTML template (dark theme)
-│   ├── app.css                    # Global styles (Tailwind)
-│   └── hooks.server.ts            # Server hooks (DB + Auth injection)
-├── drizzle/                       # Database migrations
-│   ├── 0000_initial.sql           # Initial schema
-│   ├── 0001_auth.sql              # Auth schema (users, sessions, tokens)
-│   └── seed.sql                   # Seed data
-├── scripts/
-│   └── seed.ts                    # TypeScript seed script
-├── SVELTEKIT_DATA_PATTERNS.md     # Documentation for data patterns
-├── svelte.config.js               # SvelteKit configuration
-├── vite.config.ts                 # Vite configuration
-├── drizzle.config.ts              # Drizzle Kit configuration
-├── wrangler.toml                  # Cloudflare Wrangler configuration
-├── src/app.css                    # Global styles (Tailwind CSS 4)
-└── tsconfig.json                  # TypeScript configuration
+│   ├── lib/                    # Shared libraries and utilities
+│   │   ├── auth/               # Authentication logic
+│   │   │   ├── google.ts       # Google OAuth integration (Arctic)
+│   │   │   ├── password.ts     # PBKDF2 password hashing (Web Crypto API)
+│   │   │   └── session.ts      # Session management (create, validate, invalidate)
+│   │   ├── db/                 # Database layer (2 files only)
+│   │   │   ├── index.ts        # All types + exports (Kysely + Application)
+│   │   │   └── schema.ts       # Drizzle ORM schema (camelCase)
+│   │   ├── email/              # Email service
+│   │   │   ├── resend.ts       # Resend email client
+│   │   │   └── templates/      # Email templates
+│   │   │       └── verification.ts
+│   │   ├── image/              # Image processing utilities
+│   │   │   └── convert.ts      # WebP conversion (Canvas API)
+│   │   ├── storage/            # S3-compatible storage (R2, Wasabi, S3, etc.)
+│   │   │   └── r2.ts           # R2 client, presigned URLs, file operations
+│   │   └── stores/             # Svelte 5 runes-based stores
+│   │       └── theme.svelte.ts # Theme store (dark/light mode)
+│   ├── routes/                 # SvelteKit routes (file-based routing)
+│   │   ├── (dashboard)/        # Route group: protected dashboard pages
+│   │   │   ├── dashboard/      # Main dashboard
+│   │   │   │   ├── settings/   # Settings page
+│   │   │   │   └── users/      # Users list page
+│   │   │   └── profile/        # User profile page
+│   │   ├── _examples/          # Example patterns (can be removed)
+│   │   │   ├── form-actions-example/
+│   │   │   └── server-load-example/
+│   │   ├── api/                # API endpoints
+│   │   │   ├── health/         # Health check endpoint
+│   │   │   ├── profile/        # Profile API (GET/PUT)
+│   │   │   ├── upload/         # File upload endpoints
+│   │   │   │   ├── image/      # Image upload with WebP conversion
+│   │   │   │   └── presign/    # Presigned URL for direct R2 upload
+│   │   │   └── users/          # Users API
+│   │   ├── auth/               # Auth API endpoints
+│   │   │   ├── forgot-password/# POST endpoint
+│   │   │   ├── google/         # OAuth init & callback
+│   │   │   ├── login/          # POST endpoint
+│   │   │   ├── logout/         # POST endpoint
+│   │   │   ├── register/       # POST endpoint
+│   │   │   ├── resend-verification/ # POST endpoint
+│   │   │   ├── reset-password/ # POST endpoint
+│   │   │   └── verify-email/   # Page server load
+│   │   ├── forgot-password/    # Forgot password page
+│   │   ├── login/              # Login page
+│   │   ├── register/           # Register page
+│   │   ├── reset-password/     # Reset password page
+│   │   ├── verify-email-sent/  # Email sent confirmation page
+│   │   ├── +layout.svelte      # Root layout
+│   │   ├── +page.svelte        # Home/Landing page
+│   │   └── ...
+│   ├── app.css                 # Global styles & Tailwind 4 theme
+│   ├── app.d.ts                # TypeScript declarations
+│   ├── app.html                # HTML template
+│   └── hooks.server.ts         # Server hooks (DB + Auth injection)
+├── migrations/                 # Drizzle database migrations
+├── tests/
+│   ├── e2e/                    # Playwright E2E tests
+│   │   ├── auth.spec.ts
+│   │   └── navigation.spec.ts
+│   └── unit/                   # Vitest unit tests
+│       ├── lib/
+│       │   └── auth/
+│       │       ├── password.test.ts
+│       │       └── session.test.ts
+│       ├── mocks/
+│       │   └── app.ts          # Mock for $app modules
+│       └── setup.ts            # Test setup (crypto mock, cleanup)
+├── docs/                       # Documentation
+├── scripts/                    # Utility scripts (seeding)
+├── static/                     # Static assets
+├── drizzle.config.ts           # Drizzle Kit configuration
+├── svelte.config.js            # SvelteKit configuration
+├── vite.config.ts              # Vite configuration
+├── vitest.config.ts            # Vitest configuration
+├── playwright.config.ts        # Playwright E2E configuration
+├── wrangler.toml               # Cloudflare Wrangler configuration
+└── package.json
 ```
 
-## Database Schema
+---
 
-### users
-- `id` - TEXT PRIMARY KEY (UUID)
-- `email` - TEXT NOT NULL UNIQUE
-- `name` - TEXT NOT NULL
-- `bio` - TEXT (optional)
-- `location` - TEXT (optional)
-- `website` - TEXT (optional)
-- `password_hash` - TEXT (null for OAuth users)
-- `provider` - TEXT ('email' | 'google')
-- `google_id` - TEXT UNIQUE (for Google OAuth)
-- `avatar` - TEXT (profile picture URL)
-- `email_verified` - INTEGER (boolean)
-- `created_at` - INTEGER (timestamp)
-- `updated_at` - INTEGER (timestamp)
+## Key Configuration Files
 
-### sessions (Custom Session Auth)
-- `id` - TEXT PRIMARY KEY
-- `user_id` - TEXT NOT NULL (FK to users.id)
-- `expires_at` - INTEGER (timestamp)
+### `wrangler.toml`
+Cloudflare Workers configuration with **bindings** for D1 database and R2 storage (optional):
 
-### password_reset_tokens
-- `id` - TEXT PRIMARY KEY
-- `user_id` - TEXT NOT NULL (FK to users.id)
-- `token_hash` - TEXT NOT NULL
-- `expires_at` - INTEGER (timestamp)
-- `used` - INTEGER (boolean)
-- `created_at` - INTEGER (timestamp)
+```toml
+name = "layang-app"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
-### email_verification_tokens
-- `id` - TEXT PRIMARY KEY
-- `user_id` - TEXT NOT NULL (FK to users.id)
-- `token_hash` - TEXT NOT NULL
-- `expires_at` - INTEGER (timestamp)
-- `used` - INTEGER (boolean)
-- `created_at` - INTEGER (timestamp)
+[[d1_databases]]
+binding = "DB"                              # Access via: env.DB
+database_name = "layang-app"                # Database name in Cloudflare
+database_id = "your-database-id"            # ⚠️ MUST be updated after creation
+migrations_dir = "migrations"
 
-### posts
-- `id` - INTEGER PRIMARY KEY AUTOINCREMENT
-- `title` - TEXT NOT NULL
-- `content` - TEXT
-- `published` - INTEGER (boolean)
-- `author_id` - TEXT (FK to users.id)
-- `created_at` - INTEGER (timestamp)
-- `updated_at` - INTEGER (timestamp)
+[[r2_buckets]]
+binding = "STORAGE"                         # Access via: env.STORAGE
+bucket_name = "layang-app-storage"
+```
+
+**Important:** `wrangler.toml` contains **bindings** (resource references), not secrets. For external API credentials (Google OAuth, Resend, S3 API keys), use `.env` file instead.
+
+### `drizzle.config.ts`
+Drizzle Kit configuration for migrations:
+- Schema: `./src/lib/db/schema.ts`
+- Output: `./migrations`
+- Dialect: `sqlite`
+- Driver: `d1-http`
+
+### `svelte.config.js`
+SvelteKit with Cloudflare adapter:
+```javascript
+import adapter from '@sveltejs/adapter-cloudflare';
+```
+
+### `vite.config.ts`
+Standard Vite config with SvelteKit plugin and source maps enabled.
+
+---
 
 ## Build and Development Commands
 
 ```bash
 # Development
-npm run dev                    # Start development server
+npm run dev                   # Start Vite dev server (localhost:5173)
+npm run check                 # Type-check with svelte-check
 
 # Building
-npm run build                  # Build for production
-npm run check                  # Type-check with svelte-check
+npm run build                 # Build for production
+npm run preview               # Preview production build locally with Wrangler
 
-# Preview & Deploy
-npm run preview                # Preview production build locally
-npm run deploy                 # Deploy to Cloudflare Pages
+# Testing
+npm run test                  # Run unit tests (Vitest)
+npm run test:watch            # Run unit tests in watch mode
+npm run test:coverage         # Run tests with coverage
+npm run test:e2e              # Run E2E tests (Playwright)
+npm run test:e2e:ui           # Run E2E tests with UI
 
-# Database Operations
-npm run db:generate            # Generate Drizzle migration
-npm run db:migrate             # Apply migrations to remote D1
-npm run db:migrate:local       # Apply migrations to local D1
-npm run db:seed                # Seed database via HTTP API
-npm run db:seed:local          # Execute seed.sql locally
-npm run db:studio              # Open Drizzle Studio GUI
-npm run cf:typegen             # Generate Cloudflare Workers types
+# Database
+npm run db:generate           # Generate migrations from schema.ts
+npm run db:migrate:local      # Apply migrations to local D1
+npm run db:migrate            # Apply migrations to production D1
+npm run db:refresh:local      # Reset local DB + reapply migrations
+npm run db:seed               # Seed database via HTTP API
+npm run db:seed:local         # Execute seed.sql locally
+npm run db:studio             # Open Drizzle Studio GUI
+
+# Cloudflare
+npm run cf:typegen            # Generate Cloudflare Workers types
+npm run deploy                # Deploy to Cloudflare Pages
+npm run logs                  # View production logs (real-time)
 ```
 
-## Environment Configuration
+---
 
-Create a `.env` file from `.env.example`:
+## Database Architecture
 
-```bash
-# Required for Drizzle Kit CLI
-CLOUDFLARE_ACCOUNT_ID=your_account_id
-CLOUDFLARE_DATABASE_ID=your_database_id
-CLOUDFLARE_API_TOKEN=your_api_token
+### Dual ORM Approach
 
-# Optional - for Google OAuth
+The project uses a **dual ORM strategy**:
+
+1. **Drizzle ORM**: Used ONLY for schema definition and migrations (`schema.ts`)
+2. **Kysely**: Used for actual database queries at runtime (types in `index.ts`)
+
+**Rationale**: Kysely has better Cloudflare D1 support via `kysely-d1` dialect and provides excellent type-safe query building.
+
+### Database Files (Simplified)
+
+```
+src/lib/db/
+├── schema.ts    # Drizzle schema only (for migrations)
+└── index.ts     # All types: Database interface, Table types, Insert types
+```
+
+**⚠️ IMPORTANT**: When modifying `schema.ts`, always update the `Database` interface in `index.ts` to keep them in sync!
+
+### Schema Mapping (⚠️ CRITICAL)
+
+**IMPORTANT**: When updating `schema.ts`, you MUST also update `index.ts` to keep types in sync!
+
+When converting from Drizzle (`schema.ts`) to Kysely (`index.ts` `Database` interface):
+- `camelCase` → `snake_case` (e.g., `passwordHash` → `password_hash`)
+- `integer(..., { mode: 'boolean' })` → `number` (SQLite uses 0/1)
+- `$defaultFn(...)` fields → nullable (e.g., `created_at: number | null`)
+- `.notNull()` without default → required type (e.g., `email: string`)
+
+### Database Tables
+
+| Table | Purpose |
+|-------|---------|
+| `users` | User accounts with auth fields |
+| `sessions` | Session-based authentication |
+| `password_reset_tokens` | Password reset flow |
+| `email_verification_tokens` | Email verification flow |
+
+---
+
+## Authentication System
+
+### Session-Based Auth
+
+The project implements custom session-based authentication (not JWT):
+
+1. **Session Creation**: On login, a session ID is generated and stored in `sessions` table
+2. **Cookie Storage**: Session ID stored in HTTP-only, secure cookie (`auth_session`)
+3. **Session Validation**: Performed in `hooks.server.ts` on every request
+4. **Auto-refresh**: Sessions refresh if expiring within 15 days (30-day total lifespan)
+
+### Auth Flows
+
+1. **Email/Password**: Register → (Optional: Email Verify) → Login → Session
+2. **Google OAuth**: `/auth/google` → Google consent → `/auth/google/callback` → Session
+3. **Password Reset**: Forgot → Token email → Reset page → Update password
+4. **Email Verification**: Resend → Verification email → Click link → Verify
+
+### Key Auth Files
+
+- `src/lib/auth/session.ts` - Core session logic
+- `src/lib/auth/password.ts` - PBKDF2 password hashing
+- `src/lib/auth/google.ts` - Google OAuth (Arctic library)
+- `src/hooks.server.ts` - Session validation on every request
+
+---
+
+## Configuration
+
+### File Structure
+
+| File | Purpose | Contains |
+|------|---------|----------|
+| `wrangler.toml` | Cloudflare Workers bindings | D1 database_id, R2 bucket bindings |
+| `.env` | External API secrets | Google OAuth, Resend, S3 API credentials |
+
+### wrangler.toml (Bindings - REQUIRED)
+
+Database and storage bindings for the application:
+
+```toml
+[[d1_databases]]
+binding = "DB"
+database_id = "your-database-id"  # Must match created database
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "your-bucket"
+```
+
+### .env (Secrets - Optional)
+
+External service credentials for additional features:
+
+```env
+# Google OAuth (for Google login)
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
-# Optional - for Email Verification (Resend)
-RESEND_API_TOKEN=re_your_api_token
+# Resend Email (for verification & password reset)
+RESEND_API_TOKEN=re_your_token
 FROM_EMAIL=noreply@yourdomain.com
+REPLY_TO_EMAIL=support@yourdomain.com
 
-# Optional - for File/Image Uploads (Cloudflare R2)
-R2_ACCOUNT_ID=your_r2_account_id
-R2_ACCESS_KEY_ID=your_r2_access_key
-R2_SECRET_ACCESS_KEY=your_r2_secret_key
-R2_BUCKET_NAME=your_bucket_name
-R2_PUBLIC_URL=https://pub-yourid.r2.dev
+# S3 Storage (via S3-compatible API - R2, Wasabi, AWS S3, etc.)
+S3_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
+S3_BUCKET_NAME=my-bucket
+S3_ACCESS_KEY_ID=your_access_key
+S3_SECRET_ACCESS_KEY=your_secret_key
+S3_PUBLIC_URL=https://cdn.example.com
 ```
 
-**API Token Requirements:**
-- Account: D1:Edit, Cloudflare Pages:Edit
-- Zone: Read
+> **Note:** For Drizzle Studio, add `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE_ID`, `CLOUDFLARE_API_TOKEN` to `.env` separately.
 
-## Pages & Routes
+**Production**: Configure in Cloudflare Dashboard → Pages → Settings → Environment Variables.
 
-### Public Pages
-| Route | Description |
-|-------|-------------|
-| `/` | Home page |
-| `/login` | Login (email + Google OAuth) |
-| `/register` | Register new account |
-| `/forgot-password` | Request password reset |
-| `/reset-password` | Reset password with token |
+---
 
-### Protected Pages (Require Auth)
-| Route | Description |
-|-------|-------------|
-| `/dashboard` | User dashboard with stats |
-| `/profile` | Edit profile, change password |
+## Code Style Guidelines
 
-### Example Pages (Documentation)
-| Route | Description |
-|-------|-------------|
-| `/server-load-example` | Demo: Server Load pattern |
-| `/form-actions-example` | Demo: Form Actions pattern |
+### TypeScript Conventions
 
-## API Endpoints
+1. **Strict TypeScript**: `strict: true` enabled in tsconfig.json
+2. **Type imports**: Use `import type { ... }` for type-only imports
+3. **Function exports**: Prefer named exports over default exports
+4. **Error handling**: Always handle errors with try/catch in async functions
 
-### Auth
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register` | Register with email/password (sends verification email) |
-| POST | `/auth/login` | Login with email/password (requires verified email) |
-| POST | `/auth/logout` | Logout current session |
-| GET | `/auth/google` | Initiate Google OAuth |
-| GET | `/auth/google/callback` | Google OAuth callback |
-| POST | `/auth/forgot-password` | Request reset token |
-| POST | `/auth/reset-password` | Reset password |
-| GET | `/auth/verify-email` | Verify email with token |
-| POST | `/auth/resend-verification` | Resend verification email |
+### Svelte 5 Runes
 
-### Profile
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/profile` | Get current user profile |
-| PUT | `/api/profile` | Update profile |
+The project uses Svelte 5 with runes:
 
-### Users
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/users` | List all users |
-| POST | `/api/users` | Create new user |
-| GET | `/api/users/[id]` | Get user by ID |
-| DELETE | `/api/users/[id]` | Delete user |
+```svelte
+<script>
+  // Props
+  let { data, children } = $props();
+  
+  // Reactive state
+  let count = $state(0);
+  
+  // Derived values
+  let doubled = $derived(count * 2);
+  
+  // Effects
+  $effect(() => {
+    console.log('Count changed:', count);
+  });
+</script>
+```
 
-### Upload
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/upload/presign` | Get presigned URL for direct R2 upload (files) |
-| POST | `/api/upload/image` | Upload image → convert to WebP → store in R2 |
-| DELETE | `/api/upload/image` | Delete image from R2 |
+### Styling Conventions
 
-### Health
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Health check with DB status |
+1. **Tailwind CSS 4**: Uses `@theme` directive in `app.css`
+2. **CSS Variables**: Theme colors defined as CSS variables
+3. **Component classes**: Predefined in `app.css` (`.card`, `.btn-primary`, `.input`, etc.)
+4. **Dark/Light mode**: Toggle via `html.light` / `html.dark` classes
 
-## SvelteKit Data Patterns
+---
 
-This project demonstrates the **recommended patterns** for SvelteKit data loading:
+## Testing Strategy
 
-### 1. Server Load (for GET requests)
+### Unit Tests (Vitest)
 
-Use `+page.server.ts` `load()` function instead of API + fetch:
+- **Location**: `tests/unit/`
+- **Config**: `vitest.config.ts`
+- **Environment**: `jsdom`
+- **Setup**: `tests/unit/setup.ts` (mocks crypto, matchMedia)
+
+Run with:
+```bash
+npm run test          # Single run
+npm run test:watch    # Watch mode
+npm run test:coverage # With coverage report
+```
+
+### E2E Tests (Playwright)
+
+- **Location**: `tests/e2e/`
+- **Config**: `playwright.config.ts`
+- **Browsers**: Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari
+- **Base URL**: `http://localhost:5173` (configurable via `PLAYWRIGHT_BASE_URL`)
+
+Run with:
+```bash
+npm run test:e2e      # Run all tests
+npm run test:e2e:ui   # Interactive UI mode
+npm run test:e2e:debug # Debug mode
+```
+
+---
+
+## Data Flow Patterns
+
+### Pattern 1: Server Load (Recommended)
+
+Use for initial page data - data is embedded in HTML, no loading states needed.
 
 ```typescript
-// routes/dashboard/+page.server.ts
+// +page.server.ts
+import type { PageServerLoad } from './$types';
+
 export const load: PageServerLoad = async ({ locals }) => {
-  // Query directly from server - no API needed!
   const users = await locals.db
     .selectFrom('users')
     .selectAll()
     .execute();
+  
   return { users };
 };
 ```
 
 ```svelte
-<!-- routes/dashboard/+page.svelte -->
+<!-- +page.svelte -->
 <script>
-  let { data } = $props(); // Data auto-populated from load()
+  let { data } = $props(); // Data already available
 </script>
 
 {#each data.users as user}
@@ -292,369 +410,210 @@ export const load: PageServerLoad = async ({ locals }) => {
 {/each}
 ```
 
-**Benefits:**
-- ✅ 1 request only (server renders HTML with data)
-- ✅ SEO friendly
-- ✅ No loading states needed
-- ✅ Type-safe
+### Pattern 2: Form Actions (Recommended)
 
-### 2. Form Actions (for POST/PUT/DELETE)
-
-Use `+page.server.ts` `actions` instead of API endpoints:
+Use for form submissions - works without JavaScript.
 
 ```typescript
-// routes/register/+page.server.ts
+// +page.server.ts
+import type { Actions } from './$types';
+
 export const actions: Actions = {
-  register: async ({ request, locals }) => {
+  default: async ({ request, locals }) => {
     const form = await request.formData();
-    // Validate, process, return result
+    const email = form.get('email');
+    
+    // Validate with Zod
+    // Process...
+    
     return { success: true };
   }
 };
 ```
 
 ```svelte
-<!-- routes/register/+page.svelte -->
-<form method="POST" action="?/register">
-  <input name="email" />
-  <button type="submit">Register</button>
+<!-- +page.svelte -->
+<form method="POST">
+  <input name="email" type="email" required />
+  <button type="submit">Submit</button>
 </form>
 ```
 
-**Benefits:**
-- ✅ Works without JavaScript!
-- ✅ No API endpoint needed
-- ✅ Progressive enhancement with `use:enhance`
+### Pattern 3: API Endpoints
 
-See `SVELTEKIT_DATA_PATTERNS.md` for detailed documentation.
-
-## Key Architectural Patterns
-
-### Authentication Flow
-
-1. **Registration/Login**: Form submits to `actions` → Create session → Set cookie
-2. **Session Validation**: `hooks.server.ts` validates session on every request
-3. **Protected Routes**: Check `locals.user` in `load()` or page
-4. **Logout**: Invalidate session + clear cookie
-
-### Database Access Pattern
-
-Database is accessed through SvelteKit's `locals` object using **Kysely**:
+Use for client-side data fetching or external API access.
 
 ```typescript
-// src/hooks.server.ts
-import { Kysely } from 'kysely';
-import { D1Dialect } from 'kysely-d1';
-import type { Database } from '$lib/db/kysely-types';
+// +server.ts
+import type { RequestHandler } from './$types';
 
-export const handle: Handle = async ({ event, resolve }) => {
-  // Inject Kysely DB
-  if (event.platform?.env.DB) {
-    event.locals.db = new Kysely<Database>({
-      dialect: new D1Dialect({
-        database: event.platform.env.DB,
-      }),
-    });
-  }
-  
-  // Session validation handled in hooks
-  // ... validate session
-  
-  return resolve(event);
+export const GET: RequestHandler = async ({ locals }) => {
+  const data = await locals.db.selectFrom('users').selectAll().execute();
+  return json({ data });
 };
 ```
 
-### Kysely Query Examples
-
-```typescript
-// Select
-const users = await locals.db
-  .selectFrom('users')
-  .where('provider', '=', 'email')
-  .selectAll()
-  .execute();
-
-// Insert
-await locals.db
-  .insertInto('users')
-  .values({ id, email, name, provider: 'email' })
-  .execute();
-
-// Update
-await locals.db
-  .updateTable('users')
-  .set({ name: 'New Name' })
-  .where('id', '=', userId)
-  .execute();
-
-// Delete
-await locals.db
-  .deleteFrom('sessions')
-  .where('user_id', '=', userId)
-  .execute();
-
-// Join
-const postsWithAuthor = await locals.db
-  .selectFrom('posts')
-  .innerJoin('users', 'posts.author_id', 'users.id')
-  .where('posts.published', '=', 1)
-  .select(['posts.title', 'users.name as author_name'])
-  .execute();
-```
-
-### Password Hashing
-
-Using Web Crypto API (Cloudflare Workers compatible):
-
-```typescript
-// src/lib/auth/password.ts
-export async function hashPassword(password: string): Promise<string> {
-  // PBKDF2 with SHA-256
-  // 100,000 iterations
-}
-
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  // Constant-time comparison
-}
-```
-
-## UI/UX Conventions
-
-- **Theme**: Dark mode only (Dark Elegance)
-- **Color Scheme**: 
-  - Background: `bg-neutral-950` (true black)
-  - Surface: `bg-neutral-900` (soft black)
-  - Cards: `bg-neutral-900/50` with `border-neutral-800`
-  - Primary Accent: `text-accent-500` (warm amber #f59e0b)
-  - Secondary Accent: `text-rose-400` (soft rose)
-  - Success: `text-emerald-400`
-  - Error: `text-rose-400`
-  - Text Primary: `text-neutral-100`
-  - Text Secondary: `text-neutral-500`
-  - Border: `border-neutral-800` (subtle)
-- **Layout**: Container with max-width (`max-w-4xl`)
-- **Icons**: Lucide Svelte (Hexagon for logo, minimal style)
-- **Forms**: Server-side validation with error display
-
-## Testing Strategy
-
-1. **Health Check**: Visit `/api/health`
-2. **Auth Flow**: 
-   - Register at `/register`
-   - Login at `/login`
-   - Check dashboard at `/dashboard`
-3. **API Testing**: Use curl or Postman
-
-```bash
-# Health check
-curl http://localhost:5173/api/health
-
-# Login
-curl -X POST http://localhost:5173/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
-```
-
-## Deployment Process
-
-1. **Build**: `npm run build`
-2. **Migrate**: `npm run db:migrate`
-3. **Deploy**: `npm run deploy`
+---
 
 ## Security Considerations
 
-1. **Environment Variables**: `.env` in `.gitignore`
-2. **Session Security**: HttpOnly cookies, secure in production
-3. **Password Hashing**: PBKDF2 with salt
-4. **CSRF Protection**: State parameter in OAuth
-5. **Input Validation**: Zod validation on server
-6. **SQL Injection**: Protected by Kysely (parameterized queries)
-
-## Development Workflow
-
-1. `npm install`
-2. Copy `.env.example` to `.env`
-3. `npm run db:migrate:local`
-4. `npm run dev`
-5. Test at `http://localhost:5173`
-6. Deploy with `npm run deploy`
-
-## Common Issues
-
-1. **D1 binding not found**: Check `wrangler.toml` database_id
-2. **Type errors**: Run `npm run cf:typegen`
-3. **OAuth errors**: Verify Google credentials and redirect URIs
-4. **Session issues**: Clear cookies and try again
-
-## Important Version Updates (2025-02)
-
-### Breaking Changes in Dependencies
-
-Project ini telah diupdate ke versi major baru. Berikut perubahan penting:
-
-| Package | Old | New | Notes |
-|---------|-----|-----|-------|
-| **Svelte** | 4.x | **5.20.0** | Runes syntax: `$state()`, `$props()`, `$derived()` |
-| **Tailwind CSS** | 3.4 | **4.1.18** | CSS-first config, no `tailwind.config.js` needed |
-| **Drizzle ORM** | 0.29 | **0.40.0** | API improvements |
-| **Zod** | 3.x | **4.3.6** | New features & performance |
-| **Vite** | 5.x | **6.2.0** | Build improvements |
-
-### Svelte 5 Runes (New Syntax)
-
-```svelte
-<script>
-  // Old (Svelte 4)
-  export let data;
-  let count = 0;
-  $: doubled = count * 2;
-  
-  // New (Svelte 5)
-  let { data } = $props();
-  let count = $state(0);
-  let doubled = $derived(count * 2);
-</script>
-```
-
-### Tailwind 4 Changes
-
-- **CSS-first configuration** - Konfigurasi di `app.css`, bukan `tailwind.config.js`
-- **No `@tailwind` directives** - Gunakan `@import "tailwindcss"`
-- **Built-in CSS imports** - Support native CSS `@import`
-
-Lihat [Tailwind 4 Docs](https://tailwindcss.com/docs/v4-beta) untuk detail.
+1. **Password Hashing**: PBKDF2 with 100,000 iterations, SHA-256
+2. **Session Cookies**: HTTP-only, Secure (in production), SameSite=Lax
+3. **CSRF Protection**: State parameter in OAuth flow
+4. **Input Validation**: Zod 4.x validation on all inputs
+5. **SQL Injection**: Protected via Kysely parameterized queries
+6. **XSS**: Svelte's automatic escaping
 
 ---
 
-## Workflow Agents
+## Deployment
 
-Project ini menggunakan **3 Workflow Agents** untuk manajemen pengembangan yang terstruktur:
+### Prerequisites
 
-### 1. INIT_AGENT - Project Initialization
+1. Cloudflare account
+2. Wrangler CLI authenticated: `npx wrangler login`
+3. D1 database created: `npx wrangler d1 create my-database`
+4. R2 bucket created (optional, for file uploads)
 
-**Gunakan saat:** Memulai project baru dari starter kit ini
+### Deploy Steps
 
-**Responsibilities:**
-- Setup project infrastructure
-- Create documentation (README, PRD, TDD, PROGRESS, ui-kit)
-- Setup database migrations
-- Customize auth pages
-- Git init and first commit
-
-**Cara pakai:**
-```
-"Hai @workflow/INIT_AGENT.md, yuk kita mulai project baru"
-```
-
-**Dokumentasi:** [workflow/INIT_AGENT.md](workflow/INIT_AGENT.md)
-
-### 2. TASK_AGENT - Feature Implementation (Per Task)
-
-**Gunakan saat:** Implementasi fitur satu per satu, fix bug, atau modifikasi fitur dengan konfirmasi user
-
-**Responsibilities:**
-- Implement features (pages, API routes, components)
-- Fix bugs
-- Update PROGRESS.md
-- Commit & push changes (per task)
-
-**Cara pakai:**
-```
-"Hai @workflow/TASK_AGENT.md, yuk kita kerja"
-```
-
-**Dokumentasi:** [workflow/TASK_AGENT.md](workflow/TASK_AGENT.md)
-
-### 3. BATCH_TASK_AGENT - Batch Feature Implementation (All Tasks)
-
-**Gunakan saat:** Implementasi SEMUA pending tasks dalam PROGRESS.md sekaligus tanpa berhenti
-
-**Responsibilities:**
-- Read ALL pending tasks from PROGRESS.md
-- Execute ALL tasks in sequence (1 shoot, continuous)
-- Auto-create feature branch
-- Update PROGRESS.md after each task
-- **Commit modes:**
-  - **Atomic** (default): Commit per fitur ✅
-  - **Batch**: Single commit di akhir
-- Push to trigger CI/CD
-
-**Commit Strategy:**
-| Mode | Kapan Digunakan |
-|------|-----------------|
-| **Atomic** (per task) | Team projects, production, perlu code review |
-| **Batch** (single) | Solo projects, MVP, prototype |
-
-**Best for:**
-- MVP development dengan banyak fitur awal
-- Bootstrap project baru
-- Deadline ketat
-- Prototype dengan fitur lengkap
-
-**Cara pakai:**
 ```bash
-# Default: Atomic commits (commit per fitur)
-"@workflow/BATCH_TASK_AGENT.md, execute all pending tasks"
+# 1. Build
+npm run build
 
-# Batch mode: Single commit di akhir
-"@workflow/BATCH_TASK_AGENT.md, execute all pending tasks with batch commit"
+# 2. Deploy to Cloudflare Pages
+npm run deploy
 ```
 
-**Dokumentasi:** [workflow/BATCH_TASK_AGENT.md](workflow/BATCH_TASK_AGENT.md)
+### Post-Deployment
 
-### 4. MANAGER_AGENT - Change Management
-
-**Gunakan saat:** Menerima change request, update dokumentasi, atau approve deployment
-
-**Responsibilities:**
-- Manage change requests (bug, feature, modification)
-- Update PRD.md, TDD.md, PROGRESS.md
-- Approve deployment readiness
-- Create release notes (CHANGELOG.md)
-
-**Cara pakai:**
-```
-"Hai @workflow/MANAGER_AGENT.md, ada change request"
-```
-
-**Dokumentasi:** [workflow/MANAGER_AGENT.md](workflow/MANAGER_AGENT.md)
-
-### Workflow Overview
-
-```
-INIT_AGENT (Setup)
-    ↓
-TASK_AGENT / BATCH_TASK_AGENT (Implement Features)
-    ↓
-Cloudflare Deployment (Automated)
-    ↓
-MANAGER_AGENT (Release Notes)
-```
-
-**Choose Your Execution Mode:**
-
-| Agent | Use When |
-|-------|----------|
-| `TASK_AGENT` | Incremental development, per task, with user confirmation |
-| `BATCH_TASK_AGENT` | MVP build, all pending tasks in one shot, continuous execution |
-
-### Project Documentation
-
-| File | Purpose |
-|------|---------|
-| `workflow/PRD.md` | Product Requirements Document |
-| `workflow/TDD.md` | Technical Design Document |
-| `workflow/PROGRESS.md` | Development Progress Tracking |
-| `workflow/ui-kit.html` | UI Design System |
-| `workflow/AGENT-GUIDE.md` | Complete Agent Usage Guide |
-| `workflow/BATCH_TASK_AGENT.md` | Batch Task Execution Guide |
+1. Set environment variables in Cloudflare Dashboard
+2. Bind D1 database and R2 bucket in Settings > Bindings
+3. Apply database migrations: `npm run db:migrate`
 
 ---
 
-## Useful Resources
+## Free Tier Limits
+
+The project is designed to run entirely on Cloudflare's free tier:
+
+| Service | Free Tier |
+|---------|-----------|
+| Cloudflare Pages | Unlimited requests, 500 builds/month |
+| Cloudflare D1 | 500k rows/query per day, 5 GB storage |
+| Cloudflare R2 | 10 GB storage, 1M Class A ops/month |
+| Workers (Functions) | 100k requests/day |
+| Resend | 100 emails/day |
+
+---
+
+## Common Tasks
+
+### Adding a New Database Table
+
+⚠️ **ALWAYS update both files when modifying schema!**
+
+1. Add table to `src/lib/db/schema.ts`:
+```typescript
+export const posts = sqliteTable('posts', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  content: text('content'),
+  userId: text('user_id').references(() => users.id),
+  createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now()),
+});
+```
+
+2. **Add corresponding types to `src/lib/db/index.ts`**:
+```typescript
+// Add to Database interface
+export interface Database {
+  // ... existing tables ...
+  
+  posts: {
+    id: string;
+    title: string;
+    content: string | null;
+    user_id: string;
+    created_at: number | null;
+  };
+}
+
+// Add table type export
+export type Post = Database['posts'];
+export type NewPost = Omit<Post, 'id' | 'created_at'>;
+```
+
+3. Generate migration: `npm run db:generate`
+
+4. Apply migration: `npm run db:migrate:local`
+
+### Adding a New Protected Route
+
+1. Create route folder: `src/routes/my-page/+page.svelte`
+2. Add server load to check auth:
+```typescript
+// +page.server.ts
+import { redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.user) {
+    throw redirect(302, '/login');
+  }
+  return {};
+};
+```
+
+### Adding a New API Endpoint
+
+1. Create endpoint: `src/routes/api/my-endpoint/+server.ts`
+2. Implement handlers:
+```typescript
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async ({ locals }) => {
+  // Access DB via locals.db
+  const data = await locals.db.selectFrom('users').selectAll().execute();
+  return json({ data });
+};
+```
+
+---
+
+## Troubleshooting
+
+### "D1 binding not found"
+- Check `wrangler.toml` has correct `database_id` (not the database name)
+- Ensure database exists: `npx wrangler d1 list`
+- For production, check bindings in Cloudflare Dashboard → Pages → Settings → Bindings
+- For local dev, run: `npm run db:migrate:local` first
+
+### "Email not sending"
+- Check `RESEND_API_TOKEN` and `FROM_EMAIL` in `.env` (local) or Dashboard (production)
+- Verify domain is verified in Resend dashboard
+- Check spam folders
+
+### "Upload failed"
+- Verify R2 credentials and bucket name
+- Check R2 bucket exists and is accessible
+- Verify `R2_PUBLIC_URL` is correct
+
+### Type errors after schema change
+- Run `npm run check` to identify issues
+- **Ensure `src/lib/db/index.ts` Database interface is updated to match `schema.ts`**
+- Run `npm run cf:typegen` to update Cloudflare types
+
+---
+
+## References
 
 - [SvelteKit Docs](https://kit.svelte.dev/docs)
-- [Cloudflare D1 Docs](https://developers.cloudflare.com/d1/)
-- [Drizzle ORM Docs](https://orm.drizzle.team/docs) - Schema & migrations
-- [Kysely Docs](https://kysely.dev/) - Query builder
+- [Svelte 5 Runes](https://svelte.dev/docs/svelte/what-are-runes)
+- [Cloudflare D1](https://developers.cloudflare.com/d1/)
+- [Cloudflare Pages](https://developers.cloudflare.com/pages/)
+- [Drizzle ORM](https://orm.drizzle.team/docs)
+- [Kysely](https://kysely.dev/)
 - [Arctic OAuth](https://arcticjs.dev/)
+- [Tailwind CSS v4](https://tailwindcss.com/docs/v4-beta)

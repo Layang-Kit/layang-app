@@ -1,5 +1,5 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
-import { generatePresignedUploadUrl, generateFileKey, isR2Configured } from '$lib/storage/r2';
+import { generatePresignedUploadUrl, generateFileKey, isS3Configured } from '$lib/storage/s3';
 import { z } from 'zod';
 
 const presignSchema = z.object({
@@ -20,8 +20,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       throw error(401, { message: 'Unauthorized' });
     }
     
-    // Check R2 configuration
-    if (!isR2Configured()) {
+    // Check S3 storage configuration
+    if (!isS3Configured()) {
       throw error(500, { message: 'Storage not configured' });
     }
     

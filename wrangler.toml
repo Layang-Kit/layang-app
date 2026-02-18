@@ -1,11 +1,41 @@
+# =============================================================================
+# CLOUDFLARE WORKERS CONFIGURATION
+# =============================================================================
+# File ini berisi KONFIGURASI BINDINGS untuk aplikasi yang berjalan di 
+# Cloudflare Workers (production & local development dengan wrangler).
+#
+# ⚠️  WAJIB EDIT: database_id di bagian [[d1_databases]]
+#
+# Cara setup:
+# 1. npx wrangler d1 create <nama-database>
+# 2. Copy database_id dari output, paste di bawah
+# 3. npx wrangler d1 create <nama-bucket> (opsional, untuk file upload)
+# =============================================================================
+
 name = "layang-app"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# D1 Database Binding
+# ---------------------------------------------------------------------------
+# D1 Database Binding (WAJIB)
+# ---------------------------------------------------------------------------
+# Database ini akan tersedia di code via: env.DB (Kysely/Drizzle)
+# 
 [[d1_databases]]
-binding = "DB"
-database_name = "layang-app"
-database_id = "3ea20719-74e2-49ca-8791-3db8810d2ae6" 
+binding = "DB"                              # Nama binding di code
+database_name = "layang-app"                # Nama database di Cloudflare
+database_id = "your-database-id-here"       # ← GANTI DENGAN ID KAMU!
 migrations_dir = "migrations"
- 
+
+# ---------------------------------------------------------------------------
+# R2 Storage Binding (OPSIONAL - hanya untuk Cloudflare R2)
+# ---------------------------------------------------------------------------
+# Binding ini HANYA untuk Cloudflare R2. Jika pakai Wasabi/AWS S3/MinIO,
+# binding ini tidak diperlukan - cukup isi S3_* vars di .env
+#
+# Catatan: R2 binding hanya berfungsi di Cloudflare Workers/Pages.
+# Untuk S3-compatible lain, kita pakai S3 API client (lihat .env.example)
+# 
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "layang-app-storage"

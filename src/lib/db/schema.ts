@@ -54,8 +54,8 @@ export const emailVerificationTokens = sqliteTable('email_verification_tokens', 
   createdAt: integer('created_at', { mode: 'number' }).$defaultFn(() => Date.now())
 });
 
- 
- 
+
+
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
@@ -77,4 +77,4 @@ export const emailVerificationTokensRelations = relations(emailVerificationToken
     references: [users.id]
   })
 }));
- 
+

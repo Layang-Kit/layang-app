@@ -96,48 +96,57 @@ cd my-app
 npm install
 ```
 
-### 3. Setup Database
+### 3. Setup Database (wrangler.toml)
 
 ```bash
-# Create D1 database
+# 1. Login ke Cloudflare
+npx wrangler login
+
+# 2. Create D1 database
 npx wrangler d1 create my-database
 
-# Copy database ID to wrangler.toml
-# [[d1_databases]]
-# binding = "DB"
-# database_id = "your-database-id-here"
+# 3. Copy database_id dari output ke wrangler.toml
 ```
 
-### 4. Configure Environment
+Edit `wrangler.toml`:
+```toml
+[[d1_databases]]
+binding = "DB"
+database_id = "paste-database-id-here"  # ← Dari output command di atas
+```
+
+> 📖 **Perbedaan `wrangler.toml` vs `.env`:**
+> - `wrangler.toml` = Bindings database/storage untuk aplikasi (WAJIB)
+> - `.env` = Secrets untuk external services (OAuth, Email, dll) - OPSIONAL
+
+### 4. Configure Environment (.env) - OPSIONAL
+
+Copy dan edit untuk fitur tambahan:
 
 ```bash
-# Copy environment template
 cp .env.example .env
-
-# Edit .env with your credentials
 ```
 
-Required variables:
+**Google OAuth** (untuk login dengan Google):
 ```env
-# Cloudflare (Required)
-CLOUDFLARE_ACCOUNT_ID=your_account_id
-CLOUDFLARE_DATABASE_ID=your_database_id
-CLOUDFLARE_API_TOKEN=your_api_token
-
-# Optional: Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
 
-# Optional: Email Verification
+**Resend Email** (untuk email verification & reset password):
+```env
 RESEND_API_TOKEN=re_your_token
 FROM_EMAIL=noreply@yourdomain.com
+REPLY_TO_EMAIL=support@yourdomain.com
+```
 
-# Optional: File Uploads (R2)
-R2_ACCOUNT_ID=your_r2_account_id
-R2_ACCESS_KEY_ID=your_r2_access_key
-R2_SECRET_ACCESS_KEY=your_r2_secret_key
-R2_BUCKET_NAME=your_bucket
-R2_PUBLIC_URL=https://pub-xxx.r2.dev
+**S3-Compatible Storage** (untuk file upload - R2, Wasabi, S3, dll):
+```env
+S3_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
+S3_BUCKET_NAME=my-bucket
+S3_ACCESS_KEY_ID=your_access_key
+S3_SECRET_ACCESS_KEY=your_secret_key
+S3_PUBLIC_URL=https://cdn.example.com
 ```
 
 ### 5. Generate & Apply Migrations
@@ -321,26 +330,22 @@ npx wrangler login
 npm run deploy
 ```
 
-### 2. Configure Environment Variables
+### 2. Bind D1 Database & R2 Bucket
 
-In Cloudflare Dashboard:
-1. Go to **Pages** > Your Project > **Settings** > **Functions** > **Environment Variables**
-2. Add all required variables from `.env`
+Bindings sudah dikonfigurasi di `wrangler.toml`, tapi perlu di-bind di Dashboard:
 
-### 3. Bind D1 Database & R2 Bucket
+Via Dashboard: **Pages** > Your Project > **Settings** > **Bindings**
+- Bind D1 database dengan nama binding "DB"
+- Bind R2 bucket dengan nama binding "STORAGE" (opsional)
 
-In `wrangler.toml`:
-```toml
-[[d1_databases]]
-binding = "DB"
-database_id = "your-database-id"
+### 3. Configure Environment Variables
 
-[[r2_buckets]]
-binding = "STORAGE"
-bucket_name = "your-bucket"
-```
+Di Cloudflare Dashboard: **Pages** > Your Project > **Settings** > **Functions** > **Environment Variables**
 
-Or configure via Dashboard: **Pages** > Settings > **Bindings**
+Tambahkan secrets dari `.env` yang diperlukan:
+- `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET` (jika pakai Google login)
+- `RESEND_API_TOKEN` & `FROM_EMAIL` (jika pakai email)
+- `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME` (jika pakai upload)
 
 ## 🔒 Security Features
 

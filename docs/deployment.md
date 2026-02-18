@@ -88,13 +88,13 @@ RESEND_API_TOKEN=re_xxxxxxxx
 FROM_EMAIL=noreply@yourdomain.com
 ```
 
-**Untuk R2 (jika pakai file upload):**
+**Untuk S3 Storage (jika pakai file upload):**
 ```
-R2_ACCOUNT_ID=xxx
-R2_ACCESS_KEY_ID=xxx
-R2_SECRET_ACCESS_KEY=xxx
-R2_BUCKET_NAME=xxx
-R2_PUBLIC_URL=https://pub-xxxxx.r2.dev
+S3_ENDPOINT=https://<account_id>.r2.cloudflarestorage.com
+S3_BUCKET_NAME=my-bucket
+S3_ACCESS_KEY_ID=xxx
+S3_SECRET_ACCESS_KEY=xxx
+S3_PUBLIC_URL=https://cdn.example.com
 ```
 
 **Untuk Google OAuth:**
@@ -289,16 +289,35 @@ curl -X POST https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/xx
 
 ---
 
-## 📝 wrangler.toml vs Dashboard Bindings
+## 📝 Configuration: wrangler.toml vs .env vs Dashboard
 
-| | `wrangler.toml` | Dashboard Bindings |
-|---|---|---|
-| **Gunakan untuk** | Local development | Production |
-| **D1 Database** | ✅ `preview_database_id` | ✅ Variable name: `DB` |
-| **R2 Bucket** | ❌ Not supported | ✅ Settings → Bindings |
-| **KV** | ❌ Not supported | ✅ Settings → Bindings |
+### Perbedaan File Konfigurasi
 
-> ℹ️ Untuk Git Integration deployment, `wrangler.toml` **tidak** digunakan untuk production binding. Semua binding harus di-set via Dashboard.
+| File | Isi | Gunakan Untuk |
+|------|-----|---------------|
+| `wrangler.toml` | Database bindings, R2 bindings | Local dev (database connection) |
+| `.env` | API secrets (Google, Resend, R2 keys) | Local dev (external services) |
+| Dashboard Bindings | D1 & R2 bindings | Production (Cloudflare runtime) |
+| Dashboard Environment | Secrets dari `.env` | Production (external services) |
+
+### Setup Production
+
+**Bindings (D1, R2):**
+```
+Dashboard → Pages → Project → Settings → Bindings
+- D1 Database → Name: DB
+- R2 Bucket → Name: STORAGE (opsional)
+```
+
+**Environment Variables (Secrets):**
+```
+Dashboard → Pages → Project → Settings → Environment Variables
+- GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (jika pakai Google login)
+- RESEND_API_TOKEN, FROM_EMAIL (jika pakai email)
+- S3_ENDPOINT, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_BUCKET_NAME (jika pakai upload)
+```
+
+> ℹ️ `wrangler.toml` bindings hanya untuk local development. Untuk production, binding harus di-set via Dashboard.
 
 ---
 

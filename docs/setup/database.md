@@ -137,9 +137,28 @@ npm run db:studio
 npx wrangler d1 execute DB --local --command "SELECT * FROM users"
 ```
 
-## 📊 Drizzle Studio
+## 📊 Drizzle Studio (OPSIONAL)
 
-GUI untuk manage database:
+GUI untuk manage database via browser.
+
+> ⚠️ **Drizzle Studio membutuhkan Cloudflare API Token** untuk akses D1 via HTTP API.
+> Jika tidak ingin setup, gunakan `wrangler d1 execute` untuk query database.
+
+### Setup Cloudflare API Token
+
+1. Dashboard → My Profile → API Tokens → Create Token
+2. Custom token dengan permission:
+   - Account: D1:Edit
+   - Account: Read
+3. Copy token dan tambahkan ke `.env`:
+
+```env
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+CLOUDFLARE_DATABASE_ID=your_database_id
+CLOUDFLARE_API_TOKEN=your_api_token
+```
+
+### Run Drizzle Studio
 
 ```bash
 npm run db:studio
@@ -152,6 +171,18 @@ Fitur:
 - 🔍 Query data
 - ➕ Insert/update/delete rows
 - 📈 Schema visualization
+
+### Alternatif: Wrangler CLI
+
+Jika tidak ingin setup Drizzle Studio, gunakan wrangler command:
+
+```bash
+# Query database
+npx wrangler d1 execute DB --local --command="SELECT * FROM users"
+
+# Execute SQL file
+npx wrangler d1 execute DB --local --file=./query.sql
+```
 
 ## 🧪 Testing Database
 
@@ -220,12 +251,13 @@ npx wrangler d1 delete DB
 
 ## 🐛 Troubleshooting
 
-| Error | Solusi |
-|-------|--------|
-| "D1 binding not found" | Check `wrangler.toml` database_id |
-| "Database does not exist" | Pastikan database sudah dibuat |
-| "Migration failed" | Check SQL syntax di `drizzle/` folder |
-| "Permission denied" | Check API token punya permission D1:Edit |
+| Error | Penyebab | Solusi |
+|-------|----------|--------|
+| "D1 binding not found" | `database_id` di `wrangler.toml` salah atau belum di-bind | Pastikan ID benar dari `wrangler d1 create` |
+| "Database does not exist" | Database belum dibuat atau sudah dihapus | Jalankan `npx wrangler d1 create <nama>` |
+| "Migration failed" | SQL syntax error atau tabel sudah ada | Check file di `migrations/` folder |
+| "Permission denied" | API token tidak punya permission D1:Edit | Buat token baru dengan permission Account: D1:Edit |
+| "Drizzle Studio error" | API Token tidak di-set | Tambahkan `CLOUDFLARE_*` vars ke `.env` atau gunakan wrangler CLI |
 
 ---
 

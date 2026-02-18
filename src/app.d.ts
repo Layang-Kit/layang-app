@@ -1,7 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import type { Kysely } from 'kysely';
-import type { Database } from '$lib/db/kysely-types';
+import type { Database } from '$lib/db';
 import type { SessionUser, Session } from '$lib/auth/session';
 
 declare module '$env/static/private' {

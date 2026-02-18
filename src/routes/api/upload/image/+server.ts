@@ -1,10 +1,10 @@
 import { json, error, type RequestHandler } from '@sveltejs/kit';
-import { uploadFile, isR2Configured } from '$lib/storage/r2';
+import { uploadFile, isS3Configured } from '$lib/storage/s3';
 import { convertToWebP, createAvatar, validateImageFile } from '$lib/image/convert';
 
 /**
  * POST /api/upload/image
- * Upload image, convert to WebP, and store in R2
+ * Upload image, convert to WebP, and store in S3-compatible storage (R2, Wasabi, etc.)
  * For avatars and images
  */
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -14,8 +14,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       throw error(401, { message: 'Unauthorized' });
     }
     
-    // Check R2 configuration
-    if (!isR2Configured()) {
+    // Check S3 storage configuration
+    if (!isS3Configured()) {
       throw error(500, { message: 'Storage not configured' });
     }
     
@@ -60,7 +60,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const arrayBuffer = await processedBlob.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
-    // Upload to R2
+    // Upload to S3 storage
     const uploadResult = await uploadFile(
       filename,
       uint8Array,
@@ -92,7 +92,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 /**
  * DELETE /api/upload/image
- * Delete an image from R2
+ * Delete an image from S3 storage
  */
 export const DELETE: RequestHandler = async ({ request, locals }) => {
   try {
@@ -113,8 +113,8 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
       throw error(403, { message: 'Not authorized to delete this image' });
     }
     
-    // Delete from R2
-    const { deleteFile } = await import('$lib/storage/r2');
+    // Delete from storage
+    const { deleteFile } = await import('$lib/storage/s3');
     const result = await deleteFile(key);
     
     if (!result.success) {

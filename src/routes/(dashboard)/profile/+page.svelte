@@ -4,7 +4,7 @@
     Mail, MapPin, Link as LinkIcon, FileText, Camera, Loader2, 
     Check, Upload, X, User, Shield, Globe, AlertCircle
   } from 'lucide-svelte';
-  import type { User as UserType } from '$lib/db/types';
+  import type { User as UserType } from '$lib/db';
   
   let user = $state<UserType | null>(null);
   let loading = $state(true);
