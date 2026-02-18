@@ -49,34 +49,45 @@ LayangKit (also known as `layang-app`) is a modern full-stack web application st
 │   │       └── theme.svelte.ts # Theme store (dark/light mode)
 │   ├── routes/                 # SvelteKit routes (file-based routing)
 │   │   ├── (dashboard)/        # Route group: protected dashboard pages
-│   │   │   ├── dashboard/      # Main dashboard
-│   │   │   │   ├── settings/   # Settings page
-│   │   │   │   └── users/      # Users list page
-│   │   │   └── profile/        # User profile page
+│   │   │   ├── dashboard/      # Main dashboard (unified route)
+│   │   │   │   ├── +page.svelte
+│   │   │   │   ├── +page.server.ts
+│   │   │   │   └── +server.ts  # API endpoint (optional)
+│   │   │   ├── posts/          # Posts feature (unified route)
+│   │   │   │   ├── +page.svelte
+│   │   │   │   ├── +page.server.ts
+│   │   │   │   ├── +server.ts  # API for /posts
+│   │   │   │   └── [id]/       # /posts/[id]
+│   │   │   │       ├── +page.svelte
+│   │   │   │       ├── +page.server.ts
+│   │   │   │       └── +server.ts  # API for /posts/[id]
+│   │   │   ├── settings/       # Settings page
+│   │   │   ├── users/          # Users list (unified route)
+│   │   │   │   ├── +page.svelte
+│   │   │   │   ├── +page.server.ts
+│   │   │   │   └── +server.ts
+│   │   │   └── profile/        # User profile (unified route)
+│   │   │       ├── +page.svelte
+│   │   │       ├── +page.server.ts
+│   │   │       └── +server.ts
 │   │   ├── _examples/          # Example patterns (can be removed)
 │   │   │   ├── form-actions-example/
 │   │   │   └── server-load-example/
-│   │   ├── api/                # API endpoints
-│   │   │   ├── health/         # Health check endpoint
-│   │   │   ├── profile/        # Profile API (GET/PUT)
-│   │   │   ├── upload/         # File upload endpoints
+│   │   ├── api/                # Shared API endpoints only (external services)
+│   │   │   ├── health/         # Health check endpoint (monitoring)
+│   │   │   ├── upload/         # File upload service (shared)
 │   │   │   │   ├── image/      # Image upload with WebP conversion
 │   │   │   │   └── presign/    # Presigned URL for direct R2 upload
-│   │   │   └── users/          # Users API
-│   │   ├── auth/               # Auth API endpoints
-│   │   │   ├── forgot-password/# POST endpoint
+│   │   │   └── webhook/        # External webhooks (Stripe, etc.)
+│   │   ├── auth/               # Auth pages (public)
+│   │   │   ├── forgot-password/
 │   │   │   ├── google/         # OAuth init & callback
-│   │   │   ├── login/          # POST endpoint
-│   │   │   ├── logout/         # POST endpoint
-│   │   │   ├── register/       # POST endpoint
-│   │   │   ├── resend-verification/ # POST endpoint
-│   │   │   ├── reset-password/ # POST endpoint
-│   │   │   └── verify-email/   # Page server load
-│   │   ├── forgot-password/    # Forgot password page
-│   │   ├── login/              # Login page
-│   │   ├── register/           # Register page
-│   │   ├── reset-password/     # Reset password page
-│   │   ├── verify-email-sent/  # Email sent confirmation page
+│   │   │   ├── login/
+│   │   │   ├── logout/
+│   │   │   ├── register/
+│   │   │   ├── resend-verification/
+│   │   │   ├── reset-password/
+│   │   │   └── verify-email/
 │   │   ├── +layout.svelte      # Root layout
 │   │   ├── +page.svelte        # Home/Landing page
 │   │   └── ...
@@ -196,7 +207,13 @@ The project uses a **dual ORM strategy**:
 1. **Drizzle ORM**: Used ONLY for schema definition and migrations (`schema.ts`)
 2. **Kysely**: Used for actual database queries at runtime (types in `index.ts`)
 
-**Rationale**: Kysely has better Cloudflare D1 support via `kysely-d1` dialect and provides excellent type-safe query building.
+**⚠️ IMPORTANT RULE:**
+- ✅ **Schema & Migrations** → Use Drizzle (`schema.ts`, `relations`)
+- ✅ **All Runtime Queries** → Use Kysely (`locals.db.selectFrom()`, `insertInto()`, etc.)
+- ❌ **NEVER use** `locals.db.query.table.findMany()` (Drizzle query syntax)
+- ❌ **NEVER use** `locals.db.insert(table).values()` (Drizzle insert syntax)
+
+**Rationale**: Kysely has better Cloudflare D1 support via `kysely-d1` dialect and provides excellent type-safe query building with cleaner SQL-like syntax.
 
 ### Database Files (Simplified)
 
@@ -217,6 +234,45 @@ When converting from Drizzle (`schema.ts`) to Kysely (`index.ts` `Database` inte
 - `integer(..., { mode: 'boolean' })` → `number` (SQLite uses 0/1)
 - `$defaultFn(...)` fields → nullable (e.g., `created_at: number | null`)
 - `.notNull()` without default → required type (e.g., `email: string`)
+
+### Query Pattern Examples
+
+**✅ CORRECT (Kysely):**
+```typescript
+// Select
+const users = await locals.db
+  .selectFrom('users')
+  .selectAll()
+  .where('email', '=', email)
+  .execute();
+
+// Insert
+await locals.db
+  .insertInto('users')
+  .values({ id, email, password_hash: hash })
+  .execute();
+
+// Update
+await locals.db
+  .updateTable('users')
+  .set({ last_login: Date.now() })
+  .where('id', '=', userId)
+  .execute();
+
+// Delete
+await locals.db
+  .deleteFrom('sessions')
+  .where('id', '=', sessionId)
+  .execute();
+```
+
+**❌ WRONG (Drizzle ORM query syntax - jangan dipakai):**
+```typescript
+// Jangan pakai ini untuk runtime queries!
+await locals.db.query.users.findMany({ where: eq(users.id, id) });
+await locals.db.insert(users).values({ email });
+await locals.db.update(users).set({ name }).where(eq(users.id, id));
+```
 
 ### Database Tables
 
@@ -439,18 +495,41 @@ export const actions: Actions = {
 </form>
 ```
 
-### Pattern 3: API Endpoints
+### Pattern 3: API Endpoints (Unified Route)
 
-Use for client-side data fetching or external API access.
+Use for client-side data fetching or external API access. Can be placed **in the same folder as the page** (unified) or in `api/` folder (shared).
+
+**Unified Route (Recommended)** - Page + API in one folder:
+```
+src/routes/(dashboard)/posts/
+├── +page.svelte           # Page UI
+├── +page.server.ts        # Server load + form actions
+└── +server.ts             # API endpoints (GET/POST/PUT/DELETE)
+```
 
 ```typescript
-// +server.ts
+// +server.ts (same folder as +page.svelte)
 import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
 
+// GET /posts (API version)
 export const GET: RequestHandler = async ({ locals }) => {
-  const data = await locals.db.selectFrom('users').selectAll().execute();
+  const data = await locals.db.selectFrom('posts').selectAll().execute();
   return json({ data });
 };
+
+// POST /posts (for AJAX requests)
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const body = await request.json();
+  // ... handle API request
+  return json({ success: true }, { status: 201 });
+};
+```
+
+**Shared API** - Only for external/shared endpoints:
+```
+src/routes/api/webhook/+server.ts    # External webhooks
+src/routes/api/health/+server.ts     # Health checks
 ```
 
 ---
@@ -513,7 +592,7 @@ The project is designed to run entirely on Cloudflare's free tier:
 
 ⚠️ **ALWAYS update both files when modifying schema!**
 
-1. Add table to `src/lib/db/schema.ts`:
+1. Add table to `src/lib/db/schema.ts` (Drizzle - for migrations only):
 ```typescript
 export const posts = sqliteTable('posts', {
   id: text('id').primaryKey(),
@@ -548,20 +627,67 @@ export type NewPost = Omit<Post, 'id' | 'created_at'>;
 
 4. Apply migration: `npm run db:migrate:local`
 
+5. **Use Kysely for all runtime queries**:
+```typescript
+// In your +page.server.ts or +server.ts
+const posts = await locals.db
+  .selectFrom('posts')
+  .selectAll()
+  .where('user_id', '=', locals.user.id)
+  .execute();
+```
+
 ### Adding a New Protected Route
 
-1. Create route folder: `src/routes/my-page/+page.svelte`
-2. Add server load to check auth:
+1. Create route folder: `src/routes/(dashboard)/my-feature/+page.svelte`
+2. Add unified server files:
+
+```
+src/routes/(dashboard)/my-feature/
+├── +page.svelte              # Page UI
+├── +page.server.ts           # Server load + form actions
+└── +server.ts                # API endpoints (optional)
+```
+
 ```typescript
 // +page.server.ts
-import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { redirect, fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
 
+// Auth check + data loading
 export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.user) {
-    throw redirect(302, '/login');
+  if (!locals.user) throw redirect(302, '/login');
+  
+  const data = await locals.db
+    .selectFrom('my_table')
+    .selectAll()
+    .execute();
+    
+  return { data };
+};
+
+// Form actions (works without JavaScript)
+export const actions: Actions = {
+  default: async ({ request, locals }) => {
+    if (!locals.user) return fail(401, { error: 'Unauthorized' });
+    
+    const form = await request.formData();
+    // Process form...
+    return { success: true };
   }
-  return {};
+};
+```
+
+```typescript
+// +server.ts (optional - for AJAX/fetch API)
+import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
+
+export const GET: RequestHandler = async ({ locals }) => {
+  if (!locals.user) return new Response('Unauthorized', { status: 401 });
+  
+  const data = await locals.db.selectFrom('my_table').selectAll().execute();
+  return json({ data });
 };
 ```
 

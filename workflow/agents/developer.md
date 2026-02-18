@@ -70,24 +70,41 @@ Kasih list prioritas jika client bingung.
 
 ## SvelteKit Patterns
 
-### Route Structure
+### Route Structure (Unified)
 ```
 src/routes/
 ├── (dashboard)/           # Route group (protected)
 │   ├── +layout.svelte     # Protected layout dengan sidebar
-│   ├── dashboard/         # Dashboard page
-│   └── posts/             # Posts feature
-│       ├── +page.server.ts    # Load + Actions
-│       ├── +page.svelte       # List view
-│       ├── new/
-│       │   └── +page.svelte   # Create form
-│       └── [id]/
-│           ├── +page.server.ts
-│           ├── +page.svelte   # Detail view
-│           └── edit/
-│               └── +page.svelte # Edit form
-└── api/                   # API endpoints (if needed)
+│   ├── dashboard/         # Dashboard page (unified)
+│   │   ├── +page.svelte
+│   │   ├── +page.server.ts
+│   │   └── +server.ts     # API endpoint (optional)
+│   ├── posts/             # Posts feature (unified)
+│   │   ├── +page.server.ts    # Server load + form actions
+│   │   ├── +page.svelte       # List view
+│   │   ├── +server.ts         # API endpoints (optional)
+│   │   └── [id]/
+│   │       ├── +page.server.ts
+│   │       ├── +page.svelte   # Detail view
+│   │       └── +server.ts     # API for this item
+│   └── profile/           # Profile (unified)
+│       ├── +page.svelte
+│       ├── +page.server.ts
+│       └── +server.ts
+└── api/                   # Shared API only (dipakai banyak fitur/external)
+    ├── health/+server.ts      # Health checks (monitoring)
+    ├── upload/
+    │   ├── image/+server.ts   # File upload service (shared)
+    │   └── presign/+server.ts # Presigned URL (shared)
+    └── webhook/+server.ts     # External webhooks
 ```
+
+**Unified Route**: Satu folder berisi page + API:
+- `+page.svelte` - UI component
+- `+page.server.ts` - Server load & form actions
+- `+server.ts` - HTTP API endpoints (optional untuk AJAX)
+
+**Shared API** (`api/`): Hanya untuk layanan yang dipakai banyak fitur atau external services
 
 ### Server Load Pattern
 ```typescript
@@ -162,6 +179,52 @@ export const actions: Actions = {
   <div class="text-red-600">{form.error}</div>
 {/if}
 ```
+
+### Unified Route with API Endpoint
+
+Jika perlu API endpoint di route yang sama (untuk AJAX/fetch), tambahkan `+server.ts`:
+
+```typescript
+// routes/(dashboard)/posts/+server.ts
+import type { RequestHandler } from './$types';
+import { json, error } from '@sveltejs/kit';
+
+// GET /posts (API version)
+export const GET: RequestHandler = async ({ locals, url }) => {
+  if (!locals.user) throw error(401, 'Unauthorized');
+  
+  const posts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .where('user_id', '=', locals.user.id)
+    .execute();
+    
+  return json({ posts });
+};
+
+// POST /posts (AJAX version dengan JSON body)
+export const POST: RequestHandler = async ({ request, locals }) => {
+  if (!locals.user) throw error(401, 'Unauthorized');
+  
+  const body = await request.json();
+  
+  await locals.db
+    .insertInto('posts')
+    .values({
+      id: crypto.randomUUID(),
+      user_id: locals.user.id,
+      title: body.title,
+      created_at: Date.now()
+    })
+    .execute();
+    
+  return json({ success: true }, { status: 201 });
+};
+```
+
+**Gunakan:**
+- **Form Actions** (`?/actionName`) untuk form submission (works tanpa JS)
+- **+server.ts** untuk AJAX calls dengan JSON body atau external API
 
 ---
 

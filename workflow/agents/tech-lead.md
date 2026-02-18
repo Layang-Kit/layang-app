@@ -132,49 +132,115 @@ Technical specification lengkap.
 ### 2. ARCHITECTURE.md
 Folder structure dan system design.
 
-### 3. ROUTES.md (SvelteKit Routes)
-**Dokumentasikan routes SvelteKit, bukan REST API.**
+### 3. ROUTES.md (SvelteKit Unified Routes)
+**Dokumentasikan SvelteKit unified routes (page + API dalam satu folder).**
 
 ```markdown
 # Routes
 
-## Route Table
+## Route Structure (Unified Pattern)
 
-| URL | File | Load Data | Actions | Description |
-|-----|------|-----------|---------|-------------|
-| GET /dashboard | dashboard/+page.server.ts | load() | - | Dashboard utama |
-| GET /posts | posts/+page.server.ts | load() | - | List posts |
-| GET /posts/new | posts/new/+page.svelte | - | - | Form create |
-| POST /posts | posts/+page.server.ts | - | actions.create | Handle create |
-| GET /posts/[id] | posts/[id]/+page.server.ts | load() | - | Detail post |
-| GET /posts/[id]/edit | posts/[id]/edit/+page.server.ts | load() | - | Form edit |
-| PUT /posts/[id] | posts/[id]/+page.server.ts | - | actions.update | Handle update |
-| DELETE /posts/[id] | posts/[id]/+page.server.ts | - | actions.delete | Handle delete |
-
-## Load Functions
-
-### dashboard/+page.server.ts
-```typescript
-export const load = async ({ locals }) => {
-  const stats = await getStats(locals.db);
-  const recent = await getRecent(locals.db);
-  return { stats, recent };
-};
+```
+src/routes/(dashboard)/
+├── posts/                          # /posts
+│   ├── +page.svelte                # Page UI
+│   ├── +page.server.ts             # Server load + form actions
+│   └── +server.ts                  # API endpoints (optional)
+├── posts/[id]/                     # /posts/[id]
+│   ├── +page.svelte                # Detail UI
+│   ├── +page.server.ts             # Load + actions (update, delete)
+│   └── +server.ts                  # API endpoints (optional)
+└── api/webhook/                    # Shared API (external only)
+    └── +server.ts
 ```
 
-## Form Actions
+## Route Table
 
-### posts/+page.server.ts
+| URL | Files | Load Data | Actions | API | Description |
+|-----|-------|-----------|---------|-----|-------------|
+| /dashboard | +page.server.ts, +page.svelte | load() | - | - | Dashboard utama |
+| /users | +page.server.ts, +page.svelte, +server.ts | load() | - | GET | User list + API |
+| /users/[id] | +page.server.ts, +page.svelte, +server.ts | load() | actions.update, actions.delete | GET/PUT/DELETE | User detail + API |
+| /profile | +page.server.ts, +page.svelte, +server.ts | load() | actions.update | GET/PUT | Profile page + API |
+
+## Unified Route Files
+
+### Folder: posts/
+
+#### +page.server.ts (Load + Form Actions)
 ```typescript
-export const actions = {
+import type { PageServerLoad, Actions } from './$types';
+
+// Load data untuk page
+export const load: PageServerLoad = async ({ locals }) => {
+  const posts = await locals.db
+    .selectFrom('posts')
+    .selectAll()
+    .execute();
+  return { posts };
+};
+
+// Form actions untuk form submission
+export const actions: Actions = {
   create: async ({ request, locals }) => {
     const form = await request.formData();
-    // validation...
     await locals.db.insertInto('posts').values({...}).execute();
+    return { success: true };
+  },
+  delete: async ({ request, locals }) => {
+    const form = await request.formData();
+    const id = form.get('id');
+    await locals.db.deleteFrom('posts').where('id', '=', id).execute();
     return { success: true };
   }
 };
 ```
+
+#### +page.svelte (UI)
+```svelte
+<script>
+  let { data, form } = $props();
+  import { enhance } from '$app/forms';
+</script>
+
+<!-- Data langsung dari load() -->
+{#each data.posts as post}
+  <div>{post.title}</div>
+{/each}
+
+<!-- Form pakai actions -->
+<form method="POST" action="?/create" use:enhance>
+  <input name="title" />
+  <button type="submit">Create</button>
+</form>
+```
+
+#### +server.ts (API - Optional untuk AJAX)
+```typescript
+import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
+
+// GET /posts (API endpoint)
+export const GET: RequestHandler = async ({ locals }) => {
+  const posts = await locals.db.selectFrom('posts').selectAll().execute();
+  return json({ posts });
+};
+
+// POST /posts (JSON API)
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const body = await request.json();
+  await locals.db.insertInto('posts').values({...}).execute();
+  return json({ success: true }, { status: 201 });
+};
+```
+
+## File Guidelines
+
+| File | Purpose | When to Use |
+|------|---------|-------------|
+| `+page.server.ts` | Server load + form actions | **WAJIB** untuk protected pages |
+| `+page.svelte` | Page UI | **WAJIB** untuk semua pages |
+| `+server.ts` | HTTP API endpoints | Optional (untuk AJAX/external API) |
 ```
 
 ### 4. DATABASE_SCHEMA.md
@@ -211,6 +277,7 @@ Jika Product Agent sudah define Design Direction di PRD, elaborate menjadi Desig
 • LayangKit: SvelteKit + Cloudflare D1 + Drizzle/Kysely
 • Edge-first deployment
 • Server-side rendering with SvelteKit
+• Unified Route Pattern (page + API dalam satu folder)
 • Form actions pattern (works without JS)
 
 🗄️ Schema Changes:
@@ -304,18 +371,61 @@ export const actions: Actions = {
 };
 ```
 
-### API Endpoints (for client-side data)
+### Unified Route with API (Optional)
 ```typescript
-// +server.ts
+// +server.ts (in same folder as +page.svelte)
 import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
 
+// API endpoints untuk AJAX/fetch (opsional)
 export const GET: RequestHandler = async ({ locals }) => {
   const data = await locals.db.selectFrom('posts').selectAll().execute();
   return json({ data });
 };
+
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const body = await request.json();
+  // Handle JSON API request
+  return json({ success: true }, { status: 201 });
+};
 ```
 
+**Pilihan Pattern:**
+- **Form Actions**: Untuk form submission (works tanpa JS, recommended)
+- **+server.ts**: Untuk AJAX dengan JSON body atau external API
+
 ---
+
+## Kenapa Unified Route Pattern?
+
+**Struktur yang Jelas:**
+```
+src/routes/(dashboard)/feature/
+├── +page.svelte           # UI component
+├── +page.server.ts        # Load data + form actions
+└── +server.ts             # API endpoints (optional)
+```
+
+**Keuntungan:**
+- ✅ 1 folder = 1 fitur lengkap (page + API)
+- ✅ Tidak perlu pindah-pindah folder
+- ✅ No loading state (data embed di HTML)
+- ✅ SEO friendly
+- ✅ Auth check di satu tempat (+page.server.ts)
+- ✅ API endpoint tetap tersedia untuk AJAX/fetch
+
+**Kapan pakai +server.ts?**
+- Form submission → Gunakan **Form Actions** (tanpa JS works!)
+- AJAX dengan JSON body → Gunakan **+server.ts** (unified di folder yang sama)
+- External API/Webhook → Gunakan **api/*/+server.ts** (shared service)
+
+**Rules API Location:**
+| Tipe | Location | Contoh |
+|------|----------|--------|
+| Feature API | `feature/+server.ts` | `/profile/+server.ts` |
+| Upload Service | `api/upload/+server.ts` | `/api/upload/image` |
+| Health Check | `api/health/+server.ts` | `/api/health` |
+| External Webhook | `api/webhook/+server.ts` | `/api/webhook/stripe` |
 
 ## Kenapa SvelteKit Form Actions?
 

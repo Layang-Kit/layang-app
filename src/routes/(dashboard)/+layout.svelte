@@ -1,36 +1,16 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import type { User } from '$lib/db';
+  import type { LayoutProps } from './$types';
   import AppSidebar from '$lib/components/AppSidebar.svelte';
   import { theme } from '$lib/stores/theme.svelte';
   
-  let { children } = $props();
-  let user = $state<User | null>(null);
-  let loading = $state(true);
+  let { data, children }: LayoutProps = $props();
   
-  onMount(async () => {
-    theme.init();
-    await loadUser();
-  });
+  // User dari server load (dari hooks.server.ts)
+  let user = $derived(data.user);
   
-  async function loadUser() {
-    try {
-      const res = await fetch('/api/profile');
-      
-      if (res.status === 401) {
-        goto('/login');
-        return;
-      }
-      
-      const data = await res.json() as { user: User };
-      user = data.user;
-    } catch (err) {
-      console.error('Failed to load user:', err);
-    } finally {
-      loading = false;
-    }
-  }
+  // Initialize theme
+  theme.init();
   
   async function handleLogout() {
     try {
@@ -46,11 +26,7 @@
   <AppSidebar {user} onLogout={handleLogout} />
   
   <main class="flex-1 min-w-0 lg:ml-0 ml-0">
-    {#if loading}
-      <div class="flex items-center justify-center h-screen">
-        <div class="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style="border-color: var(--accent-primary); border-top-color: transparent;"></div>
-      </div>
-    {:else if user}
+    {#if user}
       <div class="h-full">
         {@render children()}
       </div>

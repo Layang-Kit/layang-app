@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import type { PageProps } from './$types';
   import type { User } from '$lib/db';
   import { 
     Users, 
@@ -9,8 +9,7 @@
     ArrowUpRight,
     ArrowDownRight,
     Clock,
-    MoreHorizontal,
-    Loader2
+    MoreHorizontal
   } from 'lucide-svelte';
   
   interface Stats {
@@ -21,8 +20,11 @@
     icon: typeof Users;
   }
   
-  let users = $state<User[]>([]);
-  let usersLoading = $state(true);
+  let { data }: PageProps = $props();
+  
+  // Data dari server load (no loading needed!)
+  let users = $state<User[]>(data.users);
+  
   let recentActivity = $state([
     { id: 1, action: 'New user registered', user: 'john@example.com', time: '2 min ago', type: 'user' },
     { id: 2, action: 'Profile updated', user: 'sarah@example.com', time: '1 hour ago', type: 'profile' },
@@ -30,27 +32,11 @@
     { id: 4, action: 'New user registered', user: 'emma@example.com', time: '5 hours ago', type: 'user' },
   ]);
   
-  onMount(async () => {
-    await loadUsers();
-  });
-  
-  async function loadUsers() {
-    try {
-      const res = await fetch('/api/users');
-      const json = await res.json() as { data: User[] };
-      users = json.data || [];
-    } catch (err) {
-      console.error('Failed to load users:', err);
-    } finally {
-      usersLoading = false;
-    }
-  }
-  
-  // Mock stats data
-  const stats: Stats[] = [
+  // Mock stats data (update dengan real count)
+  let stats: Stats[] = [
     { 
       label: 'Total Users', 
-      value: '0', 
+      value: users.length.toString(), 
       change: '+12%', 
       trend: 'up',
       icon: Users 
@@ -77,12 +63,6 @@
       icon: TrendingUp 
     },
   ];
-  
-  $effect(() => {
-    if (!usersLoading) {
-      stats[0].value = users.length.toString();
-    }
-  });
   
   function getActivityIcon(type: string) {
     switch (type) {
@@ -156,65 +136,59 @@
         </a>
       </div>
       
-      {#if usersLoading}
-        <div class="flex items-center justify-center py-16">
-          <Loader2 class="w-6 h-6 animate-spin" style="color: var(--accent-primary);" />
-        </div>
-      {:else}
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr style="border-bottom: 1px solid var(--border-primary);">
-                <th class="text-left text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">User</th>
-                <th class="text-left text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">Provider</th>
-                <th class="text-left text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">Status</th>
-                <th class="text-right text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">Joined</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y" style="border-color: var(--border-primary);">
-              {#each users.slice(0, 5) as user}
-                <tr class="transition-colors" style="hover:background-color: var(--bg-hover);">
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      {#if user.avatar}
-                        <img src={user.avatar} alt={user.name} class="w-9 h-9 rounded-xl object-cover" style="border: 2px solid var(--border-primary);" />
-                      {:else}
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold" style="background: linear-gradient(135deg, var(--accent-primary), #d97706); color: #0a0a0a;">
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
-                      {/if}
-                      <div>
-                        <p class="font-medium" style="color: var(--text-primary);">{user.name}</p>
-                        <p class="text-sm" style="color: var(--text-tertiary);">{user.email}</p>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border-primary);">
+              <th class="text-left text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">User</th>
+              <th class="text-left text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">Provider</th>
+              <th class="text-left text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">Status</th>
+              <th class="text-right text-xs font-medium uppercase tracking-wider px-6 py-3" style="color: var(--text-tertiary);">Joined</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y" style="border-color: var(--border-primary);">
+            {#each users as user}
+              <tr class="transition-colors" style="hover:background-color: var(--bg-hover);">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    {#if user.avatar}
+                      <img src={user.avatar} alt={user.name} class="w-9 h-9 rounded-xl object-cover" style="border: 2px solid var(--border-primary);" />
+                    {:else}
+                      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold" style="background: linear-gradient(135deg, var(--accent-primary), #d97706); color: #0a0a0a;">
+                        {user.name.charAt(0).toUpperCase()}
                       </div>
+                    {/if}
+                    <div>
+                      <p class="font-medium" style="color: var(--text-primary);">{user.name}</p>
+                      <p class="text-sm" style="color: var(--text-tertiary);">{user.email}</p>
                     </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium capitalize" style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
-                      {user.provider}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium" style="background-color: var(--success-bg); color: var(--success);">
-                      <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--success);"></span>
-                      Active
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right text-sm" style="color: var(--text-tertiary);">
-                    {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
-                  </td>
-                </tr>
-              {:else}
-                <tr>
-                  <td colspan="4" class="px-6 py-12 text-center" style="color: var(--text-secondary);">
-                    No users found
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium capitalize" style="background-color: var(--bg-tertiary); color: var(--text-secondary);">
+                    {user.provider}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium" style="background-color: var(--success-bg); color: var(--success);">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--success);"></span>
+                    Active
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-right text-sm" style="color: var(--text-tertiary);">
+                  {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                </td>
+              </tr>
+            {:else}
+              <tr>
+                <td colspan="4" class="px-6 py-12 text-center" style="color: var(--text-secondary);">
+                  No users found
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     </div>
     
     <!-- Activity & Quick Actions -->
