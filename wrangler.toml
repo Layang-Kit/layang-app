@@ -9,12 +9,13 @@
 # Cara setup:
 # 1. npx wrangler d1 create <nama-database>
 # 2. Copy database_id dari output, paste di bawah
-# 3. npx wrangler d1 create <nama-bucket> (opsional, untuk file upload)
+# 3. npm run db:migrate:local
 # =============================================================================
 
 name = "layang-app"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
 
 # ---------------------------------------------------------------------------
 # D1 Database Binding (WAJIB)
@@ -22,20 +23,14 @@ compatibility_flags = ["nodejs_compat"]
 # Database ini akan tersedia di code via: env.DB (Kysely/Drizzle)
 # 
 [[d1_databases]]
-binding = "DB"                              # Nama binding di code
-database_name = "layang-app"                # Nama database di Cloudflare
-database_id = "your-database-id-here"       # ← GANTI DENGAN ID KAMU!
+binding = "DB"
+database_name = "layang-app"
+database_id = "your-database-id-here"  # ← GANTI DENGAN ID KAMU!
 migrations_dir = "migrations"
 
 # ---------------------------------------------------------------------------
-# R2 Storage Binding (OPSIONAL - hanya untuk Cloudflare R2)
+# R2 Storage Binding (OPSIONAL - uncomment jika pakai Cloudflare R2)
 # ---------------------------------------------------------------------------
-# Binding ini HANYA untuk Cloudflare R2. Jika pakai Wasabi/AWS S3/MinIO,
-# binding ini tidak diperlukan - cukup isi S3_* vars di .env
-#
-# Catatan: R2 binding hanya berfungsi di Cloudflare Workers/Pages.
-# Untuk S3-compatible lain, kita pakai S3 API client (lihat .env.example)
-# 
-[[r2_buckets]]
-binding = "STORAGE"
-bucket_name = "layang-app-storage"
+# [[r2_buckets]]
+# binding = "STORAGE"
+# bucket_name = "layang-app-storage"

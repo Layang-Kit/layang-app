@@ -9,7 +9,7 @@ File ini digunakan oleh DevOps Agent untuk melacak status deployment.
 
 | Field | Value | Last Updated |
 |-------|-------|--------------|
-| **Status** | `PENDING` / `IN_PROGRESS` / `COMPLETED` / `FAILED` | - |
+| **Status** | `PENDING` | - |
 | **Type** | `FIRST_DEPLOY` / `UPDATE` | - |
 | **Environment** | `production` / `staging` | - |
 
