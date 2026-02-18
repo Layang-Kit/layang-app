@@ -69,10 +69,7 @@ LayangKit (also known as `layang-app`) is a modern full-stack web application st
 │   │   │   └── profile/        # User profile (unified route)
 │   │   │       ├── +page.svelte
 │   │   │       ├── +page.server.ts
-│   │   │       └── +server.ts
-│   │   ├── _examples/          # Example patterns (can be removed)
-│   │   │   ├── form-actions-example/
-│   │   │   └── server-load-example/
+│   │   │       └── +server.ts 
 │   │   ├── api/                # Shared API endpoints only (external services)
 │   │   │   ├── health/         # Health check endpoint (monitoring)
 │   │   │   ├── upload/         # File upload service (shared)
@@ -569,20 +566,6 @@ npm run deploy
 1. Set environment variables in Cloudflare Dashboard
 2. Bind D1 database and R2 bucket in Settings > Bindings
 3. Apply database migrations: `npm run db:migrate`
-
----
-
-## Free Tier Limits
-
-The project is designed to run entirely on Cloudflare's free tier:
-
-| Service | Free Tier |
-|---------|-----------|
-| Cloudflare Pages | Unlimited requests, 500 builds/month |
-| Cloudflare D1 | 500k rows/query per day, 5 GB storage |
-| Cloudflare R2 | 10 GB storage, 1M Class A ops/month |
-| Workers (Functions) | 100k requests/day |
-| Resend | 100 emails/day |
 
 ---
 
